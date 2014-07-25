@@ -1,0 +1,21 @@
+#ifndef VIDEO_H
+#define VIDEO_H
+
+enum {
+  VIDEO__ERROR_CODE_BASE = 0x0,
+  VIDEO__COULD_NOT_CREATE_SURFACE,
+  VIDEO__COULD_NOT_INITIALIZE_SDL,
+  VIDEO__ERROR_CODE_LAST
+};
+
+struct video__screen_extents_t {
+  int w;
+  int h;
+};
+
+const struct video__screen_extents_t* video__get_screen_extents();
+
+int video__setup();
+int video__teardown();
+
+#endif
