@@ -11,6 +11,8 @@ struct events__callback_record_t {
 
 struct events__callback_record_t events__callbacks[EVENTS__LAST] = {
   {NULL, NULL},
+  {NULL, NULL},
+  {NULL, NULL},
   {NULL, NULL}
 };
 
@@ -20,16 +22,23 @@ int events__process_events() {
   while ( SDL_PollEvent(&event)) {
 
     enum events__type_e event_type = EVENTS__NONE;
+    uint32_t event_parameter = 0;
 
     switch ( event.type ) {
     case SDL_KEYDOWN:
-      if ( event.key.keysym.sym == SDLK_ESCAPE ) {
-	event_type = EVENTS__ON_QUIT;
-      }
+      event_type = EVENTS__KEYDOWN;
+      event_parameter = event.key.keysym.sym + (event.key.keysym.mod << 16);
+      break;
+
+    case SDL_KEYUP:
+      event_type = EVENTS__KEYUP;
+      event_parameter = event.key.keysym.sym + (event.key.keysym.mod << 16);
+      break;
+
       break;
 
     case SDL_QUIT:      
-      event_type = EVENTS__ON_QUIT;
+      event_type = EVENTS__QUIT;
       break;
     }
 
@@ -37,7 +46,7 @@ int events__process_events() {
     void* context = events__callbacks[event_type].context;
 
     if ( callback != NULL ) {
-      (*callback)(context);
+      (*callback)(event_type, event_parameter, context);
     }
   }
 }

@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 
-void on_quit( void* context ) {
+void on_quit( enum events__type_e type, uint32_t parameter, void* context ) {
   *((int*)context) = FALSE;
 }
 
@@ -14,7 +14,7 @@ int main( int argc, char** argv ) {
 
   int keep_looping = TRUE;
 
-  events__set_callback( EVENTS__ON_QUIT, on_quit, &keep_looping );
+  events__set_callback( EVENTS__QUIT, on_quit, &keep_looping );
 
   while ( keep_looping ) {
     events__process_events();
