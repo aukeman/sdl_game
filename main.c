@@ -14,7 +14,7 @@ int main( int argc, char** argv ) {
 
   int keep_looping = TRUE;
 
-  events__set_callback( EVENTS__QUIT, on_quit, &keep_looping );
+  events__set_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
 
   while ( keep_looping ) {
     events__process_events();

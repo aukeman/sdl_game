@@ -14,6 +14,8 @@ const struct video__screen_extents_t* video__get_video_extents() {
   return &video__screen_extents;
 }
 
+uint32_t video__last_texture_id = 0xFFFFFFFF;
+
 int video__setup() {
 
   int result = SUCCESS;
@@ -63,4 +65,19 @@ int video__setup() {
 
 int video__teardown() {
   SDL_Quit();
+
+  return SUCCESS;
+}
+
+int video__clearscreen(){
+  glClearColor(0, 0, 0, 1.0);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  return SUCCESS;
+}
+
+int video__flip() {
+  SDL_GL_SwapBuffers();
+
+  return SUCCESS;
 }
