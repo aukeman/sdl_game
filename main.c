@@ -16,8 +16,17 @@ int main( int argc, char** argv ) {
 
   events__set_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
 
+  struct video__texture_data_t texture;
+  video__setup_texture("testing.png", &texture);
+
   while ( keep_looping ) {
     events__process_events();
+
+    video__clearscreen();
+
+    video__blit(&texture, 0, 0);
+
+    video__flip();
   }
 
   video__teardown();

@@ -15,6 +15,12 @@ struct video__screen_extents_t {
   int h;
 };
 
+struct video__texture_data_t {
+  uint32_t texture_id;
+  uint32_t width;
+  uint32_t height;
+};
+
 const struct video__screen_extents_t* video__get_screen_extents();
 
 int video__setup();
@@ -25,9 +31,13 @@ int video__clearscreen();
 
 int video__flip();
 
-int video__setup_texture(const char* file_directory, uint32_t* texture_id);
-int video__teardown_texture(uint32_t texture_id);
+int video__setup_texture(const char* file_directory, 
+			 struct video__texture_data_t* texture_data_ptr );
 
+int video__teardown_texture(struct video__texture_data_t* texture_data_ptr);
 
+int video__blit(const struct video__texture_data_t* texture_data_ptr, 
+		uint32_t x, 
+		uint32_t y);
 
 #endif
