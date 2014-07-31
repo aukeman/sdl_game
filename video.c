@@ -4,6 +4,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 #include <SDL/SDL_image.h>
+#include <SDL/SDL_video.h>
 
 #include <GL/gl.h>
 
@@ -56,13 +57,13 @@ int video__setup() {
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0f, 0.0f, 0.0f);
+    glTranslatef(0.0f, 0.0f, -1.0f);
 
     glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+       /* glEnable(GL_BLEND); */
+       /* glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
 
-    glColor4f(1.0, 1.0, 1.0, 1.0);
+    glColor4f(1.0, 1.0, 1.0, 0.0);
 
     result = video__surface ? SUCCESS : VIDEO__COULD_NOT_CREATE_SURFACE;
   }
@@ -77,7 +78,7 @@ int video__teardown() {
 }
 
 int video__clearscreen(){
-  glClearColor(0, 0, 0, 1.0);
+  glClearColor(0.5f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
   return SUCCESS;
@@ -113,23 +114,48 @@ int video__setup_texture(const char* file,
   uint32_t alpha_mask = 0;
 
   SDL_Surface* img_surface = NULL;
-  SDL_Surface* rgb_surface = NULL;
+  SDL_Surface* alpha_surface = NULL;
+  SDL_Surface* rgba_surface = NULL;
 
   texture_data_ptr->texture_id = 0;
   texture_data_ptr->width = 0;
   texture_data_ptr->height = 0;
 
   img_surface = IMG_Load(file);
-  rgb_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, 
-				      img_surface->w, 
-				      img_surface->h, 
-				      img_surface->format->BitsPerPixel,
-				      RED_MASK,
-				      GREEN_MASK,
-				      BLUE_MASK,
-				      ALPHA_MASK );
+  
+  if ( !img_surface ){
+    fprintf(stderr, "image not loaded\n");
+  }
 
-  SDL_BlitSurface(img_surface, 0, rgb_surface, 0);
+  alpha_surface = SDL_DisplayFormatAlpha(img_surface);
+
+  if ( !alpha_surface ){
+    fprintf(stderr, "alpha channel not established\n");
+  }
+
+  fprintf( stderr, "%d\n", alpha_surface->format->BitsPerPixel );
+
+  rgba_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, 
+				       alpha_surface->w, 
+				       alpha_surface->h, 
+				       alpha_surface->format->BitsPerPixel,
+				       RED_MASK,
+				       GREEN_MASK,
+				       BLUE_MASK,
+				       ALPHA_MASK );
+
+  if ( !rgba_surface ){
+    fprintf(stderr, "cannot create RGB buffer\n");
+  }
+
+  if ( SUCCESS != SDL_BlitSurface(alpha_surface, NULL, rgba_surface, NULL) ){
+    fprintf(stderr, "cannot blit image to buffer: %s\n", SDL_GetError());
+  }
+
+  texture_data_ptr->width = rgba_surface->w;
+  texture_data_ptr->height = rgba_surface->h;
+
+  fprintf( stderr, "%d %d\n", rgba_surface->pitch, rgba_surface->format->BytesPerPixel );
 
   glGenTextures(1, &(texture_data_ptr->texture_id) );
   glBindTexture(GL_TEXTURE_2D , texture_data_ptr->texture_id);
@@ -137,11 +163,16 @@ int video__setup_texture(const char* file,
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, rgb_surface->pitch / rgb_surface->format->BytesPerPixel);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB10_A2, rgb_surface->w, rgb_surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgb_surface->pixels);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, rgba_surface->pitch / rgba_surface->format->BytesPerPixel);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB10_A2, rgba_surface->w, rgba_surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba_surface->pixels);
+
+
+  fprintf( stdout, "%08x\n", ((uint32_t*)rgba_surface->pixels)[0] );
+
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
-  SDL_FreeSurface(rgb_surface);
+  SDL_FreeSurface(rgba_surface);
+  SDL_FreeSurface(alpha_surface);
   SDL_FreeSurface(img_surface);
 
   return SUCCESS;
@@ -176,8 +207,9 @@ int video__blit(const struct video__texture_data_t* texture_data_ptr,
 
   glTexCoord2f(0, 1.0f);
   glVertex2f(x, (float)(texture_data_ptr->height)+y);
-  glEnd();
   
+  glEnd();
+
   return SUCCESS;
 }
 
