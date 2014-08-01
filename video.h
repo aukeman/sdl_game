@@ -1,6 +1,8 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include <geometry.h>
+
 #include <stdint.h>
 
 enum {
@@ -11,8 +13,10 @@ enum {
 };
 
 struct video__screen_extents_t {
-  int w;
-  int h;
+  uint32_t width;
+  uint32_t height;
+  
+  int fullscreen;
 };
 
 struct video__texture_data_t {
@@ -23,7 +27,7 @@ struct video__texture_data_t {
 
 const struct video__screen_extents_t* video__get_screen_extents();
 
-int video__setup();
+int video__setup(uint32_t width, uint32_t height, int fullscreen);
 int video__teardown();
 
 
@@ -37,7 +41,7 @@ int video__setup_texture(const char* file_directory,
 int video__teardown_texture(struct video__texture_data_t* texture_data_ptr);
 
 int video__blit(const struct video__texture_data_t* texture_data_ptr, 
-		uint32_t x, 
-		uint32_t y);
+		const struct geo__rect_t* src,
+		const struct geo__rect_t* dest);
 
 #endif

@@ -10,7 +10,7 @@ void on_quit( enum events__type_e type, uint32_t parameter, void* context ) {
 
 int main( int argc, char** argv ) {
 
-  video__setup();
+  video__setup(640, 480, FALSE);
 
   int keep_looping = TRUE;
 
@@ -18,13 +18,16 @@ int main( int argc, char** argv ) {
 
   struct video__texture_data_t texture;
   video__setup_texture("testing.png", &texture);
+  
+  struct geo__rect_t source = {32, 32, -32, -32};
+  struct geo__rect_t dest = {64, 32, 128, 128};
 
   while ( keep_looping ) {
     events__process_events();
 
     video__clearscreen();
 
-    video__blit(&texture, 0, 0);
+    video__blit(&texture, &source, &dest);
 
     video__flip();
   }

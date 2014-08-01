@@ -1,5 +1,6 @@
 #include <video.h>
 #include <constants.h>
+#include <geometry.h>
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
@@ -10,17 +11,19 @@
 
 SDL_Surface* video__surface = NULL;
 
-struct video__screen_extents_t video__screen_extents = {640, 480};
+struct video__screen_extents_t video__screen_extents = {0, 0, FALSE};
 
 const struct video__screen_extents_t* video__get_video_extents() {
   return &video__screen_extents;
 }
 
-uint32_t video__last_texture_id = 0xFFFFFFFF;
-
-int video__setup() {
+int video__setup( uint32_t width, uint32_t height, int fullscreen ) {
 
   int result = SUCCESS;
+
+  video__screen_extents.width = width;
+  video__screen_extents.height = height;
+  video__screen_extents.fullscreen = fullscreen;
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
       fprintf(stderr,
@@ -39,10 +42,10 @@ int video__setup() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     video__surface = 
-      SDL_SetVideoMode(video__screen_extents.w, 
-		       video__screen_extents.h, 
+      SDL_SetVideoMode(video__screen_extents.width, 
+		       video__screen_extents.height, 
 		       0, 
-		       SDL_OPENGL);
+		       SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
 
     /*
      * Set up OpenGL for 2D rendering.
@@ -50,10 +53,10 @@ int video__setup() {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    glViewport(0, 0, video__screen_extents.w, video__screen_extents.h);
+    glViewport(0, 0, video__screen_extents.width, video__screen_extents.height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, video__screen_extents.w, video__screen_extents.w, 0, -1.0, 1.0);
+    glOrtho(0, video__screen_extents.width, video__screen_extents.height, 0, -1.0, 1.0);
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -158,7 +161,7 @@ int video__setup_texture(const char* file,
   glGenTextures(1, &(texture_data_ptr->texture_id) );
   glBindTexture(GL_TEXTURE_2D , texture_data_ptr->texture_id);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, rgba_surface->pitch / rgba_surface->format->BytesPerPixel);
@@ -185,24 +188,33 @@ int video__teardown_texture(struct video__texture_data_t* texture_data_ptr){
 }
 
 int video__blit(const struct video__texture_data_t* texture_data_ptr, 
-		uint32_t x, 
-		uint32_t y){
+		const struct geo__rect_t* src,
+		const struct geo__rect_t* dest){
+
+  float src_x = (float)src->x / (float)(texture_data_ptr->width);
+  float src_y = (float)src->y / (float)(texture_data_ptr->height);
+
+  float src_x2 = src_x + (float)src->width / (float)(texture_data_ptr->width);
+  float src_y2 = src_y + (float)src->height / (float)(texture_data_ptr->height);
 
   glBindTexture(GL_TEXTURE_2D, texture_data_ptr->texture_id);
 
   glBegin(GL_QUADS);
-  glTexCoord2f(0, 0);
-  glVertex2f(x, y);
+  glTexCoord2f(src_x, src_y);
+  glVertex2i(dest->x, 
+	     dest->y);
 
-  glTexCoord2f(1.0f, 0);
-  glVertex2f((float)(texture_data_ptr->width)+x, y);
+  glTexCoord2f(src_x2, src_y);
+  glVertex2i(dest->x + dest->width, 
+	     dest->y);
 
-  glTexCoord2f(1.0f, 1.0f);  
-  glVertex2f((float)(texture_data_ptr->width)+x, 
-	     (float)(texture_data_ptr->height)+y);
+  glTexCoord2f(src_x2, src_y2);  
+  glVertex2i(dest->x + dest->width, 
+	     dest->y + dest->height);
 
-  glTexCoord2f(0, 1.0f);
-  glVertex2f(x, (float)(texture_data_ptr->height)+y);
+  glTexCoord2f(src_x, src_y2);
+  glVertex2i(dest->x, 
+	     dest->y + dest->height);
   
   glEnd();
 
