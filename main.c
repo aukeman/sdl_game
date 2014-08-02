@@ -4,7 +4,10 @@
 
 #include <unistd.h>
 
-void on_quit( enum events__type_e type, uint32_t parameter, void* context ) {
+void on_quit( events__type_e type, 
+	      const events__event_parameter_t* parameter, 
+	      void* context ) {
+
   *((int*)context) = FALSE;
 }
 
@@ -22,6 +25,8 @@ int main( int argc, char** argv ) {
   struct geo__rect_t source = {32, 32, -32, -32};
   struct geo__rect_t dest = {64, 32, 128, 128};
 
+  js__setup();
+
   while ( keep_looping ) {
     events__process_events();
 
@@ -31,6 +36,8 @@ int main( int argc, char** argv ) {
 
     video__flip();
   }
+
+  js__teardown();
 
   video__teardown();
 

@@ -4,25 +4,43 @@
 #include <constants.h>
 #include <stdint.h>
 
+typedef struct {
+  uint16_t modifier;
+  uint16_t value;
+} events__key_param_t;
+
+typedef struct{
+  float value;
+  uint8_t joystick_id;
+  uint8_t axis_id;
+} events__joystick_axis_param_t;
+
+typedef struct{
+  uint8_t value;
+  uint8_t joystick_id;
+  uint8_t button_id;
+} events__joystick_button_param_t;
+
+typedef union{
+  events__key_param_t key;
+  events__joystick_axis_param_t js_axis;
+  events__joystick_button_param_t js_button;
+} events__event_parameter_t;
 
 enum {
   EVENTS__ERROR_CODE_BASE = 0x10,
   EVENTS__INVALID_EVENT_TYPE
 };
 
-enum {
-  EVENTS__MODIFIER_MASK = 0xFFFF0000,
-  EVENTS__VALUE_MASK = 0x0000FFFF
-};
-
-
-enum events__type_e { 
+typedef enum { 
   EVENTS__TYPE_NONE = 0,
   EVENTS__TYPE_QUIT,
   EVENTS__TYPE_KEYDOWN,
   EVENTS__TYPE_KEYUP,
+  EVENTS__TYPE_JOYSTICK_AXIS,
+  EVENTS__TYPE_JOYSTICK_BUTTON,
   EVENTS__TYPE_LAST
-};
+} events__type_e;
 
 extern const uint32_t EVENTS__KEYMOD_LSHIFT;
 extern const uint32_t EVENTS__KEYMOD_RSHIFT;
@@ -168,45 +186,20 @@ extern const uint32_t EVENTS__KEY_LMETA;
 extern const uint32_t EVENTS__KEY_LWIN;
 extern const uint32_t EVENTS__KEY_RWIN;
 
-typedef void events__callback_fxn(enum events__type_e event, uint32_t event_parameter, void* context); 
+extern const uint32_t EVENTS__JS_AXIS;
+extern const uint32_t EVENTS__JS_BUTTON;
+
+
+
+typedef void events__callback_fxn(events__type_e event, 
+				  const events__event_parameter_t* event_parameter, 
+				  void* context); 
 
 int events__process_events();
 
-int events__set_callback( enum events__type_e,
+int events__set_callback( events__type_e,
 			  events__callback_fxn callback, 
 			  void* context );
 
-extern inline 
-uint32_t events__get_key( uint32_t event_parameter ) {
-  return (EVENTS__VALUE_MASK & event_parameter);
-}
-
-extern inline 
-uint32_t events__get_modifier( uint32_t event_parameter ) {
-  return (EVENTS__MODIFIER_MASK & event_parameter);
-}
-
-extern inline 
-int events__test_shift( uint32_t event_parameter ) {
-  return ((EVENTS__KEYMOD_LSHIFT | EVENTS__KEYMOD_RSHIFT) & event_parameter ? 
-	  TRUE : FALSE);
-}
-
-extern inline 
-int events__test_ctrl( uint32_t event_parameter ) {
-  return ((EVENTS__KEYMOD_LCTRL | EVENTS__KEYMOD_RCTRL) & event_parameter ? 
-	  TRUE : FALSE);
-}
-
-extern inline 
-int events__test_alt( uint32_t event_parameter ) {
-  return ((EVENTS__KEYMOD_LALT | EVENTS__KEYMOD_RALT) & event_parameter ? 
-	  TRUE : FALSE);
-}
-
-extern inline 
-int events__test_key( uint32_t keycode, uint32_t event_parameter ) {
-  return (keycode & event_parameter ? TRUE : FALSE);
-}
 
 #endif

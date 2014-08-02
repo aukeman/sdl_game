@@ -4,16 +4,16 @@
 
 #include <SDL/SDL.h>
 
-const uint32_t EVENTS__KEYMOD_LSHIFT = (KMOD_LSHIFT << 16);
-const uint32_t EVENTS__KEYMOD_RSHIFT = (KMOD_RSHIFT << 16);
-const uint32_t EVENTS__KEYMOD_LCTRL = (KMOD_LCTRL << 16);
-const uint32_t EVENTS__KEYMOD_RCTRL = (KMOD_RCTRL << 16);
-const uint32_t EVENTS__KEYMOD_LALT = (KMOD_LALT << 16);
-const uint32_t EVENTS__KEYMOD_RALT = (KMOD_RALT << 16);
-const uint32_t EVENTS__KEYMOD_LMETA = (KMOD_LMETA << 16);
-const uint32_t EVENTS__KEYMOD_RMETA = (KMOD_RMETA << 16);
-const uint32_t EVENTS__KEYMOD_NUM = (KMOD_NUM << 16);
-const uint32_t EVENTS__KEYMOD_CAPS = (KMOD_CAPS << 16);
+const uint32_t EVENTS__KEYMOD_LSHIFT = KMOD_LSHIFT;
+const uint32_t EVENTS__KEYMOD_RSHIFT = KMOD_RSHIFT;
+const uint32_t EVENTS__KEYMOD_LCTRL = KMOD_LCTRL;
+const uint32_t EVENTS__KEYMOD_RCTRL = KMOD_RCTRL;
+const uint32_t EVENTS__KEYMOD_LALT = KMOD_LALT;
+const uint32_t EVENTS__KEYMOD_RALT = KMOD_RALT;
+const uint32_t EVENTS__KEYMOD_LMETA = KMOD_LMETA;
+const uint32_t EVENTS__KEYMOD_RMETA = KMOD_RMETA;
+const uint32_t EVENTS__KEYMOD_NUM = KMOD_NUM;
+const uint32_t EVENTS__KEYMOD_CAPS = KMOD_CAPS;
 
 const uint32_t EVENTS__KEY_UNKNOWN = SDLK_UNKNOWN;
 const uint32_t EVENTS__KEY_FIRST = SDLK_FIRST;
@@ -149,12 +149,12 @@ const uint32_t EVENTS__KEY_LWIN = SDLK_LSUPER;
 const uint32_t EVENTS__KEY_RWIN = SDLK_RSUPER;
 
 
-struct events__callback_record_t {
+typedef struct {
   events__callback_fxn* callback;
   void* context;
-};
+} events__callback_record_t;
 
-struct events__callback_record_t events__callbacks[EVENTS__TYPE_LAST] = {
+events__callback_record_t events__callbacks[EVENTS__TYPE_LAST] = {
   {NULL, NULL},
   {NULL, NULL},
   {NULL, NULL},
@@ -166,24 +166,55 @@ int events__process_events() {
   SDL_Event event;
   while ( SDL_PollEvent(&event)) {
 
-    enum events__type_e event_type = EVENTS__TYPE_NONE;
-    uint32_t event_parameter = 0;
+    events__type_e event_type = EVENTS__TYPE_NONE;
+    events__event_parameter_t param;
+    events__event_parameter_t* param_ptr = NULL;
 
     switch ( event.type ) {
     case SDL_KEYDOWN:
       event_type = EVENTS__TYPE_KEYDOWN;
-      event_parameter = event.key.keysym.sym + (event.key.keysym.mod << 16);
+
+      param.key.value = event.key.keysym.sym;
+      param.key.modifier = event.key.keysym.mod;
+
+      param_ptr = &param;
       break;
 
     case SDL_KEYUP:
       event_type = EVENTS__TYPE_KEYUP;
-      event_parameter = event.key.keysym.sym + (event.key.keysym.mod << 16);
+      param.key.value = event.key.keysym.sym;
+      param.key.modifier = event.key.keysym.mod;
+
+      param_ptr = &param;
       break;
 
+    case SDL_JOYAXISMOTION:
+      event_type = EVENTS__TYPE_JOYSTICK_AXIS;
+      param.js_axis.joystick_id = event.jaxis.which;
+      param.js_axis.axis_id = event.jaxis.axis;
+      param.js_axis.value = (float)(event.jaxis.value) / (int16_t)0x7FFF;
+
+      param.js_axis.value = 
+	(param.js_axis.value < -1.0f ? -1.0f :
+	 (1.0f < param.js_axis.value ? 1.0f : param.js_axis.value));
+	
+      param_ptr = &param;
+      break;
+
+    case SDL_JOYBUTTONDOWN:
+    case SDL_JOYBUTTONUP:
+      event_type = EVENTS__TYPE_JOYSTICK_BUTTON;
+      param.js_button.joystick_id = event.jbutton.which;
+      param.js_button.button_id = event.jbutton.button;
+      param.js_button.value = (event.jbutton.state == SDL_PRESSED);
+
+      param_ptr = &param;
+      
       break;
 
     case SDL_QUIT:      
       event_type = EVENTS__TYPE_QUIT;
+      param_ptr = NULL;
       break;
     }
 
@@ -191,12 +222,12 @@ int events__process_events() {
     void* context = events__callbacks[event_type].context;
 
     if ( callback != NULL ) {
-      (*callback)(event_type, event_parameter, context);
+      (*callback)(event_type, param_ptr, context);
     }
   }
 }
 
-int events__set_callback( enum events__type_e event_type,
+int events__set_callback( events__type_e event_type,
 			  events__callback_fxn callback, 
 			  void* context ) {
 
