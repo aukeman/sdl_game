@@ -1,8 +1,10 @@
 #include <video.h>
 #include <events.h>
 #include <constants.h>
+#include <timing.h>
 
 #include <unistd.h>
+#include <stdio.h>
 
 void on_quit( events__type_e type, 
 	      const events__event_parameter_t* parameter, 
@@ -14,6 +16,8 @@ void on_quit( events__type_e type,
 int main( int argc, char** argv ) {
 
   video__setup(640, 480, FALSE);
+  js__setup();
+  timing__setup();
 
   int keep_looping = TRUE;
 
@@ -25,9 +29,10 @@ int main( int argc, char** argv ) {
   struct geo__rect_t source = {32, 32, -32, -32};
   struct geo__rect_t dest = {64, 32, 128, 128};
 
-  js__setup();
-
   while ( keep_looping ) {
+
+    timing__declare_top_of_frame();
+
     events__process_events();
 
     video__clearscreen();
@@ -37,8 +42,16 @@ int main( int argc, char** argv ) {
     video__flip();
   }
 
+  fprintf( stdout, 
+	   "%d frames; %f seconds %f fps average %f fps instantaneous\n",
+	   timing__get_frame_count(),
+	   timing__get_top_of_frame() / 1000.0f,
+	   timing__get_average_fps(),
+	   timing__get_instantaneous_fps());
+	   
+  
+  timing__teardown();
   js__teardown();
-
   video__teardown();
 
   return 0;
