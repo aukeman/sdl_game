@@ -45,7 +45,10 @@ int video__setup( uint32_t width, uint32_t height, int fullscreen ) {
       SDL_SetVideoMode(video__screen_extents.width, 
 		       video__screen_extents.height, 
 		       0, 
-		       SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
+		       SDL_HWSURFACE | 
+		       SDL_OPENGL | 
+		       SDL_DOUBLEBUF |
+		       (fullscreen ? SDL_FULLSCREEN : 0));
 
     /*
      * Set up OpenGL for 2D rendering.

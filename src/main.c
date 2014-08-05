@@ -10,18 +10,23 @@ void on_quit( events__type_e type,
 	      const events__event_parameter_t* parameter, 
 	      void* context ) {
 
-  *((int*)context) = FALSE;
+  if ( type == EVENTS__TYPE_QUIT ||
+       (type == EVENTS__TYPE_KEYUP &&
+	parameter->key.value == EVENTS__KEY_ESCAPE) ) {
+    *((int*)context) = FALSE;
+  }
 }
 
 int main( int argc, char** argv ) {
 
-  video__setup(640, 480, FALSE);
+  video__setup(800, 600, FALSE);
   js__setup();
   timing__setup();
 
   int keep_looping = TRUE;
 
   events__set_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
+  events__set_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
 
   struct video__texture_data_t texture;
   video__setup_texture("resources/testing.png", &texture);
