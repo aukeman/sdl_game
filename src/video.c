@@ -11,9 +11,9 @@
 
 SDL_Surface* video__surface = NULL;
 
-struct video__screen_extents_t video__screen_extents = {0, 0, FALSE};
+video__screen_extents_t video__screen_extents = {0, 0, FALSE};
 
-const struct video__screen_extents_t* video__get_video_extents() {
+const video__screen_extents_t* video__get_video_extents() {
   return &video__screen_extents;
 }
 
@@ -113,7 +113,7 @@ int video__flip() {
 #endif
 
 int video__setup_texture(const char* file, 
-			 struct video__texture_data_t* texture_data_ptr){
+			 video__texture_data_t* texture_data_ptr){
   uint32_t red_mask = 0;
   uint32_t green_mask = 0;
   uint32_t blue_mask = 0;
@@ -180,7 +180,7 @@ int video__setup_texture(const char* file,
   return SUCCESS;
 }
 
-int video__teardown_texture(struct video__texture_data_t* texture_data_ptr){
+int video__teardown_texture(video__texture_data_t* texture_data_ptr){
   glDeleteTextures(1, &(texture_data_ptr->texture_id));
 
   texture_data_ptr->texture_id = 0;
@@ -190,9 +190,9 @@ int video__teardown_texture(struct video__texture_data_t* texture_data_ptr){
   return SUCCESS;
 }
 
-int video__blit(const struct video__texture_data_t* texture_data_ptr, 
-		const struct geo__rect_t* src,
-		const struct geo__rect_t* dest){
+int video__blit(const video__texture_data_t* texture_data_ptr, 
+		const geo__rect_t* src,
+		const geo__rect_t* dest){
 
   float src_x = (float)src->x / (float)(texture_data_ptr->width);
   float src_y = (float)src->y / (float)(texture_data_ptr->height);

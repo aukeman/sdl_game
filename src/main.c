@@ -28,11 +28,11 @@ int main( int argc, char** argv ) {
   events__set_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
   events__set_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
 
-  struct video__texture_data_t texture;
+  video__texture_data_t texture;
   video__setup_texture("resources/testing.png", &texture);
   
-  struct geo__rect_t source = {32, 32, -32, -32};
-  struct geo__rect_t dest = {64, 32, 128, 128};
+  geo__rect_t source = {32, 32, -32, -32};
+  geo__rect_t dest = {64, 32, 128, 128};
 
   while ( keep_looping ) {
 
