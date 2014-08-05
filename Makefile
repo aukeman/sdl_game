@@ -1,6 +1,7 @@
-SOURCES=src/main.c src/video.c src/events.c src/joystick.c src/timing.c
+SOURCES=$(wildcard src/*.c)
+HEADERS=$(wildcard include/*.h)
 
-sdl_game: $(SOURCES)
+sdl_game: $(SOURCES) $(HEADERS)
 	gcc -g -I./include -o sdl_game $(SOURCES) -lSDL -lSDL_image -lGL
 
 clean: 
