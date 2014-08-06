@@ -23,14 +23,14 @@ build_tests: $(TEST_EXES)
 
 test: build_tests
 	@((for t in test/bin/*; do                      \
-	    $${t};                                      \
+	    $${t} 2>&1;                                 \
 	   done) | awk 'BEGIN {c=0; f=0}                \
                         /\.\.\.ok$$/ {c=c+1}            \
                         /\.\.\.FAILED$$/ {c=c+1; f=f+1} \
                         { print $$0; }                  \
-                        END {print f" of "c" failed"}')
+                        END { if (0 < f){ print f" of "c" failed"; exit 1} }')
 
 clean: 
 	rm -f sdl_game
-	rm -f test/tests
+	rm -f test/bin/*
 
