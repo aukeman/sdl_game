@@ -2,19 +2,21 @@
 #define COLLISION_H
 
 #include <geometry.h>
+#include <types.h>
 
+bool_t collision__rectangles_overlap( const geo__rect_t* a,
+				      const geo__rect_t* b );
 
-int collision__rectangles_overlap( const geo__rect_t* a,
-				   const geo__rect_t* b );
+bool_t collision__point_in_rectangle( const geo__point_t* point,
+				      const geo__rect_t* rect );
 
-int collision__point_in_rectangle( const geo__point_t* point,
-				   const geo__rect_t* rect );
+bool_t collision__line_intersects_line( const geo__line_t* a,
+					const geo__line_t* b,
+					geo__point_t* intersection );
 
-int collision__line_intersects_line( const geo__line_t* a,
-				     const geo__line_t* b );
-
-int collision__line_intersects_rectangle( const geo__line_t* point,
-					  const geo__rect_t* rect );
+bool_t collision__line_intersects_rectangle( const geo__line_t* point,
+					     const geo__rect_t* rect,
+					     geo__point_t* intersection);
 
 
 #endif

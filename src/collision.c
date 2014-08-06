@@ -2,9 +2,10 @@
 #include <geometry.h>
 #include <constants.h>
 #include <math.h>
+#include <limits.h>
 
-int collision__rectangles_overlap( const geo__rect_t* a,
-				   const geo__rect_t* b ){
+bool_t collision__rectangles_overlap( const geo__rect_t* a,
+				      const geo__rect_t* b ){
 
   return ( a->x < (b->x + b->width)  &&
 	   b->x < (a->x + a->width)  &&
@@ -13,47 +14,91 @@ int collision__rectangles_overlap( const geo__rect_t* a,
 
 }
 
-int collision__point_in_rectangle( const geo__point_t* point,
-				   const geo__rect_t* rect ){
+bool_t collision__point_in_rectangle( const geo__point_t* point,
+				      const geo__rect_t* rect ){
   geo__rect_t point_as_rect = { point->x, point->y, 0, 0 };
   
   return collision__rectangles_overlap( rect, &point_as_rect );
 }
 
-int collision__line_intersects_line( const geo__line_t* a,
-				     const geo__line_t* b ){
+bool_t collision__line_intersects_line( const geo__line_t* a,
+					const geo__line_t* b,
+					geo__point_t* intersection ){
 
-  /* if a vertical line, transpose x and y coordinates to avoid singularities */
-  if ( a->x1 == a->x2 || b->x1 == b->x2 ){
-    geo__line_t xpose_a = {a->y1, a->x1, a->y2, a->x2};
-    geo__line_t xpose_b = {b->y1, b->x1, b->y2, b->x2};
+  bool_t result = FALSE;
+
+  if ( intersection ){
+    intersection->x = 0;
+    intersection->y = 0;
+  }
+
+  if ( a->x1 == a->x2 && b->x1 == b->x2 ){
+    /* two parallel vertical lines */
+    result = FALSE;
+  }
+  else if ( a->x1 == a->x2 ) {
+    /* a is vertical */
+
+    result = collision__line_intersects_line( b, a, intersection );
+  }
+  else if ( b->x1 == b->x2 ) {
+    /* b is vertical */
+
+    float slope_a = (float)(a->y2 - a->y1) / (a->x2 - a->x1);
+
+    float y_at_intercept = slope_a * b->x1 + ( a->y2 - slope_a*a->x2);
+
+    bool_t x_on_line_a = ((a->x1 < b->x1 && b->x1 < a->x2) ||
+			  (a->x2 < b->x1 && b->x1 < a->x1));
     
-    return collision__line_intersects_line( &xpose_a, &xpose_b );
-  }
+    bool_t y_on_line_b = ((b->y1 < y_at_intercept && y_at_intercept < b->y2) ||
+			  (b->y2 < y_at_intercept && y_at_intercept < b->y1));
 
-  float slope_a = (float)(a->y2 - a->y1) / (a->x2 - a->x1);
-  float slope_b = (float)(b->y2 - b->y1) / (b->x2 - b->x1);
+    bool_t result = (x_on_line_a && y_on_line_b);
+
+    if ( intersection ){
+      intersection->x = b->x1;
+      intersection->y = (int)(y_at_intercept + 0.5f);
+    }
+  }
+  else {
+
+    float slope_a = (float)(a->y2 - a->y1) / (a->x2 - a->x1);
+    float slope_b = (float)(b->y2 - b->y1) / (b->x2 - b->x1);
   
-  /* parallel or nearly so, no intersection */
-  if ( fabs(slope_b - slope_a) < 0.001f ){
-    return FALSE;
+    if ( 0.0001f < fabs(slope_b - slope_a) ){
+
+      float x_at_intercept = 
+	(a->y2 - slope_a*a->x2 - b->y2 - slope_b*b->x2) / (slope_b - slope_a);
+
+      bool_t x_on_line_a = 
+	((a->x1 < x_at_intercept && x_at_intercept < a->x2) ||
+	 (a->x2 < x_at_intercept && x_at_intercept < a->x1));
+
+      bool_t x_on_line_b = 
+	((b->x1 < x_at_intercept && x_at_intercept < b->x2) ||
+	 (b->x2 < x_at_intercept && x_at_intercept < b->x1));
+
+      result = ( x_on_line_a && x_on_line_b );
+
+      if ( intersection ){
+	float y_at_intercept = 
+	  slope_a * x_at_intercept + ( a->y2 - slope_a*x_at_intercept);
+	
+	intersection->x = (int)(x_at_intercept+0.5f);
+	intersection->y = (int)(y_at_intercept+0.5f);
+      }
+    }
   }
 
-  float x_at_intercept = 
-    (a->y2 - slope_a*a->x2 - b->y2 - slope_b*b->x2) / (slope_b - slope_a);
-
-  int x_on_line_a = ((a->x1 < x_at_intercept && x_at_intercept < a->x2) ||
-		     (a->x2 < x_at_intercept && x_at_intercept < a->x1));
-
-  int x_on_line_b = ((b->x1 < x_at_intercept && x_at_intercept < b->x2) ||
-		     (b->x2 < x_at_intercept && x_at_intercept < b->x1));
-
-
-  return ( x_on_line_a && x_on_line_b );
+  return result;
 }
 
-int collision__line_intersects_rectangle( const geo__line_t* line,
-					  const geo__rect_t* rect ){
+bool_t collision__line_intersects_rectangle( const geo__line_t* line,
+					     const geo__rect_t* rect,
+					     geo__point_t* intersection ){
+
+  bool_t result = FALSE;
 
   geo__rect_t line_bbox = { line->x1, line->y1, 
 			    line->x2 - line->x1, line->y2 - line->y1 };
@@ -70,10 +115,44 @@ int collision__line_intersects_rectangle( const geo__line_t* line,
   geo__line_t side_4 = { rect->x, rect->y+rect->height, 
 			 rect->x, rect->y };
 
-  return (collision__rectangles_overlap( rect, &line_bbox ) &&
-	  collision__line_intersects_line( line, &side_1 ) ||
-	  collision__line_intersects_line( line, &side_2 ) ||
-	  collision__line_intersects_line( line, &side_3 ) ||
-	  collision__line_intersects_line( line, &side_4 ));
+  if (!intersection){
+    result = (collision__rectangles_overlap( rect, &line_bbox ) &&
+	      collision__line_intersects_line( line, &side_1, NULL ) ||
+	      collision__line_intersects_line( line, &side_2, NULL ) ||
+	      collision__line_intersects_line( line, &side_3, NULL ) ||
+	      collision__line_intersects_line( line, &side_4, NULL ));
+  }
+  else{
+    intersection->x = 0;
+    intersection->y = 0;
+
+    if ( collision__rectangles_overlap( rect, &line_bbox ) ){
+
+      geo__line_t* sides[] = { &side_1, &side_2, &side_3, &side_4 };
+      int distance_squared = INT_MAX;
+
+      int idx;
+      for ( idx = 0; idx < 4; ++idx ){
+
+	geo__point_t current_intersection = {0, 0};
+
+	if ( collision__line_intersects_line( line, 
+					      sides[idx], 
+					      &current_intersection ) &&
+	     (((current_intersection.x << 1) + 
+	       (current_intersection.y << 1)) < distance_squared) ){
+
+	  distance_squared = ((current_intersection.x << 1) + 
+			      (current_intersection.y << 1));
+
+	  *intersection = current_intersection;
+
+	  result = TRUE;
+	}
+      }
+    }
+  }
+
+  return result;
 }
 
