@@ -6,6 +6,7 @@ MAIN=src/main.c
 TEST_CASES=$(filter-out test/main.c,$(wildcard test/*.c))
 TEST_MAIN=test/main.c
 
+TEST_HEADERS=$(wildcard test/*.h)
 TEST_EXES=$(patsubst test/%.c, test/bin/%, $(TEST_CASES))
 
 all: sdl_game test
@@ -16,7 +17,7 @@ sdl_game: $(SOURCES) $(HEADERS) $(MAIN)
 test/bin: 
 	mkdir -p test/bin
 
-test/bin/% : test/%.c $(SOURCES) $(HEADERS) $(TEST_MAIN) test/bin
+test/bin/% : test/%.c $(SOURCES) $(HEADERS) $(TEST_MAIN) $(TEST_HEADERS) test/bin
 	gcc -g -I./include -I./test -o $@ $(SOURCES) $(TEST_MAIN) $<  -lSDL -lSDL_image -lGL
 
 build_tests: $(TEST_EXES)

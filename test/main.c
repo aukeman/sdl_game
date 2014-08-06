@@ -10,22 +10,23 @@ int main(int argc, char** argv){
 
   FILE* fout = stdout;
 
-  fprintf(fout, "TEST: %s\n", test_suite_name);
+  fprintf(fout, "%s\n", test_suite_name);
 
   int test_idx = 0;
   while ( iter->test_fxn != NULL ){
 
-    fprintf(fout, " %3d: %-48s...", test_idx, iter->title);
+    fprintf(fout, " %3d: %-48s", test_idx, iter->title);
     fflush(stdout);
 
     if ( iter->test_fxn() ){
-      fprintf( fout, "ok\n" );
+      fprintf( fout, "...ok\n" );
     }
     else{
-      fprintf( fout, "FAILED\n" );
+      fprintf( fout, "...FAILED\n" );
       result = 1;
     }
 
+    ++test_idx;
     ++iter;
   }
   

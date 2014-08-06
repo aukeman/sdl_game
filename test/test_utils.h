@@ -2,6 +2,7 @@
 #define TEST_UTILS_H
 
 #include <constants.h>
+#include <stdio.h>
 
 typedef int test_fxn_t();
 
@@ -19,5 +20,8 @@ extern test_case_t test_suite[];
 
 #define TEST_CASE(tc) { tc, #tc },
 #define TEST_SUITE_END() {NULL, NULL} };
+
+#define TEST_OK() return TRUE
+#define TEST_ASSERT(a) if ( !(a) ) { fprintf(stderr, "\nFILE %s LINE %d failed assertion \"%s\"", __FILE__, __LINE__, #a); return FALSE; }
 
 #endif
