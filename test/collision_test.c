@@ -333,6 +333,19 @@ int rectangle_doesnt_overlap_lower_right_corner(){
   TEST_OK();
 }
 
+int horizontal_line_intersects_rectangle(){
+
+  geo__rect_t r = { 0, 0, 10, 10 };
+  geo__line_t l = { -5, 5, 10, 10 };
+
+  geo__point_t p;
+
+  TEST_ASSERT(TRUE == collision__line_intersects_rectangle( &l, &r, &p ));
+  TEST_ASSERT(p.x == 0);
+  TEST_ASSERT(p.y == 5);
+  
+  TEST_OK();
+}
 
 TEST_SUITE_START(Collision Tests)
 
@@ -360,6 +373,8 @@ TEST_CASE(rectangle_doesnt_overlap_upper_left_corner)
 TEST_CASE(rectangle_doesnt_overlap_upper_right_corner)
 TEST_CASE(rectangle_doesnt_overlap_lower_left_corner)
 TEST_CASE(rectangle_doesnt_overlap_lower_right_corner)
+
+TEST_CASE(horizontal_line_intersects_rectangle)
 
 TEST_SUITE_END()
 			     
