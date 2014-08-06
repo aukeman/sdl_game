@@ -22,11 +22,13 @@ test/bin/% : test/%.c $(SOURCES) $(HEADERS) $(TEST_MAIN) test/bin
 build_tests: $(TEST_EXES)
 
 test: build_tests
-	@(result=true;                         \
-	  for t in test/bin/*; do              \
-	    if ! $${t}; then result=false; fi  \
-	  done;                                \
-	  $${result})
+	@((for t in test/bin/*; do                      \
+	    $${t};                                      \
+	   done) | awk 'BEGIN {c=0; f=0}                \
+                        /\.\.\.ok$$/ {c=c+1}            \
+                        /\.\.\.FAILED$$/ {c=c+1; f=f+1} \
+                        { print $$0; }                  \
+                        END {print f" of "c" failed"}')
 
 clean: 
 	rm -f sdl_game
