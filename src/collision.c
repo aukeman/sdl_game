@@ -54,11 +54,11 @@ bool_t collision__line_intersects_line( const geo__line_t* a,
     bool_t y_on_line_b = ((b->y1 < y_at_intercept && y_at_intercept < b->y2) ||
 			  (b->y2 < y_at_intercept && y_at_intercept < b->y1));
 
-    bool_t result = (x_on_line_a && y_on_line_b);
+    result = (x_on_line_a && y_on_line_b);
 
     if ( intersection ){
       intersection->x = b->x1;
-      intersection->y = (int)(y_at_intercept + 0.5f);
+      intersection->y = (int)rintf(y_at_intercept);
     }
   }
   else {
@@ -69,7 +69,7 @@ bool_t collision__line_intersects_line( const geo__line_t* a,
     if ( 0.0001f < fabs(slope_b - slope_a) ){
 
       float x_at_intercept = 
-	(a->y2 - slope_a*a->x2 - b->y2 - slope_b*b->x2) / (slope_b - slope_a);
+	((a->y2 - slope_a*a->x2) - (b->y2 - slope_b*b->x2)) / (slope_b - slope_a);
 
       bool_t x_on_line_a = 
 	((a->x1 < x_at_intercept && x_at_intercept < a->x2) ||
@@ -83,10 +83,10 @@ bool_t collision__line_intersects_line( const geo__line_t* a,
 
       if ( intersection ){
 	float y_at_intercept = 
-	  slope_a * x_at_intercept + ( a->y2 - slope_a*x_at_intercept);
+	  slope_a * x_at_intercept + (a->y2 - slope_a*a->x2);
 	
-	intersection->x = (int)(x_at_intercept+0.5f);
-	intersection->y = (int)(y_at_intercept+0.5f);
+	intersection->x = (int)rintf(x_at_intercept);
+	intersection->y = (int)rintf(y_at_intercept);
       }
     }
   }
