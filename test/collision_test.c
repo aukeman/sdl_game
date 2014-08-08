@@ -545,13 +545,23 @@ int diagonal_lines_dont_intersect_2(){
 int horizontal_line_intersects_rectangle(){
 
   geo__rect_t r = { 0, 0, 10, 10 };
-  geo__line_t l = { -5, 5, 10, 10 };
+
+  geo__line_t l1 = { -5, 5,   15, 5 };
+  geo__line_t l2 = { 15, 5,   -5, 5 };
 
   geo__point_t p;
 
-  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l, &r, &p ));
-  TEST_ASSERT_TRUE(p.x == 0);
-  TEST_ASSERT_TRUE(p.y == 5);
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, &p ));
+  TEST_ASSERT_INT(p.x, 0);
+  TEST_ASSERT_INT(p.y, 5);
+  
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l2, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l2, &r, &p ));
+  TEST_ASSERT_INT(p.x, 10);
+  TEST_ASSERT_INT(p.y, 5);
   
   TEST_OK();
 }

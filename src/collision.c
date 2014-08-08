@@ -7,11 +7,37 @@
 bool_t collision__rectangles_overlap( const geo__rect_t* a,
 				      const geo__rect_t* b ){
 
-  return ( a->x < (b->x + b->width)  &&
-	   b->x < (a->x + a->width)  &&
-	   a->y < (b->y + a->height) &&
-	   b->y < (a->y + a->height) );
+  geo__rect_t local_a = *a;
+  geo__rect_t local_b = *b;
 
+  if ( local_a.width < 0 )
+  {
+    local_a.x += a->width;
+    local_a.width = -a->width;
+  }
+
+  if ( local_a.height < 0 )
+  {
+    local_a.y += a->height;
+    local_a.width = -a->width;
+  }
+
+  if ( local_b.width < 0 )
+  {
+    local_b.x += b->width;
+    local_b.width = -b->width;
+  }
+
+  if ( local_b.height < 0 )
+  {
+    local_b.y += b->height;
+    local_b.width = -b->width;
+  }
+
+  return ( local_a.x < (local_b.x + local_b.width)  &&
+	   local_b.x < (local_a.x + local_a.width)  &&
+	   local_a.y < (local_b.y + local_a.height) &&
+	   local_b.y < (local_a.y + local_a.height) );
 }
 
 bool_t collision__point_in_rectangle( const geo__point_t* point,
@@ -117,10 +143,10 @@ bool_t collision__line_intersects_rectangle( const geo__line_t* line,
 
   if (!intersection){
     result = (collision__rectangles_overlap( rect, &line_bbox ) &&
-	      collision__line_intersects_line( line, &side_1, NULL ) ||
-	      collision__line_intersects_line( line, &side_2, NULL ) ||
-	      collision__line_intersects_line( line, &side_3, NULL ) ||
-	      collision__line_intersects_line( line, &side_4, NULL ));
+	      (collision__line_intersects_line( line, &side_1, NULL ) ||
+	       collision__line_intersects_line( line, &side_2, NULL ) ||
+	       collision__line_intersects_line( line, &side_3, NULL ) ||
+	       collision__line_intersects_line( line, &side_4, NULL )));
   }
   else{
     intersection->x = 0;
@@ -138,14 +164,15 @@ bool_t collision__line_intersects_rectangle( const geo__line_t* line,
 
 	if ( collision__line_intersects_line( line, 
 					      sides[idx], 
-					      &current_intersection ) &&
-	     (((current_intersection.x << 1) + 
-	       (current_intersection.y << 1)) < distance_squared) ){
+					      &current_intersection ) ){
 
-	  distance_squared = ((current_intersection.x << 1) + 
-			      (current_intersection.y << 1));
+	  int d = ((abs(current_intersection.x - line->x1) << 1) + 
+		   (abs(current_intersection.y - line->y1) << 1));
 
-	  *intersection = current_intersection;
+	  if ( d < distance_squared){
+	    distance_squared = d;
+	    *intersection = current_intersection;
+	  }
 
 	  result = TRUE;
 	}
