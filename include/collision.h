@@ -10,6 +10,9 @@ bool_t collision__rectangles_overlap( const geo__rect_t* a,
 bool_t collision__point_in_rectangle( const geo__point_t* point,
 				      const geo__rect_t* rect );
 
+bool_t collision__point_on_line( const geo__point_t* point,
+				 const geo__line_t* line );
+
 bool_t collision__line_intersects_line( const geo__line_t* a,
 					const geo__line_t* b,
 					geo__point_t* intersection );

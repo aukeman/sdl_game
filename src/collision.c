@@ -48,6 +48,34 @@ bool_t collision__point_in_rectangle( const geo__point_t* point,
   return collision__rectangles_overlap( rect, &point_as_rect );
 }
 
+bool_t collision__point_on_line( const geo__point_t* point,
+				 const geo__line_t* line ){
+  
+  bool_t result = FALSE;
+
+  if ( line->x1 <= point->x && point->x <= line->x2 ||
+       line->x2 <= point->x && point->x <= line->x1 ){
+
+    if ( line->y1 == line->y2 && point->y == line->y1 ){
+      result = TRUE;
+    }
+    else if ( line->x1 == line->x2 && point->x == line->x1 ){
+      result = (( line->y1 <= point->y && point->y <= line->y2 ) ||
+		( line->y2 <= point->y && point->y <= line->y1 ));
+    }
+    else{
+      float slope = (float)(line->y2 - line->y1) / (line->x2 - line->x1);
+      float y_intercept = (line->y2 - slope*line->x2);
+
+      float y_at_point_x = slope*point->x + y_intercept;
+
+      result = (fabs(y_at_point_x - point->y) < 0.5f);
+    }
+  }
+
+  return result;
+}
+
 bool_t collision__line_intersects_line( const geo__line_t* a,
 					const geo__line_t* b,
 					geo__point_t* intersection ){

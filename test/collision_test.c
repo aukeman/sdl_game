@@ -619,7 +619,7 @@ void diagonal_lines_dont_intersect_2(){
   TEST_ASSERT_INT( p.y, -5 );
 }
 
-void vertical_parallel_nonoverlapping_lines_dont_intersect(){
+void vertical_parallel_lines_dont_intersect(){
 
   geo__line_t a = { -10, 100,  -10, -100 };
   geo__line_t b = {  30,  10,  30,    12 };
@@ -652,7 +652,7 @@ void vertical_parallel_nonoverlapping_lines_dont_intersect(){
   TEST_ASSERT_INT( p.y, 0 );
 }
 
-void horizontal_parallel_nonoverlapping_lines_dont_intersect(){
+void horizontal_parallel_lines_dont_intersect(){
 
   geo__line_t a = { -100,    10,  100,  10 };
   geo__line_t b = {  10,     30,  12,    30 };
@@ -685,7 +685,7 @@ void horizontal_parallel_nonoverlapping_lines_dont_intersect(){
   TEST_ASSERT_INT( p.y, 0 );
 }
 
-void diagonal_parallel_nonoverlapping_lines_dont_intersect(){
+void diagonal_parallel_lines_dont_intersect(){
 
   geo__line_t a = { -100,    10,  -120,  15 };
   geo__line_t b = { -100,    30,  -120,  35 };
@@ -716,6 +716,34 @@ void diagonal_parallel_nonoverlapping_lines_dont_intersect(){
   TEST_ASSERT_FALSE(collision__line_intersects_line(&c, &a, &p));
   TEST_ASSERT_INT( p.x, 0 );
   TEST_ASSERT_INT( p.y, 0 );
+}
+
+void vertical_overlapping_lines_intersect(){
+
+  geo__line_t a = { -10, -100,  -10, 100 };
+
+  geo__line_t b = { -10,   10,  -10,  20 };
+
+  geo__line_t c = { -10, -100,  -10, -90 };
+  geo__line_t d = { -10,  -90,  -10, -100 };
+
+  geo__line_t e = { -10,  110,  -10,  90 };
+  geo__line_t f = { -10,   90,  -10, 110 };
+
+  geo__point_t p;
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&a, &b, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, &p));
+  TEST_ASSERT_INT( p.x, -10 );
+  TEST_ASSERT_INT( p.y, 10 );
+
+}
+void horizontal_overlapping_lines_intersect(){
+  TEST_ASSERT_TRUE(0);
+}
+void diagonal_overlapping_lines_intersect(){
+  TEST_ASSERT_TRUE(0);
 }
 
 void horizontal_line_intersects_rectangle(){
@@ -1060,9 +1088,111 @@ void point_outside_rectangle(){
   TEST_ASSERT_FALSE(collision__point_in_rectangle( &p6, &r ));
   TEST_ASSERT_FALSE(collision__point_in_rectangle( &p7, &r ));
   TEST_ASSERT_FALSE(collision__point_in_rectangle( &p8, &r ));
-
-  
 }
+
+void point_on_vertical_line(){
+
+  geo__line_t l1 = { 1, 5,    1, 100 };
+  geo__line_t l2 = { 1, 100,  1,   5 };
+
+  geo__point_t end1 = { 1, 5 };
+  geo__point_t end2 = { 1, 100 };
+
+  geo__point_t middle = { 1, 50 };
+
+  geo__point_t off_end1 = { 1, 0 };
+  geo__point_t off_end2 = { 1, 110 };
+
+  geo__point_t off_middle = { 0, 50 };
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l2 ) );
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &end2, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &end2, &l2 ) );
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &middle, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &middle, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end1, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end1, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end2, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end2, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_middle, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_middle, &l2 ) );
+}
+
+void point_on_horizontal_line(){
+
+  geo__line_t l1 = { 5,   1,    100, 1 };
+  geo__line_t l2 = { 100, 1,      5, 1 };
+
+  geo__point_t end1 = { 5, 1 };
+  geo__point_t end2 = { 100, 1 };
+
+  geo__point_t middle = { 50, 1 };
+
+  geo__point_t off_end1 = { 0, 1 };
+  geo__point_t off_end2 = { 110, 1 };
+
+  geo__point_t off_middle = { 50, 0 };
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l2 ) );
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &end2, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &end2, &l2 ) );
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &middle, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &middle, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end1, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end1, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end2, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end2, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_middle, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_middle, &l2 ) );
+}
+
+void point_on_diagonal_line(){
+
+  geo__line_t l1 = { 5,   1,    105, 5 };
+  geo__line_t l2 = { 105, 5,      5, 1 };
+
+  geo__point_t end1 = { 5, 1 };
+  geo__point_t end2 = { 105, 5 };
+
+  geo__point_t middle = { 55, 3 };
+
+  geo__point_t off_end1 = { 205, 9 };
+  geo__point_t off_end2 = { -95, -3 };
+
+  geo__point_t off_middle = { 50, 0 };
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l2 ) );
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &end2, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &end2, &l2 ) );
+
+  TEST_ASSERT_TRUE( collision__point_on_line( &middle, &l1 ) );
+  TEST_ASSERT_TRUE( collision__point_on_line( &middle, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end1, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end1, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end2, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_end2, &l2 ) );
+
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_middle, &l1 ) );
+  TEST_ASSERT_FALSE( collision__point_on_line( &off_middle, &l2 ) );
+
+}
+ 
 
 
 TEST_SUITE_START(Collision Tests)
@@ -1102,9 +1232,13 @@ TEST_CASE(diagonal_lines_intersect_3)
 TEST_CASE(diagonal_lines_dont_intersect)
 TEST_CASE(diagonal_lines_dont_intersect_2)
 
-TEST_CASE(vertical_parallel_nonoverlapping_lines_dont_intersect)
-TEST_CASE(horizontal_parallel_nonoverlapping_lines_dont_intersect)
-TEST_CASE(diagonal_parallel_nonoverlapping_lines_dont_intersect)
+TEST_CASE(vertical_parallel_lines_dont_intersect)
+TEST_CASE(horizontal_parallel_lines_dont_intersect)
+TEST_CASE(diagonal_parallel_lines_dont_intersect)
+
+TEST_CASE(vertical_overlapping_lines_intersect)
+TEST_CASE(horizontal_overlapping_lines_intersect)
+TEST_CASE(diagonal_overlapping_lines_intersect)
 
 TEST_CASE(horizontal_line_intersects_rectangle)
 TEST_CASE(vertical_line_intersects_rectangle)
@@ -1117,6 +1251,11 @@ TEST_CASE(line_on_side_intersects_rectangle_at_origin)
 TEST_CASE(point_in_rectangle_middle)
 TEST_CASE(point_in_rectangle_edge)
 TEST_CASE(point_outside_rectangle)
+
+TEST_CASE(point_on_vertical_line)
+TEST_CASE(point_on_horizontal_line)
+TEST_CASE(point_on_diagonal_line)
+
 
 TEST_SUITE_END()
 			     
