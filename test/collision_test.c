@@ -766,7 +766,7 @@ void orthogonal_line_intersects_rectangle_corner(){
   TEST_ASSERT_INT(p.y, i8.y);
 }
 
-void line_from_inside_intersects_rectangle(){
+void line_from_inside_intersects_rectangle_at_origin(){
   
   geo__rect_t r = { -50, -11, 10, 10 };
 
@@ -809,9 +809,103 @@ void line_from_inside_intersects_rectangle(){
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l5, &r, &p ));
   TEST_ASSERT_INT(p.x, i5.x);
   TEST_ASSERT_INT(p.y, i5.y);
-
-
 }
+
+void line_on_side_intersects_rectangle_at_origin(){
+
+  geo__rect_t r = { -100, 10, 30, 5 };
+
+  geo__line_t l1 = { -100, 12,  -110, 12 }; geo__point_t i1 = { -100, 12 };
+  geo__line_t l2 = { -100, 12,  -100, 10 }; geo__point_t i2 = { -100, 12 };
+  geo__line_t l3 = { -100, 12,  -100, 8 };  geo__point_t i3 = { -100, 12 };
+
+  geo__line_t l4 = { -90, 15,  -100, 12 }; geo__point_t i4  = { -90, 15 };
+  geo__line_t l5 = { -90, 15,  -80,  15 }; geo__point_t i5  = { -90, 15 };
+  geo__line_t l6 = { -90, 15,  -100, 15 };  geo__point_t i6 = { -90, 15 };
+
+  geo__line_t l7 = { -70, 12,  -60, 12 }; geo__point_t i7  = { -70, 12 };
+  geo__line_t l8 = { -70, 12,  -70,  15 }; geo__point_t i8 = { -70, 12 };
+  geo__line_t l9 = { -70, 12,  -70, 8 };  geo__point_t i9  = { -70, 12 };
+
+  geo__line_t l10 = { -90, 10,  -90, 5 }; geo__point_t i10 = { -90, 10 };
+  geo__line_t l11 = { -90, 10,  -80, 10 }; geo__point_t i11 = { -90, 10 };
+  geo__line_t l12 = { -90, 10,  -100, 10 }; geo__point_t i12 = { -90, 10 };
+
+  geo__point_t p;
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, &p ));
+  TEST_ASSERT_INT(p.x, i1.x);
+  TEST_ASSERT_INT(p.y, i1.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l2, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l2, &r, &p ));
+  TEST_ASSERT_INT(p.x, i2.x);
+  TEST_ASSERT_INT(p.y, i2.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l3, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l3, &r, &p ));
+  TEST_ASSERT_INT(p.x, i3.x);
+  TEST_ASSERT_INT(p.y, i3.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l4, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l4, &r, &p ));
+  TEST_ASSERT_INT(p.x, i4.x);
+  TEST_ASSERT_INT(p.y, i4.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l5, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l5, &r, &p ));
+  TEST_ASSERT_INT(p.x, i5.x);
+  TEST_ASSERT_INT(p.y, i5.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l6, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l6, &r, &p ));
+  TEST_ASSERT_INT(p.x, i6.x);
+  TEST_ASSERT_INT(p.y, i6.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l7, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l7, &r, &p ));
+  TEST_ASSERT_INT(p.x, i7.x);
+  TEST_ASSERT_INT(p.y, i7.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l8, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l8, &r, &p ));
+  TEST_ASSERT_INT(p.x, i8.x);
+  TEST_ASSERT_INT(p.y, i8.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l9, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l9, &r, &p ));
+  TEST_ASSERT_INT(p.x, i9.x);
+  TEST_ASSERT_INT(p.y, i9.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l10, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l10, &r, &p ));
+  TEST_ASSERT_INT(p.x, i10.x);
+  TEST_ASSERT_INT(p.y, i10.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l11, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l11, &r, &p ));
+  TEST_ASSERT_INT(p.x, i11.x);
+  TEST_ASSERT_INT(p.y, i11.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l12, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l12, &r, &p ));
+  TEST_ASSERT_INT(p.x, i12.x);
+  TEST_ASSERT_INT(p.y, i12.y);
+}
+
 
 void point_in_rectangle_middle(){
   geo__rect_t r = { -5, -5, 10, 5 };
@@ -918,7 +1012,8 @@ TEST_CASE(vertical_line_intersects_rectangle)
 TEST_CASE(diagonal_line_intersects_rectangle)
 TEST_CASE(orthogonal_line_intersects_rectangle_corner)
 
-TEST_CASE(line_from_inside_intersects_rectangle)
+TEST_CASE(line_from_inside_intersects_rectangle_at_origin)
+TEST_CASE(line_on_side_intersects_rectangle_at_origin)
 
 TEST_CASE(point_in_rectangle_middle)
 TEST_CASE(point_in_rectangle_edge)
