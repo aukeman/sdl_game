@@ -617,11 +617,106 @@ void diagonal_lines_dont_intersect_2(){
   TEST_ASSERT_FALSE(collision__line_intersects_line(&b, &a, &p));
   TEST_ASSERT_INT( p.x, -10 );
   TEST_ASSERT_INT( p.y, -5 );
-  
-  
- 
 }
 
+void vertical_parallel_nonoverlapping_lines_dont_intersect(){
+
+  geo__line_t a = { -10, 100,  -10, -100 };
+  geo__line_t b = {  30,  10,  30,    12 };
+  geo__line_t c = {  -30,  -1000,  -30,    -1200 };
+
+  geo__point_t p;
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&b, &a, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&b, &a, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &c, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &c, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&c, &a, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&c, &a, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+}
+
+void horizontal_parallel_nonoverlapping_lines_dont_intersect(){
+
+  geo__line_t a = { -100,    10,  100,  10 };
+  geo__line_t b = {  10,     30,  12,    30 };
+  geo__line_t c = { -1000,  -30, -1200, -30 };
+
+  geo__point_t p;
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&b, &a, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&b, &a, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &c, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &c, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&c, &a, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&c, &a, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+}
+
+void diagonal_parallel_nonoverlapping_lines_dont_intersect(){
+
+  geo__line_t a = { -100,    10,  -120,  15 };
+  geo__line_t b = { -100,    30,  -120,  35 };
+  geo__line_t c = { -1000,  -30, -1020, -25 };
+
+  geo__point_t p;
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&b, &a, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&b, &a, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &c, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &c, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+
+  p.x = 99; p.y = 99;
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&c, &a, NULL));
+  TEST_ASSERT_FALSE(collision__line_intersects_line(&c, &a, &p));
+  TEST_ASSERT_INT( p.x, 0 );
+  TEST_ASSERT_INT( p.y, 0 );
+}
 
 void horizontal_line_intersects_rectangle(){
 
@@ -1006,6 +1101,10 @@ TEST_CASE(diagonal_lines_intersect_2)
 TEST_CASE(diagonal_lines_intersect_3)
 TEST_CASE(diagonal_lines_dont_intersect)
 TEST_CASE(diagonal_lines_dont_intersect_2)
+
+TEST_CASE(vertical_parallel_nonoverlapping_lines_dont_intersect)
+TEST_CASE(horizontal_parallel_nonoverlapping_lines_dont_intersect)
+TEST_CASE(diagonal_parallel_nonoverlapping_lines_dont_intersect)
 
 TEST_CASE(horizontal_line_intersects_rectangle)
 TEST_CASE(vertical_line_intersects_rectangle)
