@@ -763,9 +763,55 @@ void orthogonal_line_intersects_rectangle_corner(){
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l8, &r, NULL ));
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l8, &r, &p ));
   TEST_ASSERT_INT(p.x, i8.x);
-  TEST_ASSERT_INT(p.y, 7);
+  TEST_ASSERT_INT(p.y, i8.y);
 }
 
+void line_from_inside_intersects_rectangle(){
+  
+  geo__rect_t r = { -50, -11, 10, 10 };
+
+  geo__line_t l1 = { -45, -5,  10,  -5 };  geo__point_t i1 = { -45, -5 };
+  geo__line_t l2 = { -45, -5,  -60, -5 };  geo__point_t i2 = { -45, -5 };
+  geo__line_t l3 = { -45, -5,  -45, -15 }; geo__point_t i3 = { -45, -5 };
+  geo__line_t l4 = { -45, -5,  -45, 15 };  geo__point_t i4 = { -45, -5 };
+
+  geo__line_t l5 = { -45, -5,  -45, -6 };  geo__point_t i5 = { -45, -5 };
+
+
+  geo__point_t p;
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, &p ));
+  TEST_ASSERT_INT(p.x, i1.x);
+  TEST_ASSERT_INT(p.y, i1.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l2, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l2, &r, &p ));
+  TEST_ASSERT_INT(p.x, i2.x);
+  TEST_ASSERT_INT(p.y, i2.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l3, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l3, &r, &p ));
+  TEST_ASSERT_INT(p.x, i3.x);
+  TEST_ASSERT_INT(p.y, i3.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l4, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l4, &r, &p ));
+  TEST_ASSERT_INT(p.x, i4.x);
+  TEST_ASSERT_INT(p.y, i4.y);
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l5, &r, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l5, &r, &p ));
+  TEST_ASSERT_INT(p.x, i5.x);
+  TEST_ASSERT_INT(p.y, i5.y);
+
+
+}
 
 void point_in_rectangle_middle(){
   geo__rect_t r = { -5, -5, 10, 5 };
@@ -871,6 +917,8 @@ TEST_CASE(horizontal_line_intersects_rectangle)
 TEST_CASE(vertical_line_intersects_rectangle)
 TEST_CASE(diagonal_line_intersects_rectangle)
 TEST_CASE(orthogonal_line_intersects_rectangle_corner)
+
+TEST_CASE(line_from_inside_intersects_rectangle)
 
 TEST_CASE(point_in_rectangle_middle)
 TEST_CASE(point_in_rectangle_edge)

@@ -42,6 +42,7 @@ bool_t collision__rectangles_overlap( const geo__rect_t* a,
 
 bool_t collision__point_in_rectangle( const geo__point_t* point,
 				      const geo__rect_t* rect ){
+
   geo__rect_t point_as_rect = { point->x, point->y, 0, 0 };
   
   return collision__rectangles_overlap( rect, &point_as_rect );
@@ -171,6 +172,19 @@ bool_t collision__line_intersects_rectangle( const geo__line_t* line,
 	}
 
 	result = TRUE;
+      }
+    }
+
+    if ( !result )
+    {
+      geo__point_t origin = { line->x1, line->y1 };
+
+      if ( collision__point_in_rectangle( &origin, rect ) ) {
+	result = TRUE;
+	
+	if ( intersection ){
+	  *intersection = origin;
+	}
       }
     }
   }
