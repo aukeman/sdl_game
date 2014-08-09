@@ -4,17 +4,17 @@
 
 #include <test_utils.h>
 
-int rectangle_overlap_colocated(){
+void rectangle_overlap_colocated(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { 0, 0, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_contains(){
+void rectangle_overlap_contains(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { 3, 3, 4, 4 };
@@ -22,10 +22,10 @@ int rectangle_overlap_contains(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_spans_horizontal(){
+void rectangle_overlap_spans_horizontal(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { -5, 3, 20, 4 };
@@ -33,10 +33,10 @@ int rectangle_overlap_spans_horizontal(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_spans_vertical(){
+void rectangle_overlap_spans_vertical(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { 3, -5, 4, 20 };
@@ -44,10 +44,10 @@ int rectangle_overlap_spans_vertical(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_top(){
+void rectangle_overlap_top(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { 0, -5, 10, 10 };
@@ -64,10 +64,10 @@ int rectangle_overlap_top(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &d ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &d, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_bottom(){
+void rectangle_overlap_bottom(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { 0, 5, 10, 10 };
@@ -84,10 +84,10 @@ int rectangle_overlap_bottom(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &d ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &d, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_left(){
+void rectangle_overlap_left(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { -5, 0, 10, 10 };
@@ -104,10 +104,10 @@ int rectangle_overlap_left(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &d ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &d, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_right(){
+void rectangle_overlap_right(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { 5, 0, 10, 10 };
@@ -124,10 +124,10 @@ int rectangle_overlap_right(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &d ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &d, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_upper_left(){
+void rectangle_overlap_upper_left(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { -5, -5, 10, 10 };
@@ -140,10 +140,10 @@ int rectangle_overlap_upper_left(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &c ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &c, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_upper_right(){
+void rectangle_overlap_upper_right(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { 5, -5, 10, 10 };
@@ -156,10 +156,10 @@ int rectangle_overlap_upper_right(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &c ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &c, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_lower_left(){
+void rectangle_overlap_lower_left(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { -5, 5, 10, 10 };
@@ -172,10 +172,10 @@ int rectangle_overlap_lower_left(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &c ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &c, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_lower_right(){
+void rectangle_overlap_lower_right(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
   geo__rect_t b = { 5, 5, 10, 10 };
@@ -188,10 +188,10 @@ int rectangle_overlap_lower_right(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &c ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &c, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_overlap_touching(){
+void rectangle_overlap_touching(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
 
@@ -228,10 +228,10 @@ int rectangle_overlap_touching(){
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &i ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &i, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_doesnt_overlap_top(){
+void rectangle_doesnt_overlap_top(){
   
   geo__rect_t a = { 0,   0, 10, 10 };
 
@@ -252,10 +252,10 @@ int rectangle_doesnt_overlap_top(){
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_doesnt_overlap_bottom(){
+void rectangle_doesnt_overlap_bottom(){
   
   geo__rect_t a = { 0,   0, 10, 10 };
   geo__rect_t b = { 0,  11, 10, 10 };
@@ -275,10 +275,10 @@ int rectangle_doesnt_overlap_bottom(){
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_doesnt_overlap_left(){
+void rectangle_doesnt_overlap_left(){
   
   geo__rect_t a = {   0, 0, 10, 10 };
   geo__rect_t b = { -10, 0, 9, 10 };
@@ -298,10 +298,10 @@ int rectangle_doesnt_overlap_left(){
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_doesnt_overlap_right(){
+void rectangle_doesnt_overlap_right(){
   
   geo__rect_t a = {  0, 0, 10, 10 };
   geo__rect_t b = { 11, 0, 10, 10 };
@@ -321,10 +321,10 @@ int rectangle_doesnt_overlap_right(){
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_doesnt_overlap_upper_left_corner(){
+void rectangle_doesnt_overlap_upper_left_corner(){
   
   geo__rect_t a = {   0,   0, 10, 10 };
   geo__rect_t b = { -10, -10, 9, 9 };
@@ -344,10 +344,10 @@ int rectangle_doesnt_overlap_upper_left_corner(){
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_doesnt_overlap_upper_right_corner(){
+void rectangle_doesnt_overlap_upper_right_corner(){
   
   geo__rect_t a = {  0,   0, 10, 10 };
   geo__rect_t b = { 11, -11, 10, 10 };
@@ -367,10 +367,10 @@ int rectangle_doesnt_overlap_upper_right_corner(){
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_doesnt_overlap_lower_left_corner(){
+void rectangle_doesnt_overlap_lower_left_corner(){
   
   geo__rect_t a = {   0,   0, 10, 10 };
   geo__rect_t b = { -10, 10, 9, 9 };
@@ -390,10 +390,10 @@ int rectangle_doesnt_overlap_lower_left_corner(){
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_OK();
+  
 }
 
-int rectangle_doesnt_overlap_lower_right_corner(){
+void rectangle_doesnt_overlap_lower_right_corner(){
   
   geo__rect_t a = {  0,  0, 10, 10 };
   geo__rect_t b = { 11, 11, 10, 10 };
@@ -413,10 +413,10 @@ int rectangle_doesnt_overlap_lower_right_corner(){
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_OK();
+  
 }
 
-int perpendicular_lines_intersect(){
+void perpendicular_lines_intersect(){
 
   geo__line_t v = { 5, -5,  5, 5 };
   geo__line_t h = { 0,  0, 10, 0 };
@@ -434,10 +434,10 @@ int perpendicular_lines_intersect(){
   TEST_ASSERT_INT( p.x, 5 );
   TEST_ASSERT_INT( p.y, 0 );
 
-  TEST_OK();
+  
 }
 
-int perpendicular_lines_dont_intersect(){
+void perpendicular_lines_dont_intersect(){
 
   geo__line_t v =  {  5, -5,    5,  5 };
   geo__line_t h1 = { -5,  0,    4,  0 };
@@ -482,10 +482,10 @@ int perpendicular_lines_dont_intersect(){
   TEST_ASSERT_INT( p.x, 5 );
   TEST_ASSERT_INT( p.y, 6 );
 
-  TEST_OK();
+  
 }
 
-int diagonal_lines_intersect(){
+void diagonal_lines_intersect(){
 
   geo__line_t l1 = { 0,   0, 10, -10 };
   geo__line_t l2 = { 0, -10, 10,  0  };
@@ -503,10 +503,10 @@ int diagonal_lines_intersect(){
   TEST_ASSERT_INT( p.x,  5 );
   TEST_ASSERT_INT( p.y, -5 );
 
-  TEST_OK();
+  
 }
 
-int diagonal_lines_intersect_2(){
+void diagonal_lines_intersect_2(){
 
   geo__line_t a  = { 0,  0, 20, 10 };
   geo__line_t b =  { 0, 10, 20,  0 };
@@ -525,10 +525,10 @@ int diagonal_lines_intersect_2(){
   TEST_ASSERT_INT( p.x, 10 );
   TEST_ASSERT_INT( p.y, 5 );
   
-  TEST_OK();
+  
 }
 
-int diagonal_lines_intersect_3(){
+void diagonal_lines_intersect_3(){
 
   geo__line_t a  = { 0,   0, 20, 10 };
   geo__line_t b =  { 0, -10, 20, 30 };
@@ -547,10 +547,10 @@ int diagonal_lines_intersect_3(){
   TEST_ASSERT_INT( p.x,  7 );
   TEST_ASSERT_INT( p.y,  3 );
   
-  TEST_OK();
+  
 }
 
-int diagonal_lines_dont_intersect(){
+void diagonal_lines_dont_intersect(){
 
   geo__line_t l  = { 0,  0, 10, 10 };
  
@@ -596,10 +596,10 @@ int diagonal_lines_dont_intersect(){
   TEST_ASSERT_INT( p.x, 10 );
   TEST_ASSERT_INT( p.y, 10 );
 
-  TEST_OK();
+  
 }
 
-int diagonal_lines_dont_intersect_2(){
+void diagonal_lines_dont_intersect_2(){
 
   geo__line_t a = { 0,  0,   20, 10 };
   geo__line_t b = { 0, 10,   20, 40 };
@@ -618,12 +618,12 @@ int diagonal_lines_dont_intersect_2(){
   TEST_ASSERT_INT( p.x, -10 );
   TEST_ASSERT_INT( p.y, -5 );
   
-  TEST_OK();
+  
  
 }
 
 
-int horizontal_line_intersects_rectangle(){
+void horizontal_line_intersects_rectangle(){
 
   geo__rect_t r = { 0, 0, 10, 10 };
 
@@ -644,10 +644,10 @@ int horizontal_line_intersects_rectangle(){
   TEST_ASSERT_INT(p.x, 10);
   TEST_ASSERT_INT(p.y, 5);
   
-  TEST_OK();
+  
 }
 
-int vertical_line_intersects_rectangle(){
+void vertical_line_intersects_rectangle(){
 
   geo__rect_t r = { 0, 0, 10, 10 };
 
@@ -668,10 +668,10 @@ int vertical_line_intersects_rectangle(){
   TEST_ASSERT_INT(p.x, 5);
   TEST_ASSERT_INT(p.y, 10);
   
-  TEST_OK();
+  
 }
 
-int diagonal_line_intersects_rectangle(){
+void diagonal_line_intersects_rectangle(){
 
   geo__rect_t r = { 0, 0, 10, 10 };
 
@@ -695,7 +695,7 @@ int diagonal_line_intersects_rectangle(){
 
 }
 
-int orthogonal_line_intersects_rectangle_corner(){
+void orthogonal_line_intersects_rectangle_corner(){
 
   geo__rect_t r = { 3, 4, 5, 6 };
 
@@ -763,13 +763,11 @@ int orthogonal_line_intersects_rectangle_corner(){
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l8, &r, NULL ));
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l8, &r, &p ));
   TEST_ASSERT_INT(p.x, i8.x);
-  TEST_ASSERT_INT(p.y, i8.y);
-  
-  TEST_OK();
+  TEST_ASSERT_INT(p.y, 7);
 }
 
 
-int point_in_rectangle_middle(){
+void point_in_rectangle_middle(){
   geo__rect_t r = { -5, -5, 10, 5 };
 
   geo__point_t p1 = { -3, -3 };
@@ -781,7 +779,7 @@ int point_in_rectangle_middle(){
   TEST_ASSERT_TRUE(collision__point_in_rectangle( &p3, &r ));
 }
 
-int point_in_rectangle_edge(){
+void point_in_rectangle_edge(){
   geo__rect_t r = { -5, -5, 10, 5 };
 
   geo__point_t p1 = { -5, -5 };
@@ -805,7 +803,7 @@ int point_in_rectangle_edge(){
   TEST_ASSERT_TRUE(collision__point_in_rectangle( &p8, &r ));
 }
 
-int point_outside_rectangle(){
+void point_outside_rectangle(){
   geo__rect_t r = { -5, -5, 10, 5 };
 
   geo__point_t p1 = { -6, -6 };
@@ -828,7 +826,7 @@ int point_outside_rectangle(){
   TEST_ASSERT_FALSE(collision__point_in_rectangle( &p7, &r ));
   TEST_ASSERT_FALSE(collision__point_in_rectangle( &p8, &r ));
 
-  TEST_OK();
+  
 }
 
 

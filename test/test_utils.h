@@ -4,7 +4,7 @@
 #include <constants.h>
 #include <stdio.h>
 
-typedef int test_fxn_t();
+typedef void test_fxn_t();
 
 typedef struct {
   
@@ -16,18 +16,37 @@ typedef struct {
 extern const char* test_suite_name;
 extern test_case_t test_suite[];
 
+extern int g_test_result;
+
 #define TEST_SUITE_START(name) const char* test_suite_name = #name; test_case_t test_suite[] = {
 
 #define __ASSERTION_LOCATION fprintf(stderr, "\nFILE %s LINE %d failed assertion: ", __FILE__, __LINE__);
 
+#define __ASSERTION_FAIL g_test_result = FALSE; return
+
+#define __ASSERTION_EQUALITY(comparison_result, actual, expected, fmt )	\
+if ( !(comparison_result) ) {						\
+  __ASSERTION_LOCATION;                  \
+  fprintf(stderr, "\"%s\" expected: %"#fmt" actual: %"#fmt"\n", #actual" == "#expected, (expected), (actual));                     \
+  __ASSERTION_FAIL; }
+
 #define TEST_CASE(tc) { tc, #tc },
 #define TEST_SUITE_END() {NULL, NULL} };
 
-#define TEST_OK() return TRUE
-#define TEST_ASSERT_TRUE(a) if ( !(a) ) { __ASSERTION_LOCATION; fprintf(stderr, "\"%s\"", #a); return FALSE; }
+#define TEST_ASSERT_TRUE(a)      \
+if ( !(a) ) {                    \
+  __ASSERTION_LOCATION;          \
+  fprintf(stderr, "\"%s\"", #a); \
+  __ASSERTION_FAIL; }
 
-#define TEST_ASSERT_FALSE(a) if ( (a) ) { __ASSERTION_LOCATION; fprintf(stderr, " NOT \"%s\"", #a); return FALSE; }
+#define TEST_ASSERT_FALSE(a) \
+if ( (a) ) {                          \
+  __ASSERTION_LOCATION;               \
+  fprintf(stderr, " NOT \"%s\"", #a); \
+  __ASSERTION_FAIL; }
 
-#define TEST_ASSERT_INT(actual,expected) if ((actual) != (expected)) { __ASSERTION_LOCATION; fprintf(stderr, "\"%s\" expected: %d actual: %d\n", #actual" == "#expected, (expected), (actual)); return FALSE; }
+#define TEST_ASSERT_INT(actual,expected) \
+  __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, d )
+  
 
 #endif

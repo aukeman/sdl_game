@@ -2,6 +2,8 @@
 #include <constants.h>
 #include <stdio.h>
 
+int g_test_result = TRUE;
+
 int main(int argc, char** argv){
 
   int result = 0;
@@ -18,7 +20,11 @@ int main(int argc, char** argv){
     fprintf(fout, " %3d: %-48s", test_idx, iter->title);
     fflush(stdout);
 
-    if ( iter->test_fxn() ){
+    g_test_result = TRUE;
+
+    iter->test_fxn();
+
+    if ( g_test_result ){
       fprintf( fout, "...ok\n" );
     }
     else{
