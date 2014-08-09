@@ -19,7 +19,7 @@ bool_t collision__rectangles_overlap( const geo__rect_t* a,
   if ( local_a.height < 0 )
   {
     local_a.y += a->height;
-    local_a.width = -a->width;
+    local_a.height = -a->height;
   }
 
   if ( local_b.width < 0 )
@@ -31,13 +31,13 @@ bool_t collision__rectangles_overlap( const geo__rect_t* a,
   if ( local_b.height < 0 )
   {
     local_b.y += b->height;
-    local_b.width = -b->width;
+    local_b.height = -b->height;
   }
 
-  return ( local_a.x < (local_b.x + local_b.width)  &&
-	   local_b.x < (local_a.x + local_a.width)  &&
-	   local_a.y < (local_b.y + local_a.height) &&
-	   local_b.y < (local_a.y + local_a.height) );
+  return ( local_a.x <= (local_b.x + local_b.width)  &&
+	   local_b.x <= (local_a.x + local_a.width)  &&
+	   local_a.y <= (local_b.y + local_b.height) &&
+	   local_b.y <= (local_a.y + local_a.height) );
 }
 
 bool_t collision__point_in_rectangle( const geo__point_t* point,
@@ -74,11 +74,13 @@ bool_t collision__line_intersects_line( const geo__line_t* a,
 
     float y_at_intercept = slope_a * b->x1 + ( a->y2 - slope_a*a->x2);
 
-    bool_t x_on_line_a = ((a->x1 < b->x1 && b->x1 < a->x2) ||
-			  (a->x2 < b->x1 && b->x1 < a->x1));
+    bool_t x_on_line_a = 
+      ((a->x1 <= b->x1 && b->x1 <= a->x2) ||
+       (a->x2 <= b->x1 && b->x1 <= a->x1));
     
-    bool_t y_on_line_b = ((b->y1 < y_at_intercept && y_at_intercept < b->y2) ||
-			  (b->y2 < y_at_intercept && y_at_intercept < b->y1));
+    bool_t y_on_line_b = 
+      ((b->y1 <= y_at_intercept && y_at_intercept <= b->y2) ||
+       (b->y2 <= y_at_intercept && y_at_intercept <= b->y1));
 
     result = (x_on_line_a && y_on_line_b);
 
@@ -98,12 +100,12 @@ bool_t collision__line_intersects_line( const geo__line_t* a,
 	((a->y2 - slope_a*a->x2) - (b->y2 - slope_b*b->x2)) / (slope_b - slope_a);
 
       bool_t x_on_line_a = 
-	((a->x1 < x_at_intercept && x_at_intercept < a->x2) ||
-	 (a->x2 < x_at_intercept && x_at_intercept < a->x1));
+	((a->x1 <= x_at_intercept && x_at_intercept <= a->x2) ||
+	 (a->x2 <= x_at_intercept && x_at_intercept <= a->x1));
 
       bool_t x_on_line_b = 
-	((b->x1 < x_at_intercept && x_at_intercept < b->x2) ||
-	 (b->x2 < x_at_intercept && x_at_intercept < b->x1));
+	((b->x1 <= x_at_intercept && x_at_intercept <= b->x2) ||
+	 (b->x2 <= x_at_intercept && x_at_intercept <= b->x1));
 
       result = ( x_on_line_a && x_on_line_b );
 
