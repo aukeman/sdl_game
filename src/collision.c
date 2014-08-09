@@ -131,53 +131,46 @@ bool_t collision__line_intersects_rectangle( const geo__line_t* line,
   geo__rect_t line_bbox = { line->x1, line->y1, 
 			    line->x2 - line->x1, line->y2 - line->y1 };
 
-  geo__line_t side_1 = { rect->x, rect->y, 
-			 rect->x+rect->width, rect->y };
-
-  geo__line_t side_2 = { rect->x+rect->width, rect->y, 
-			 rect->x+rect->width, rect->y+rect->height };
-
-  geo__line_t side_3 = { rect->x+rect->width, rect->y+rect->height, 
-			 rect->x, rect->y+rect->height };
-
-  geo__line_t side_4 = { rect->x, rect->y+rect->height, 
-			 rect->x, rect->y };
-
-  if (!intersection){
-    result = (collision__rectangles_overlap( rect, &line_bbox ) &&
-	      (collision__line_intersects_line( line, &side_1, NULL ) ||
-	       collision__line_intersects_line( line, &side_2, NULL ) ||
-	       collision__line_intersects_line( line, &side_3, NULL ) ||
-	       collision__line_intersects_line( line, &side_4, NULL )));
-  }
-  else{
+  if (intersection){
     intersection->x = 0;
     intersection->y = 0;
+  }
 
-    if ( collision__rectangles_overlap( rect, &line_bbox ) ){
+  if ( collision__rectangles_overlap( rect, &line_bbox ) ){
 
-      geo__line_t* sides[] = { &side_1, &side_2, &side_3, &side_4 };
-      int distance_squared = INT_MAX;
+    geo__line_t side_1 = { rect->x+rect->width, rect->y,
+			   rect->x, rect->y };
+    
+    geo__line_t side_2 = { rect->x+rect->width, rect->y, 
+			   rect->x+rect->width, rect->y+rect->height };
+    
+    geo__line_t side_3 = { rect->x, rect->y+rect->height,
+			   rect->x+rect->width, rect->y+rect->height };
+    
+    geo__line_t side_4 = { rect->x, rect->y+rect->height, 
+			   rect->x, rect->y };
 
-      int idx;
-      for ( idx = 0; idx < 4; ++idx ){
+    geo__line_t* sides[] = { &side_1, &side_2, &side_3, &side_4 };
 
-	geo__point_t current_intersection = {0, 0};
+    geo__point_t current_intersection = {0, 0};
 
-	if ( collision__line_intersects_line( line, 
-					      sides[idx], 
-					      &current_intersection ) ){
+    int idx;
+    for ( idx = 0; idx < 4 && !result; ++idx ){
 
-	  int d = ((abs(current_intersection.x - line->x1) << 1) + 
-		   (abs(current_intersection.y - line->y1) << 1));
+      int dot_product_line_with_side_normal = 
+	((line->x2-line->x1)*(sides[idx]->y2-sides[idx]->y1) + 
+	 (line->y2-line->y1)*(sides[idx]->x2-sides[idx]->x1));
 
-	  if ( d < distance_squared){
-	    distance_squared = d;
-	    *intersection = current_intersection;
-	  }
+      if ( dot_product_line_with_side_normal < 0 &&
+	   collision__line_intersects_line( line, 
+					    sides[idx], 
+					    &current_intersection ) ){
 
-	  result = TRUE;
+	if ( intersection ){
+	  *intersection = current_intersection;
 	}
+
+	result = TRUE;
       }
     }
   }
