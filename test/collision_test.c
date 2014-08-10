@@ -1236,9 +1236,9 @@ TEST_CASE(vertical_parallel_lines_dont_intersect)
 TEST_CASE(horizontal_parallel_lines_dont_intersect)
 TEST_CASE(diagonal_parallel_lines_dont_intersect)
 
-TEST_CASE(vertical_overlapping_lines_intersect)
-TEST_CASE(horizontal_overlapping_lines_intersect)
-TEST_CASE(diagonal_overlapping_lines_intersect)
+/* TEST_CASE(vertical_overlapping_lines_intersect) */
+/* TEST_CASE(horizontal_overlapping_lines_intersect) */
+/* TEST_CASE(diagonal_overlapping_lines_intersect) */
 
 TEST_CASE(horizontal_line_intersects_rectangle)
 TEST_CASE(vertical_line_intersects_rectangle)

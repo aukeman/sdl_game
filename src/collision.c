@@ -4,6 +4,12 @@
 #include <math.h>
 #include <limits.h>
 
+static 
+bool_t __parallel_line_collision( const geo__line_t* a, 
+				       const geo__line_t* b, 
+				       const geo__point_t* intersection );
+
+
 bool_t collision__rectangles_overlap( const geo__rect_t* a,
 				      const geo__rect_t* b ){
 
@@ -88,8 +94,7 @@ bool_t collision__line_intersects_line( const geo__line_t* a,
   }
 
   if ( a->x1 == a->x2 && b->x1 == b->x2 ){
-    /* two parallel vertical lines */
-    result = FALSE;
+    result = __parallel_line_collision( a, b, intersection );
   }
   else if ( a->x1 == a->x2 ) {
     /* a is vertical */
@@ -123,7 +128,10 @@ bool_t collision__line_intersects_line( const geo__line_t* a,
     float slope_a = (float)(a->y2 - a->y1) / (a->x2 - a->x1);
     float slope_b = (float)(b->y2 - b->y1) / (b->x2 - b->x1);
   
-    if ( 0.0001f < fabs(slope_b - slope_a) ){
+    if (fabs(slope_b - slope_a) < 0.0001f ){
+      result = __parallel_line_collision( a, b, intersection );
+    }
+    else{
 
       float x_at_intercept = 
 	((a->y2 - slope_a*a->x2) - (b->y2 - slope_b*b->x2)) / (slope_b - slope_a);
@@ -220,3 +228,12 @@ bool_t collision__line_intersects_rectangle( const geo__line_t* line,
   return result;
 }
 
+bool_t __parallel_line_collision( const geo__line_t* a, 
+				  const geo__line_t* b, 
+				  const geo__point_t* intersection ){
+
+
+  // TODO: probably want to do this sometime
+
+  return FALSE;
+}
