@@ -733,6 +733,12 @@ void vertical_overlapping_lines_intersect(){
   geo__point_t p;
 
   p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&a, &a, NULL));
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&a, &a, &p));
+  TEST_ASSERT_INT( p.x, -10 );
+  TEST_ASSERT_INT( p.y, -100 );
+
+  p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_line(&b, &a, NULL));
   TEST_ASSERT_TRUE(collision__line_intersects_line(&b, &a, &p));
   TEST_ASSERT_INT( p.x, -10 );
@@ -764,10 +770,91 @@ void vertical_overlapping_lines_intersect(){
 
 }
 void horizontal_overlapping_lines_intersect(){
-  TEST_ASSERT_TRUE(0);
+
+  geo__line_t a = { -100, -10,  100, -10 };
+
+  geo__line_t b = { 10,  -10,  20,  -10 };
+
+  geo__line_t c = { -100, -10,  -90, -10 };
+  geo__line_t d = { -90,  -10,  -100, -10 };
+
+  geo__line_t e = { 110, -10,  90,  -10 };
+  geo__line_t f = { 90,  -10,  110, -10 };
+
+  geo__point_t p;
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&b, &a, NULL));
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&b, &a, &p));
+  TEST_ASSERT_INT( p.x, 10 );
+  TEST_ASSERT_INT( p.y, -10 );
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&c, &a, NULL));
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&c, &a, &p));
+  TEST_ASSERT_INT( p.x, -100 );
+  TEST_ASSERT_INT( p.y, -10 );
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&d, &a, NULL));
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&d, &a, &p));
+  TEST_ASSERT_INT( p.x, -90 );
+  TEST_ASSERT_INT( p.y, -10 );
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&e, &a, NULL));
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&e, &a, &p));
+  TEST_ASSERT_INT( p.x, 100 );
+  TEST_ASSERT_INT( p.y, -10 );
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&f, &a, NULL));
+  TEST_ASSERT_TRUE(collision__line_intersects_line(&f, &a, &p));
+  TEST_ASSERT_INT( p.x, 90 );
+  TEST_ASSERT_INT( p.y, -10 );
 }
 void diagonal_overlapping_lines_intersect(){
-  TEST_ASSERT_TRUE(0);
+
+  geo__line_t a = {10, 10,   100, 100 };
+
+  geo__line_t b = {  0,   0,  100, 100 };
+  geo__line_t c = {110, 110,    0,   0 };
+  geo__line_t d = { 20,  20,   30,  30 };
+  geo__line_t e = { 30, 30,    20,  20 };
+
+  geo__point_t p;
+
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &a, &a, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &a, &a, &p ));
+  TEST_ASSERT_INT(p.x, 10);
+  TEST_ASSERT_INT(p.y, 10);
+  
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &b, &a, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &b, &a, &p ));
+  TEST_ASSERT_INT(p.x, 10);
+  TEST_ASSERT_INT(p.y, 10);
+  
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &c, &a, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &c, &a, &p ));
+  TEST_ASSERT_INT(p.x, 100);
+  TEST_ASSERT_INT(p.y, 100);
+  
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &d, &a, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &d, &a, &p ));
+  TEST_ASSERT_INT(p.x, 20);
+  TEST_ASSERT_INT(p.y, 20);
+  
+  p.x = 0; p.y = 0;
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &e, &a, NULL ));
+  TEST_ASSERT_TRUE(collision__line_intersects_line( &e, &a, &p ));
+  TEST_ASSERT_INT(p.x, 30);
+  TEST_ASSERT_INT(p.y, 30);
+  
+
 }
 
 void horizontal_line_intersects_rectangle(){
@@ -1261,8 +1348,8 @@ TEST_CASE(horizontal_parallel_lines_dont_intersect)
 TEST_CASE(diagonal_parallel_lines_dont_intersect)
 
 TEST_CASE(vertical_overlapping_lines_intersect)
-/* TEST_CASE(horizontal_overlapping_lines_intersect) */
-/* TEST_CASE(diagonal_overlapping_lines_intersect) */
+TEST_CASE(horizontal_overlapping_lines_intersect)
+TEST_CASE(diagonal_overlapping_lines_intersect)
 
 TEST_CASE(horizontal_line_intersects_rectangle)
 TEST_CASE(vertical_line_intersects_rectangle)
