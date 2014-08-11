@@ -6,8 +6,12 @@
 
 static 
 bool_t __parallel_line_collision( const geo__line_t* a, 
-				       const geo__line_t* b, 
-				       const geo__point_t* intersection );
+				  const geo__line_t* b, 
+				  geo__point_t* intersection );
+
+static
+uint32_t __distance_squared( const geo__point_t* a,
+			     const geo__point_t* b );
 
 
 bool_t collision__rectangles_overlap( const geo__rect_t* a,
@@ -230,10 +234,65 @@ bool_t collision__line_intersects_rectangle( const geo__line_t* line,
 
 bool_t __parallel_line_collision( const geo__line_t* a, 
 				  const geo__line_t* b, 
-				  const geo__point_t* intersection ){
+				  geo__point_t* intersection ){
 
 
-  // TODO: probably want to do this sometime
+  geo__point_t a1 = { a->x1, a->y1 };
+  
+  bool_t result = FALSE;
 
-  return FALSE;
+  if ( collision__point_on_line( &a1, b ) ){
+    if ( intersection ){
+      *intersection = a1;
+    }
+
+    result = TRUE;
+  }
+  else {
+
+    geo__point_t b1 = { b->x1, b->y1 };
+    geo__point_t b2 = { b->x2, b->y2 };
+
+    bool_t b1_on_a = collision__point_on_line(&b1, a);
+    bool_t b2_on_a = collision__point_on_line(&b2, a);
+
+    if ( b1_on_a && b2_on_a ){
+
+      if ( intersection ){
+
+	uint32_t distance_to_b1 = __distance_squared( &a1, &b1 );
+	uint32_t distance_to_b2 = __distance_squared( &a1, &b2 );
+
+	*intersection = distance_to_b1 < distance_to_b2 ? b1 : b2;
+      }
+      
+      result = TRUE;
+
+      /* shortest distance to colliding point */
+    }
+    else if ( b1_on_a ){
+      if ( intersection ){
+	*intersection = b1;
+      }
+
+      result = TRUE;
+    }
+    else if ( b2_on_a ){
+      if ( intersection ){
+	*intersection = b2;
+      }
+
+      result = TRUE;
+    }
+  }
+
+  return result;
+}
+
+uint32_t __distance_squared( const geo__point_t* a, const geo__point_t* b ){
+
+  int x_term = abs(b->x - a->x);
+  int y_term = abs(b->y - a->y);
+
+  return (x_term*x_term + y_term*y_term);
 }
