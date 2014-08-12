@@ -47,6 +47,8 @@ if ( (a) ) {                          \
 
 #define TEST_ASSERT_INT(actual,expected) \
   __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, d )
-  
+
+#define TEST_ASSERT_PTR(  actual,expected) \
+  __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, p )
 
 #endif
