@@ -143,7 +143,7 @@ int video__setup_texture(const char* file,
 
   if ( !alpha_surface ){
     fprintf(stderr, "alpha channel not established\n");
-    *texture_handle_ptr;
+    *texture_handle_ptr = NULL;
     return VIDEO__COULD_NOT_LOAD_IMAGE;
   }
 

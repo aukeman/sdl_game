@@ -35,7 +35,7 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
     const int BUFFER_LENGTH=1023;
     char buffer[BUFFER_LENGTH+1];
 
-    int rc = fscanf(fin, "%s", buffer);
+    int rc = fscanf(fin, "%s%*c", buffer);
 
     if ( rc < 1 ){
       result = FONT__BAD_CONFIG_FILE;
@@ -53,12 +53,12 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
       uint32_t x, y, width, height;
 
       do{
-	rc = fscanf(fin, "%hhu %u %u %u %u", 
+	rc = fscanf(fin, "%c %u %u %u %u%*c", 
 		    &ascii, &x, &y, &width, &height);
 	
 	if ( rc == 5 ){
 	  (*handle_ptr)->ascii_to_rect[ascii].x = x;
-	  (*handle_ptr)->ascii_to_rect[ascii].y = x;
+	  (*handle_ptr)->ascii_to_rect[ascii].y = y;
 	  (*handle_ptr)->ascii_to_rect[ascii].width = width;
 	  (*handle_ptr)->ascii_to_rect[ascii].height = height;
 	}
@@ -73,5 +73,7 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
 }
 
 int font__free( struct font__handle_t* handle ){
+
+  video__teardown_texture(handle->texture);
   free(handle);
 }
