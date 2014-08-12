@@ -13,9 +13,17 @@ SDL_Surface* video__surface = NULL;
 
 video__screen_extents_t video__screen_extents = {0, 0, FALSE};
 
+struct video__texture_handle_t {
+  uint32_t texture_id;
+  uint32_t width;
+  uint32_t height;
+};
+
 const video__screen_extents_t* video__get_video_extents() {
   return &video__screen_extents;
 }
+
+
 
 int video__setup( uint32_t width, uint32_t height, int fullscreen ) {
 
@@ -113,7 +121,7 @@ int video__flip() {
 #endif
 
 int video__setup_texture(const char* file, 
-			 video__texture_data_t* texture_data_ptr){
+			 struct video__texture_handle_t** texture_handle_ptr){
   uint32_t red_mask = 0;
   uint32_t green_mask = 0;
   uint32_t blue_mask = 0;
@@ -123,20 +131,20 @@ int video__setup_texture(const char* file,
   SDL_Surface* alpha_surface = NULL;
   SDL_Surface* rgba_surface = NULL;
 
-  texture_data_ptr->texture_id = 0;
-  texture_data_ptr->width = 0;
-  texture_data_ptr->height = 0;
-
   img_surface = IMG_Load(file);
   
   if ( !img_surface ){
     fprintf(stderr, "image not loaded\n");
+    *texture_handle_ptr = NULL;
+    return VIDEO__COULD_NOT_LOAD_IMAGE;
   }
 
   alpha_surface = SDL_DisplayFormatAlpha(img_surface);
 
   if ( !alpha_surface ){
     fprintf(stderr, "alpha channel not established\n");
+    *texture_handle_ptr;
+    return VIDEO__COULD_NOT_LOAD_IMAGE;
   }
 
   rgba_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, 
@@ -150,19 +158,26 @@ int video__setup_texture(const char* file,
 
   if ( !rgba_surface ){
     fprintf(stderr, "cannot create RGB buffer\n");
+    *texture_handle_ptr;
+    return VIDEO__COULD_NOT_LOAD_IMAGE;
   }
 
   SDL_SetAlpha(alpha_surface, 0, 0);
 
   if ( SUCCESS != SDL_BlitSurface(alpha_surface, NULL, rgba_surface, NULL) ){
     fprintf(stderr, "cannot blit image to buffer: %s\n", SDL_GetError());
+    *texture_handle_ptr;
+    return VIDEO__COULD_NOT_LOAD_IMAGE;
   }
 
-  texture_data_ptr->width = rgba_surface->w;
-  texture_data_ptr->height = rgba_surface->h;
+  (*texture_handle_ptr) = 
+    (struct video__texture_handle_t*)malloc(sizeof(**texture_handle_ptr));
 
-  glGenTextures(1, &(texture_data_ptr->texture_id) );
-  glBindTexture(GL_TEXTURE_2D , texture_data_ptr->texture_id);
+  (*texture_handle_ptr)->width = rgba_surface->w;
+  (*texture_handle_ptr)->height = rgba_surface->h;
+
+  glGenTextures(1, &((*texture_handle_ptr)->texture_id) );
+  glBindTexture(GL_TEXTURE_2D , (*texture_handle_ptr)->texture_id);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -180,27 +195,25 @@ int video__setup_texture(const char* file,
   return SUCCESS;
 }
 
-int video__teardown_texture(video__texture_data_t* texture_data_ptr){
-  glDeleteTextures(1, &(texture_data_ptr->texture_id));
+int video__teardown_texture(struct video__texture_handle_t* texture_handle){
+  glDeleteTextures(1, &(texture_handle->texture_id));
 
-  texture_data_ptr->texture_id = 0;
-  texture_data_ptr->width = 0;
-  texture_data_ptr->height = 0;
+  free(texture_handle);
 
   return SUCCESS;
 }
 
-int video__blit(const video__texture_data_t* texture_data_ptr, 
+int video__blit(const struct video__texture_handle_t* texture_handle, 
 		const geo__rect_t* src,
 		const geo__rect_t* dest){
 
-  float src_x = (float)src->x / (float)(texture_data_ptr->width);
-  float src_y = (float)src->y / (float)(texture_data_ptr->height);
+  float src_x = (float)src->x / (float)(texture_handle->width);
+  float src_y = (float)src->y / (float)(texture_handle->height);
 
-  float src_x2 = src_x + (float)src->width / (float)(texture_data_ptr->width);
-  float src_y2 = src_y + (float)src->height / (float)(texture_data_ptr->height);
+  float src_x2 = src_x + (float)src->width / (float)(texture_handle->width);
+  float src_y2 = src_y + (float)src->height / (float)(texture_handle->height);
 
-  glBindTexture(GL_TEXTURE_2D, texture_data_ptr->texture_id);
+  glBindTexture(GL_TEXTURE_2D, texture_handle->texture_id);
 
   glBegin(GL_QUADS);
   glTexCoord2f(src_x, src_y);

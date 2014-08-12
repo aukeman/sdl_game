@@ -10,7 +10,7 @@ typedef geo__rect_t ascii_to_rect_t[256];
 
 struct font__handle_t {
 
-  video__texture_data_t* texture;
+  struct video__texture_handle_t* texture;
 
   ascii_to_rect_t ascii_to_rect;
 
@@ -42,7 +42,7 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
       free(*handle_ptr);
       *handle_ptr = NULL;
     }
-    else if ( SUCCESS != video__setup_texture(buffer, (*handle_ptr)->texture) ){
+    else if ( SUCCESS != video__setup_texture(buffer, &(*handle_ptr)->texture) ){
       result = FONT__IMAGE_NOT_FOUND;
       free(*handle_ptr);
       *handle_ptr = NULL;

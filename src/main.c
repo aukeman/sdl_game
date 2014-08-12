@@ -28,7 +28,7 @@ int main( int argc, char** argv ) {
   events__set_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
   events__set_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
 
-  video__texture_data_t texture;
+  struct video__texture_handle_t* texture;
   video__setup_texture("resources/img/testing.png", &texture);
   
   geo__rect_t source = {32, 32, -32, -32};
@@ -42,7 +42,7 @@ int main( int argc, char** argv ) {
 
     video__clearscreen();
 
-    video__blit(&texture, &source, &dest);
+    video__blit(texture, &source, &dest);
 
     video__flip();
   }

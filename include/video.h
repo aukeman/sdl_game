@@ -9,6 +9,9 @@ enum {
   VIDEO__ERROR_CODE_BASE = 0x0,
   VIDEO__COULD_NOT_CREATE_SURFACE,
   VIDEO__COULD_NOT_INITIALIZE_SDL,
+
+  VIDEO__COULD_NOT_LOAD_IMAGE,
+
   VIDEO__ERROR_CODE_LAST
 };
 
@@ -19,11 +22,7 @@ typedef struct {
   int fullscreen;
 } video__screen_extents_t;
 
-typedef struct {
-  uint32_t texture_id;
-  uint32_t width;
-  uint32_t height;
-} video__texture_data_t;
+struct video__texture_handle_t;
 
 const video__screen_extents_t* video__get_screen_extents();
 
@@ -36,11 +35,11 @@ int video__clearscreen();
 int video__flip();
 
 int video__setup_texture(const char* file_directory, 
-			 video__texture_data_t* texture_data_ptr );
+			 struct video__texture_handle_t** texture_handle_ptr );
 
-int video__teardown_texture(video__texture_data_t* texture_data_ptr);
+int video__teardown_texture(struct video__texture_handle_t* texture_handle);
 
-int video__blit(const video__texture_data_t* texture_data_ptr, 
+int video__blit(const struct video__texture_handle_t* texture_handle, 
 		const geo__rect_t* src,
 		const geo__rect_t* dest);
 
