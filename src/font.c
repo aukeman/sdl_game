@@ -1,10 +1,12 @@
 #include <font.h>
 #include <video.h>
 #include <geometry.h>
+#include <types.h>
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 typedef geo__rect_t ascii_to_rect_t[256];
 
@@ -77,3 +79,83 @@ int font__free( struct font__handle_t* handle ){
   video__teardown_texture(handle->texture);
   free(handle);
 }
+
+
+int font__draw_string( const struct font__handle_t* handle, int x, int y, const char* fmt, ... ){
+
+  geo__rect_t dest = {x, y, 0, 0};
+
+  va_list ap;
+  va_start(ap, fmt);
+  int result = _process_string(handle, &dest, TRUE, fmt, ap);
+  va_end(ap);
+  
+  return result;
+}
+
+int font__dimensions( const struct font__handle_t* handle, int* width, int* height, const char* fmt, ... ){
+
+  geo__rect_t dest = {0, 0, 0, 0};
+
+  *width = 0;
+  *height = 0;
+
+  va_list ap;
+  va_start(ap, fmt);
+  int result = _process_string(handle, &dest, FALSE, fmt, ap);
+  va_end(ap);
+  
+  if ( result == SUCCESS ){
+    *width = dest.width;
+    *height = dest.height;
+  }
+
+  return result;
+}
+
+int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, bool_t render, const char* fmt, va_list ap ){
+
+  static char buffer[1024];
+
+  size_t formatted_string_length = vsnprintf(buffer, 1023, fmt, ap);
+
+  if ( 1023 < formatted_string_length ){
+    return FONT__STRING_TOO_LONG;
+  }
+
+  int original_x = dest->x;
+
+  const char* iter = buffer;
+  while ( *iter != '\0' ){
+    const geo__rect_t* src = &handle->ascii_to_rect[*buffer];
+
+    switch (*iter){
+    case ' ':
+      dest->x += src->width;
+      break;
+    case '\t':
+      dest->x += (handle->ascii_to_rect[' '].width*4);
+      break;
+    case '\n':
+      dest->x = original_x;
+      dest->y += handle->ascii_to_rect[' '].height;
+      break;
+    default:
+      if ( 0 < src->width && 0 < src->height ){
+	dest->width = src->width;
+	dest->height = src->height;
+
+	if ( render ){
+	  video__blit(handle->texture, src, dest);
+	}
+
+	dest->x += src->width;
+      }
+    }
+
+    ++iter;
+  }
+
+  return SUCCESS;
+}
+

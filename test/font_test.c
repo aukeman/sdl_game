@@ -58,6 +58,7 @@ void load_font_file(){
   TEST_ASSERT_TRUE( image_file != NULL );
 
   const char* font_file = write_test_font_file("%s\n"
+					       "   0 0 8 8\n"
 					       "a  0 0 8 8\n"
 					       "b  8 0 8 8\n"
 					       "c 16 0 8 8\n"
@@ -73,6 +74,7 @@ void load_font_file(){
 
   int rc = font__create( font_file, &font );
 
+  unlink(image_file);
   unlink(font_file);
 
   ascii_to_rect_t ascii_to_rect;
@@ -87,6 +89,7 @@ void load_font_file(){
   int idx = 0;
   for ( idx = 0; idx < 256; ++idx ){
     switch(idx){
+    case ' ': 
     case 'a': 
       TEST_ASSERT_INT(ascii_to_rect[idx].x, 0);
       TEST_ASSERT_INT(ascii_to_rect[idx].y, 0);
