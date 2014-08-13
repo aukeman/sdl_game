@@ -64,11 +64,32 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
 	  (*handle_ptr)->ascii_to_rect[ascii].width = width;
 	  (*handle_ptr)->ascii_to_rect[ascii].height = height;
 	}
-
       } while ( rc != EOF );
     }
   
     fclose(fin);
+  }
+
+  if ( *handle_ptr &&
+       ((*handle_ptr)->ascii_to_rect[' '].width == 0 ||
+	(*handle_ptr)->ascii_to_rect[' '].height == 0 )){
+
+    font__free( *handle_ptr );
+    *handle_ptr = NULL;
+
+    result = FONT__NO_SPACE_CHAR_DIMENSIONS;
+  }
+
+  if ( *handle_ptr &&
+       (*handle_ptr)->ascii_to_rect['\t'].width == 0 ){
+    (*handle_ptr)->ascii_to_rect['\t'].width = 
+      (*handle_ptr)->ascii_to_rect[' '].width*4;
+  }
+
+  if ( *handle_ptr &&
+       (*handle_ptr)->ascii_to_rect['\n'].height == 0 ){
+    (*handle_ptr)->ascii_to_rect['\n'].height = 
+      (*handle_ptr)->ascii_to_rect[' '].height;
   }
 
   return result;
@@ -106,8 +127,8 @@ int font__dimensions( const struct font__handle_t* handle, int* width, int* heig
   va_end(ap);
   
   if ( result == SUCCESS ){
-    *width = dest.width;
-    *height = dest.height;
+    *width = dest.x;
+    *height = dest.y;
   }
 
   return result;
@@ -117,7 +138,7 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 
   static char buffer[1024];
 
-  size_t formatted_string_length = vsnprintf(buffer, 1023, fmt, ap);
+  size_t formatted_string_length = vsnprintf(buffer, 1024, fmt, ap);
 
   if ( 1023 < formatted_string_length ){
     return FONT__STRING_TOO_LONG;
@@ -131,15 +152,31 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 
     switch (*iter){
     case ' ':
+    case '\t':
+      if ( render && (src->x != 0 || src->y != 0) ){
+
+	dest->width = src->width;
+	dest->height = src->height;
+
+	video__blit(handle->texture, src, dest);
+      }
       dest->x += src->width;
       break;
-    case '\t':
-      dest->x += (handle->ascii_to_rect[' '].width*4);
-      break;
+
     case '\n':
+
+      if ( render && (src->x != 0 || src->y != 0) ){
+
+	dest->width = src->width;
+	dest->height = src->height;
+
+	video__blit(handle->texture, src, dest);
+      }
+
       dest->x = original_x;
-      dest->y += handle->ascii_to_rect[' '].height;
+      dest->y += src->height;
       break;
+
     default:
       if ( 0 < src->width && 0 < src->height ){
 	dest->width = src->width;
@@ -148,12 +185,16 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 	if ( render ){
 	  video__blit(handle->texture, src, dest);
 	}
-
-	dest->x += src->width;
       }
+
+      dest->x += src->width;
     }
 
     ++iter;
+  }
+
+  if ( iter != buffer ){
+    dest->y += handle->ascii_to_rect['\n'].height;
   }
 
   return SUCCESS;

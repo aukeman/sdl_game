@@ -144,6 +144,18 @@ void load_font_file(){
       TEST_ASSERT_INT(ascii_to_rect[idx].width, 8);
       TEST_ASSERT_INT(ascii_to_rect[idx].height, 8);
       break;
+    case '\t':
+      TEST_ASSERT_INT(ascii_to_rect[idx].x, 0);
+      TEST_ASSERT_INT(ascii_to_rect[idx].y, 0);
+      TEST_ASSERT_INT(ascii_to_rect[idx].width, 8*4);
+      TEST_ASSERT_INT(ascii_to_rect[idx].height, 0);
+      break;
+    case '\n':
+      TEST_ASSERT_INT(ascii_to_rect[idx].x, 0);
+      TEST_ASSERT_INT(ascii_to_rect[idx].y, 0);
+      TEST_ASSERT_INT(ascii_to_rect[idx].width, 0);
+      TEST_ASSERT_INT(ascii_to_rect[idx].height, 8);
+      break;
     default:
       TEST_ASSERT_INT(ascii_to_rect[idx].x, 0);
       TEST_ASSERT_INT(ascii_to_rect[idx].y, 0);
@@ -155,12 +167,107 @@ void load_font_file(){
 
 }
 
+void test_long_string(){
+
+  video__setup(32, 32, FALSE);
+
+  struct font__handle_t* font;
+
+  const char* image_file = write_test_image_file();
+
+  TEST_ASSERT_TRUE( image_file != NULL );
+
+  const char* font_file = write_test_font_file("%s\n"
+					       "   0 0 8 8\n"
+					       "a  0 0 8 8\n"
+					       "b  8 0 8 8\n"
+					       "c 16 0 8 8\n"
+					       "A  0 8 8 8\n"
+					       "B  8 8 8 8\n"
+					       "C  16 8 8 8\n"
+					       "1  0 16 8 8\n"
+					       "2  8 16 8 8\n"
+					       "3  16 16 8 8\n",
+					       image_file);
+
+  TEST_ASSERT_TRUE( font_file != NULL );
+
+  int rc = font__create( font_file, &font );
+
+  unlink(image_file);
+  unlink(font_file);
+
+  char buffer[2048];
+  memset(buffer, '\0', sizeof(buffer));
+  memset(buffer, 'a', 1023);
+  
+  int w_1023, h_1023, w_1024, h_1024, w_2047, h_2047;
+
+  int rc_1023 = font__dimensions(font, &w_1023, &h_1023, buffer);
+
+  memset(buffer, 'b', 1024);
+  
+  int rc_1024 = font__dimensions(font, &w_1024, &h_1024, buffer);
+  
+  memset(buffer, 'c', 2047);
+  
+  int rc_2047 = font__dimensions(font, &w_2047, &h_2047, buffer);
+  
+  font__free(font);
+  video__teardown();
+
+  TEST_ASSERT_INT(rc_1023, SUCCESS);
+  TEST_ASSERT_INT(w_1023, 1023*8);
+  TEST_ASSERT_INT(h_1023, 1*8);
+  
+  TEST_ASSERT_INT(rc_1024, FONT__STRING_TOO_LONG);
+  TEST_ASSERT_INT(w_1024, 0);
+  TEST_ASSERT_INT(h_1024, 0);
+  
+  TEST_ASSERT_INT(rc_2047, FONT__STRING_TOO_LONG);
+  TEST_ASSERT_INT(w_2047, 0);
+  TEST_ASSERT_INT(h_2047, 0);
+}
+
+void font_dimensions(){
+
+  video__setup(32, 32, FALSE);
+
+  struct font__handle_t* font;
+
+  const char* image_file = write_test_image_file();
+
+  TEST_ASSERT_TRUE( image_file != NULL );
+
+  const char* font_file = write_test_font_file("%s\n"
+					       "   0 0 8 8\n"
+					       "a  0 0 8 8\n"
+					       "b  8 0 8 8\n"
+					       "c 16 0 8 8\n"
+					       "A  0 8 8 8\n"
+					       "B  8 8 8 8\n"
+					       "C  16 8 8 8\n"
+					       "1  0 16 8 8\n"
+					       "2  8 16 8 8\n"
+					       "3  16 16 8 8\n",
+					       image_file);
+
+  TEST_ASSERT_TRUE( font_file != NULL );
+
+  int rc = font__create( font_file, &font );
+
+  unlink(image_file);
+  unlink(font_file);
+
+
+}
+
 
 TEST_SUITE_START(Font Tests)
   TEST_CASE(no_font_file)
   TEST_CASE(no_image_file)
   TEST_CASE(load_font_file)
-
+  TEST_CASE(test_long_string)
 TEST_SUITE_END()
 
 const char* write_test_font_file(const char* contents, ...){
