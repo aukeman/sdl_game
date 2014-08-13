@@ -167,6 +167,109 @@ void load_font_file(){
 
 }
 
+void test_empty_string(){
+  video__setup(32, 32, FALSE);
+
+  struct font__handle_t* font;
+
+  const char* image_file = write_test_image_file();
+
+  TEST_ASSERT_TRUE( image_file != NULL );
+
+  const char* font_file = write_test_font_file("%s\n"
+					       "   0 0 8 8\n",
+					       image_file);
+
+  TEST_ASSERT_TRUE( font_file != NULL );
+
+  int rc = font__create( font_file, &font );
+
+  unlink(image_file);
+  unlink(font_file);
+
+  int w, h;
+
+  int rc_empty = font__dimensions(font, &w, &h, "");
+
+  font__free(font);
+  video__teardown();
+
+  TEST_ASSERT_INT(rc, SUCCESS);
+  TEST_ASSERT_INT(rc_empty, SUCCESS);
+  TEST_ASSERT_INT(w, 0);
+  TEST_ASSERT_INT(h, 0);
+
+}
+
+void test_tab_string(){
+  video__setup(32, 32, FALSE);
+
+  struct font__handle_t* font;
+
+  const char* image_file = write_test_image_file();
+
+  TEST_ASSERT_TRUE( image_file != NULL );
+
+  const char* font_file = write_test_font_file("%s\n"
+					       "  0 0 8 8\n"
+					       "	  0 0 40 0\n",
+					       image_file);
+
+  TEST_ASSERT_TRUE( font_file != NULL );
+
+  int rc = font__create( font_file, &font );
+
+  unlink(image_file);
+  unlink(font_file);
+
+  int w, h;
+
+  int rc_tab = font__dimensions(font, &w, &h, "\t");
+
+  font__free(font);
+  video__teardown();
+
+  TEST_ASSERT_INT(rc, SUCCESS);
+  TEST_ASSERT_INT(rc_tab, SUCCESS);
+  TEST_ASSERT_INT(w, 40);
+  TEST_ASSERT_INT(h, 8);
+
+}
+
+void test_newline_string(){
+  video__setup(32, 32, FALSE);
+
+  struct font__handle_t* font;
+
+  const char* image_file = write_test_image_file();
+
+  TEST_ASSERT_TRUE( image_file != NULL );
+
+  const char* font_file = write_test_font_file("%s\n"
+					       "  0 0 8 8\n",
+					       image_file);
+
+  TEST_ASSERT_TRUE( font_file != NULL );
+
+  int rc = font__create( font_file, &font );
+
+  unlink(image_file);
+  unlink(font_file);
+
+  int w, h;
+
+  int rc_tab = font__dimensions(font, &w, &h, "\n");
+
+  font__free(font);
+  video__teardown();
+
+  TEST_ASSERT_INT(rc, SUCCESS);
+  TEST_ASSERT_INT(rc_tab, SUCCESS);
+  TEST_ASSERT_INT(w, 0);
+  TEST_ASSERT_INT(h, 16);
+
+}
+
 void test_long_string(){
 
   video__setup(32, 32, FALSE);
@@ -203,15 +306,15 @@ void test_long_string(){
   
   int w_1023, h_1023, w_1024, h_1024, w_2047, h_2047;
 
-  int rc_1023 = font__dimensions(font, &w_1023, &h_1023, buffer);
+  int rc_1023 = font__dimensions(font, &w_1023, &h_1023, "%s", buffer);
 
   memset(buffer, 'b', 1024);
   
-  int rc_1024 = font__dimensions(font, &w_1024, &h_1024, buffer);
+  int rc_1024 = font__dimensions(font, &w_1024, &h_1024, "%s", buffer);
   
   memset(buffer, 'c', 2047);
   
-  int rc_2047 = font__dimensions(font, &w_2047, &h_2047, buffer);
+  int rc_2047 = font__dimensions(font, &w_2047, &h_2047, "%s", buffer);
   
   font__free(font);
   video__teardown();
@@ -267,6 +370,9 @@ TEST_SUITE_START(Font Tests)
   TEST_CASE(no_font_file)
   TEST_CASE(no_image_file)
   TEST_CASE(load_font_file)
+  TEST_CASE(test_empty_string)
+  TEST_CASE(test_tab_string)
+  TEST_CASE(test_newline_string)
   TEST_CASE(test_long_string)
 TEST_SUITE_END()
 
