@@ -2,6 +2,7 @@
 #include <events.h>
 #include <constants.h>
 #include <timing.h>
+#include <font.h>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -34,6 +35,10 @@ int main( int argc, char** argv ) {
   geo__rect_t source = {32, 32, -32, -32};
   geo__rect_t dest = {64, 32, 128, 128};
 
+  struct font__handle_t* font = NULL;
+  fprintf( stderr, "font rc: %d\n",
+	   font__create("resources/font/test_font.dat", &font) );
+
   while ( keep_looping ) {
 
     timing__declare_top_of_frame();
@@ -43,6 +48,8 @@ int main( int argc, char** argv ) {
     video__clearscreen();
 
     video__blit(texture, &source, &dest);
+    
+    font__draw_string(font, 0, 0, "%5.1f", timing__get_instantaneous_fps());
 
     video__flip();
   }
@@ -54,6 +61,8 @@ int main( int argc, char** argv ) {
 	   timing__get_average_fps(),
 	   timing__get_instantaneous_fps());
 	   
+  font__free(font);
+
   
   timing__teardown();
   js__teardown();

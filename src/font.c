@@ -55,7 +55,7 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
       uint32_t x, y, width, height;
 
       do{
-	rc = fscanf(fin, "%c %u %u %u %u%*c", 
+	rc = fscanf(fin, "%c %d %d %d %d%*c", 
 		    &ascii, &x, &y, &width, &height);
 	
 	if ( rc == 5 ){
