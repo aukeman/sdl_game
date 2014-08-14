@@ -32,8 +32,8 @@ int main( int argc, char** argv ) {
   struct video__texture_handle_t* texture;
   video__setup_texture("resources/img/testing.png", &texture);
   
-  geo__rect_t source = {32, 32, -32, -32};
-  geo__rect_t dest = {64, 32, 128, 128};
+  geo__rect_t source = {0, 0, 32, 32};
+  geo__rect_t dest = {0, 0, 32, 32};
 
   struct font__handle_t* font = NULL;
   fprintf( stderr, "font rc: %d\n",
@@ -47,7 +47,20 @@ int main( int argc, char** argv ) {
 
     video__clearscreen();
 
-    video__blit(texture, &source, &dest);
+    for ( dest.x = 0; dest.x < 400; dest.x += 32 ){
+      for ( dest.y = 0; dest.y < 300; dest.y += 32 ){
+    	video__blit(texture, &source, &dest);
+      }
+    }
+    
+    dest.x = 175;
+    dest.y = 250;
+    video__rect( &dest, 0, 0, 255, 255 );
+
+    geo__line_t line = { 30, 30, 350, 45 };
+
+    video__line( &line, 0, 255, 0, 192 );
+
     
     font__draw_string(font, 0, 0, 
 		      "FPS:         %5.1f\n"

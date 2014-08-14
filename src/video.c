@@ -11,6 +11,8 @@
 
 SDL_Surface* video__surface = NULL;
 
+uint32_t last_rendered_texture_id = 0;
+
 video__screen_extents_t video__screen_extents = {0, 0, FALSE};
 
 struct video__texture_handle_t {
@@ -217,7 +219,13 @@ int video__blit(const struct video__texture_handle_t* texture_handle,
   float src_x2 = src_x + (float)src->width / (float)(texture_handle->width);
   float src_y2 = src_y + (float)src->height / (float)(texture_handle->height);
 
-  glBindTexture(GL_TEXTURE_2D, texture_handle->texture_id);
+  if ( texture_handle->texture_id != last_rendered_texture_id ){
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture_handle->texture_id);
+    last_rendered_texture_id = texture_handle->texture_id;
+  }
+
+  glColor4f(1.0, 1.0, 1.0, 1.0);
 
   glBegin(GL_QUADS);
   glTexCoord2f(src_x, src_y);
@@ -241,4 +249,53 @@ int video__blit(const struct video__texture_handle_t* texture_handle,
   return SUCCESS;
 }
 
+int video__rect(const geo__rect_t* rect,
+		uint8_t red,
+		uint8_t green,
+		uint8_t blue,
+		uint8_t alpha){
 
+  glDisable(GL_TEXTURE_2D);
+  last_rendered_texture_id = 0;
+
+  glColor4f(red/255.0f, green/255.0f, blue/255.0f, alpha/255.0f);
+
+  glBegin(GL_QUADS);
+  glVertex2i(rect->x, 
+	     rect->y);
+
+  glVertex2i(rect->x + rect->width, 
+	     rect->y);
+
+  glVertex2i(rect->x + rect->width, 
+	     rect->y + rect->height);
+
+  glVertex2i(rect->x, 
+	     rect->y + rect->height);
+  
+  glEnd();
+
+  return SUCCESS;
+}
+
+int video__line(const geo__line_t* line,
+		uint8_t red,
+		uint8_t green,
+		uint8_t blue,
+		uint8_t alpha){
+
+  glDisable(GL_TEXTURE_2D);
+  last_rendered_texture_id = 0;
+
+  glColor4f(red/255.0f, green/255.0f, blue/255.0f, alpha/255.0f);
+
+  glBegin(GL_LINES);
+  glVertex2i(line->x1, 
+	     line->y1);
+
+  glVertex2i(line->x2, 
+	     line->y2);
+  glEnd();
+
+  return SUCCESS;
+}

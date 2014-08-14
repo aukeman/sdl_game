@@ -9,7 +9,7 @@ TEST_MAIN=test/main.c
 TEST_HEADERS=$(wildcard test/*.h)
 TEST_EXES=$(patsubst test/%.c, test/bin/%, $(TEST_CASES))
 
-all: sdl_game test
+all: sdl_game 
 
 sdl_game: $(SOURCES) $(HEADERS) $(MAIN) 
 	gcc -g -I./include -o sdl_game $(SOURCES) $(MAIN) -lSDL -lSDL_image -lGL

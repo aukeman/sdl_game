@@ -47,4 +47,17 @@ int video__blit(const struct video__texture_handle_t* texture_handle,
 		const geo__rect_t* src,
 		const geo__rect_t* dest);
 
+int video__rect(const geo__rect_t* rect,
+		uint8_t red,
+		uint8_t green,
+		uint8_t blue,
+		uint8_t alpha);
+
+int video__line(const geo__line_t* line,
+		uint8_t red,
+		uint8_t green,
+		uint8_t blue,
+		uint8_t alpha);
+		
+
 #endif
