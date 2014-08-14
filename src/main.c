@@ -20,7 +20,7 @@ void on_quit( events__type_e type,
 
 int main( int argc, char** argv ) {
 
-  video__setup(800, 600, FALSE);
+  video__setup(800, 600, 400, 300, FALSE);
   js__setup();
   timing__setup();
 
@@ -49,7 +49,13 @@ int main( int argc, char** argv ) {
 
     video__blit(texture, &source, &dest);
     
-    font__draw_string(font, 0, 0, "%5.1f", timing__get_instantaneous_fps());
+    font__draw_string(font, 0, 0, 
+		      "FPS:         %5.1f\n"
+		      "Frame Count: %5d\n"
+		      "Fame Length: %5d",
+		      timing__get_instantaneous_fps(),
+		      timing__get_frame_count(),
+		      timing__get_frame_length());
 
     video__flip();
   }

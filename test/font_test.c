@@ -49,7 +49,7 @@ void no_image_file(){
 
 void load_font_file(){
 
-  video__setup(32, 32, FALSE);
+  video__setup(32, 32, 32, 32, FALSE);
 
   struct font__handle_t* font;
 
@@ -168,7 +168,7 @@ void load_font_file(){
 }
 
 void test_empty_string(){
-  video__setup(32, 32, FALSE);
+  video__setup(32, 32, 32, 32, FALSE);
 
   struct font__handle_t* font;
 
@@ -202,7 +202,7 @@ void test_empty_string(){
 }
 
 void test_tab_string(){
-  video__setup(32, 32, FALSE);
+  video__setup(32, 32, 32, 32, FALSE);
 
   struct font__handle_t* font;
 
@@ -237,7 +237,7 @@ void test_tab_string(){
 }
 
 void test_newline_string(){
-  video__setup(32, 32, FALSE);
+  video__setup(32, 32, 32, 32, FALSE);
 
   struct font__handle_t* font;
 
@@ -272,7 +272,7 @@ void test_newline_string(){
 
 void test_long_string(){
 
-  video__setup(32, 32, FALSE);
+  video__setup(32, 32, 32, 32, FALSE);
 
   struct font__handle_t* font;
 
@@ -334,7 +334,7 @@ void test_long_string(){
 
 void font_dimensions(){
 
-  video__setup(32, 32, FALSE);
+  video__setup(32, 32, 32, 32, FALSE);
 
   struct font__handle_t* font;
 

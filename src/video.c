@@ -25,12 +25,16 @@ const video__screen_extents_t* video__get_video_extents() {
 
 
 
-int video__setup( uint32_t width, uint32_t height, int fullscreen ) {
+int video__setup( uint32_t screen_width, 
+		  uint32_t screen_height, 
+		  uint32_t viewport_width,
+		  uint32_t viewport_height,
+		  int fullscreen ) {
 
   int result = SUCCESS;
 
-  video__screen_extents.width = width;
-  video__screen_extents.height = height;
+  video__screen_extents.width = screen_width;
+  video__screen_extents.height = screen_height;
   video__screen_extents.fullscreen = fullscreen;
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -67,7 +71,7 @@ int video__setup( uint32_t width, uint32_t height, int fullscreen ) {
     glViewport(0, 0, video__screen_extents.width, video__screen_extents.height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, video__screen_extents.width, video__screen_extents.height, 0, -1.0, 1.0);
+    glOrtho(0, viewport_width, viewport_height, 0, -1.0, 1.0);
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

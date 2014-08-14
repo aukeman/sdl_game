@@ -148,7 +148,7 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 
   const char* iter = buffer;
   while ( *iter != '\0' ){
-    const geo__rect_t* src = &handle->ascii_to_rect[*buffer];
+    const geo__rect_t* src = &handle->ascii_to_rect[*iter];
 
     switch (*iter){
     case ' ':

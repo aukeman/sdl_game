@@ -26,7 +26,11 @@ struct video__texture_handle_t;
 
 const video__screen_extents_t* video__get_screen_extents();
 
-int video__setup(uint32_t width, uint32_t height, int fullscreen);
+int video__setup(uint32_t screen_width, 
+		 uint32_t screen_height, 
+		 uint32_t viewport_width, 
+		 uint32_t viewport_height, 
+		 int fullscreen);
 int video__teardown();
 
 
