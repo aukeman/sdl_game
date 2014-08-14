@@ -5,6 +5,8 @@
 #include <stdio.h>
 
 typedef void test_fxn_t();
+typedef int setup_fxn_t();
+typedef int teardown_fxn_t();
 
 typedef struct {
   
@@ -14,11 +16,21 @@ typedef struct {
 } test_case_t;
 
 extern const char* test_suite_name;
+
+extern setup_fxn_t* setup_fxn;
+extern setup_fxn_t* teardown_fxn;
+
 extern test_case_t test_suite[];
 
 extern int g_test_result;
 
-#define TEST_SUITE_START(name) const char* test_suite_name = #name; test_case_t test_suite[] = {
+#define TEST_SUITE_WITH_SETUP_START(name, setup, teardown) \
+setup_fxn_t* setup_fxn = setup;                            \
+teardown_fxn_t* teardown_fxn = teardown;                   \
+const char* test_suite_name = #name;                       \
+test_case_t test_suite[] = {
+
+#define TEST_SUITE_START(name) TEST_SUITE_WITH_SETUP_START(name, NULL, NULL)
 
 #define __ASSERTION_LOCATION fprintf(stderr, "\nFILE %s LINE %d failed assertion: ", __FILE__, __LINE__);
 

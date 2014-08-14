@@ -17,6 +17,9 @@ struct font__handle_t {
 const char* write_test_font_file(const char* contents, ...);
 const char* write_test_image_file();
 
+const char* image_file;
+const char* font_file;
+struct font__handle_t* font;
 
 void no_font_file(){
 
@@ -32,57 +35,45 @@ void no_image_file(){
 
   struct font__handle_t* font;
 
-  const char* tmp = write_test_font_file("dummy_filename\n"
-					 "a  0 0 8 8\n"
-					 "b  8 0 8 8\n"
-					 "c 16 0 8 8\n");
+  font_file = write_test_font_file("dummy_filename\n"
+				   "a  0 0 8 8\n"
+				   "b  8 0 8 8\n"
+				   "c 16 0 8 8\n");
 
-  TEST_ASSERT_TRUE( tmp != NULL );
+  TEST_ASSERT_TRUE( font_file != NULL );
 
-  int rc = font__create( tmp, &font );
+  int rc = font__create( font_file, &font );
 
-  unlink(tmp);
-  
   TEST_ASSERT_INT( rc, FONT__IMAGE_NOT_FOUND );
   TEST_ASSERT_PTR( font, NULL );
 }
 
 void load_font_file(){
 
-  video__setup(32, 32, 32, 32, FALSE);
-
-  struct font__handle_t* font;
-
-  const char* image_file = write_test_image_file();
+  image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
 
-  const char* font_file = write_test_font_file("%s\n"
-					       "   0 0 8 8\n"
-					       "a  0 0 8 8\n"
-					       "b  8 0 8 8\n"
-					       "c 16 0 8 8\n"
-					       "A  0 8 8 8\n"
-					       "B  8 8 8 8\n"
-					       "C  16 8 8 8\n"
-					       "1  0 16 8 8\n"
-					       "2  8 16 8 8\n"
-					       "3  16 16 8 8\n",
-					       image_file);
+  font_file = write_test_font_file("%s\n"
+				   "   0 0 8 8\n"
+				   "a  0 0 8 8\n"
+				   "b  8 0 8 8\n"
+				   "c 16 0 8 8\n"
+				   "A  0 8 8 8\n"
+				   "B  8 8 8 8\n"
+				   "C  16 8 8 8\n"
+				   "1  0 16 8 8\n"
+				   "2  8 16 8 8\n"
+				   "3  16 16 8 8\n",
+				   image_file);
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
   int rc = font__create( font_file, &font );
 
-  unlink(image_file);
-  unlink(font_file);
-
   ascii_to_rect_t ascii_to_rect;
   memcpy(ascii_to_rect, font->ascii_to_rect, sizeof(ascii_to_rect));
   
-  font__free(font);
-  video__teardown();
-
   TEST_ASSERT_INT( rc, SUCCESS );
   TEST_ASSERT_TRUE( font != NULL );
 
@@ -168,31 +159,22 @@ void load_font_file(){
 }
 
 void test_empty_string(){
-  video__setup(32, 32, 32, 32, FALSE);
 
-  struct font__handle_t* font;
-
-  const char* image_file = write_test_image_file();
+  image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
 
-  const char* font_file = write_test_font_file("%s\n"
-					       "   0 0 8 8\n",
-					       image_file);
+  font_file = write_test_font_file("%s\n"
+				 "   0 0 8 8\n",
+				 image_file);
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
   int rc = font__create( font_file, &font );
 
-  unlink(image_file);
-  unlink(font_file);
-
   int w, h;
 
   int rc_empty = font__dimensions(font, &w, &h, "");
-
-  font__free(font);
-  video__teardown();
 
   TEST_ASSERT_INT(rc, SUCCESS);
   TEST_ASSERT_INT(rc_empty, SUCCESS);
@@ -202,32 +184,23 @@ void test_empty_string(){
 }
 
 void test_tab_string(){
-  video__setup(32, 32, 32, 32, FALSE);
 
-  struct font__handle_t* font;
-
-  const char* image_file = write_test_image_file();
+  image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
 
-  const char* font_file = write_test_font_file("%s\n"
-					       "  0 0 8 8\n"
-					       "	  0 0 40 0\n",
-					       image_file);
+  font_file = write_test_font_file("%s\n"
+				   "  0 0 8 8\n"
+				   "	  0 0 40 0\n",
+				   image_file);
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
   int rc = font__create( font_file, &font );
 
-  unlink(image_file);
-  unlink(font_file);
-
   int w, h;
 
   int rc_tab = font__dimensions(font, &w, &h, "\t");
-
-  font__free(font);
-  video__teardown();
 
   TEST_ASSERT_INT(rc, SUCCESS);
   TEST_ASSERT_INT(rc_tab, SUCCESS);
@@ -237,31 +210,22 @@ void test_tab_string(){
 }
 
 void test_newline_string(){
-  video__setup(32, 32, 32, 32, FALSE);
 
-  struct font__handle_t* font;
-
-  const char* image_file = write_test_image_file();
+  image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
 
-  const char* font_file = write_test_font_file("%s\n"
-					       "  0 0 8 8\n",
-					       image_file);
+  font_file = write_test_font_file("%s\n"
+				   "  0 0 8 8\n",
+				   image_file);
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
   int rc = font__create( font_file, &font );
 
-  unlink(image_file);
-  unlink(font_file);
-
   int w, h;
 
   int rc_tab = font__dimensions(font, &w, &h, "\n");
-
-  font__free(font);
-  video__teardown();
 
   TEST_ASSERT_INT(rc, SUCCESS);
   TEST_ASSERT_INT(rc_tab, SUCCESS);
@@ -272,33 +236,27 @@ void test_newline_string(){
 
 void test_long_string(){
 
-  video__setup(32, 32, 32, 32, FALSE);
 
-  struct font__handle_t* font;
-
-  const char* image_file = write_test_image_file();
+  image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
 
-  const char* font_file = write_test_font_file("%s\n"
-					       "   0 0 8 8\n"
-					       "a  0 0 8 8\n"
-					       "b  8 0 8 8\n"
-					       "c 16 0 8 8\n"
-					       "A  0 8 8 8\n"
-					       "B  8 8 8 8\n"
-					       "C  16 8 8 8\n"
-					       "1  0 16 8 8\n"
-					       "2  8 16 8 8\n"
-					       "3  16 16 8 8\n",
-					       image_file);
+  font_file = write_test_font_file("%s\n"
+				   "   0 0 8 8\n"
+				   "a  0 0 8 8\n"
+				   "b  8 0 8 8\n"
+				   "c 16 0 8 8\n"
+				   "A  0 8 8 8\n"
+				   "B  8 8 8 8\n"
+				   "C  16 8 8 8\n"
+				   "1  0 16 8 8\n"
+				   "2  8 16 8 8\n"
+				   "3  16 16 8 8\n",
+				   image_file);
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
   int rc = font__create( font_file, &font );
-
-  unlink(image_file);
-  unlink(font_file);
 
   char buffer[2048];
   memset(buffer, '\0', sizeof(buffer));
@@ -316,9 +274,6 @@ void test_long_string(){
   
   int rc_2047 = font__dimensions(font, &w_2047, &h_2047, "%s", buffer);
   
-  font__free(font);
-  video__teardown();
-
   TEST_ASSERT_INT(rc_1023, SUCCESS);
   TEST_ASSERT_INT(w_1023, 1023*8);
   TEST_ASSERT_INT(h_1023, 1*8);
@@ -334,39 +289,58 @@ void test_long_string(){
 
 void font_dimensions(){
 
-  video__setup(32, 32, 32, 32, FALSE);
-
-  struct font__handle_t* font;
-
-  const char* image_file = write_test_image_file();
+  image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
 
-  const char* font_file = write_test_font_file("%s\n"
-					       "   0 0 8 8\n"
-					       "a  0 0 8 8\n"
-					       "b  8 0 8 8\n"
-					       "c 16 0 8 8\n"
-					       "A  0 8 8 8\n"
-					       "B  8 8 8 8\n"
-					       "C  16 8 8 8\n"
-					       "1  0 16 8 8\n"
-					       "2  8 16 8 8\n"
-					       "3  16 16 8 8\n",
-					       image_file);
-
+  font_file = write_test_font_file("%s\n"
+				   "   0 0 8 8\n"
+				   "a  0 0 8 8\n"
+				   "b  8 0 8 8\n"
+				   "c 16 0 8 8\n"
+				   "A  0 8 8 8\n"
+				   "B  8 8 8 8\n"
+				   "C  16 8 8 8\n"
+				   "1  0 16 8 8\n"
+				   "2  8 16 8 8\n"
+				   "3  16 16 8 8\n",
+				   image_file);
+  
   TEST_ASSERT_TRUE( font_file != NULL );
 
   int rc = font__create( font_file, &font );
+}
 
-  unlink(image_file);
-  unlink(font_file);
+int setup(){
+  video__setup(32, 32, 32, 32, FALSE);
 
+  image_file = NULL;
+  font_file = NULL;
+  font = NULL;
 
+  return SUCCESS;
+}
+
+int teardown(){
+  video__teardown();
+
+  if (image_file){
+    unlink(image_file);
+  }
+
+  if (font_file){
+    unlink(font_file);
+  }
+
+  if (font){
+    font__free(font);
+  }
+
+  return SUCCESS;
 }
 
 
-TEST_SUITE_START(Font Tests)
+TEST_SUITE_WITH_SETUP_START(Font Tests, setup, teardown)
   TEST_CASE(no_font_file)
   TEST_CASE(no_image_file)
   TEST_CASE(load_font_file)

@@ -15,21 +15,33 @@ int main(int argc, char** argv){
   fprintf(fout, "%s\n", test_suite_name);
 
   int test_idx = 0;
-  while ( iter->test_fxn != NULL ){
+  while ( iter->test_fxn != NULL && result < 2 ){
 
     fprintf(fout, " %3d: %-48s", test_idx, iter->title);
     fflush(stdout);
 
     g_test_result = TRUE;
 
-    iter->test_fxn();
-
-    if ( g_test_result ){
-      fprintf( fout, "...ok\n" );
+    if ( setup_fxn != NULL && SUCCESS != setup_fxn() ){
+      fprintf(fout, "ERROR.  cannot complete setup.  ending test.\n");
+      result = 2;
     }
     else{
-      fprintf( fout, "...FAILED\n" );
-      result = 1;
+
+      iter->test_fxn();
+
+      if ( g_test_result ){
+	fprintf( fout, "...ok\n" );
+      }
+      else{
+	fprintf( fout, "...FAILED\n" );
+	result = 1;
+      }
+
+      if ( teardown_fxn != NULL && SUCCESS != teardown_fxn() ){
+	fprintf(fout, "ERROR.  cannot complete teardown.  ending test.\n");
+	result = 3;
+      }
     }
 
     ++test_idx;
