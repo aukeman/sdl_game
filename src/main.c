@@ -3,6 +3,7 @@
 #include <constants.h>
 #include <timing.h>
 #include <font.h>
+#include <control.h>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -39,6 +40,9 @@ int main( int argc, char** argv ) {
   fprintf( stderr, "font rc: %d\n",
 	   font__create("resources/font/test_font.dat", &font) );
 
+  int x_value = 175;
+  int y_value = 250;
+
   while ( keep_looping ) {
 
     timing__declare_top_of_frame();
@@ -52,9 +56,23 @@ int main( int argc, char** argv ) {
     	video__blit(texture, &source, &dest);
       }
     }
+
+    struct control__state_t control;
+    control__get_state(1, &control);
     
-    dest.x = 175;
-    dest.y = 250;
+    font__draw_string(font, 200, 0,
+		      "left: %4.1f  right: %4.1f",
+		      control.left,
+		      control.right);
+
+    x_value -= (int)(control.left*10);
+    x_value += (int)(control.right*10);
+
+    y_value -= (int)(control.up*10);
+    y_value += (int)(control.down*10);
+
+    dest.x = x_value;
+    dest.y = y_value;
     video__rect( &dest, 0, 0, 255, 255 );
 
     geo__line_t line = { 30, 30, 350, 45 };

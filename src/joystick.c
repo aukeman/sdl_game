@@ -115,3 +115,13 @@ int teardown_joystick(int idx){
 
   memset(&js__joystick_info[idx], '\0', sizeof(js__joystick_info[idx]));
 }
+
+const js__joystick_state_t* js__get_joystick_state(uint32_t joystick_index){
+  if ( joystick_index < JS__MAX_JOYSTICKS &&
+       js__joystick_info[joystick_index].state.enabled ){
+    return &js__joystick_info[joystick_index].state;
+  }
+  else{
+    return NULL;
+  }
+}
