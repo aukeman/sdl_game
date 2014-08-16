@@ -261,11 +261,9 @@ int events__add_callback( events__type_e event_type,
        event_type < EVENTS__TYPE_LAST ) {
 
     struct events__callback_node_t** current_node_ptr = &events__callbacks[event_type];
-    struct events__callback_node_t* previous_node = NULL;
 
     while ( *current_node_ptr != NULL ){
-      previous_node = *current_node_ptr;
-      *current_node_ptr = (*current_node_ptr)->next;
+      current_node_ptr = &((*current_node_ptr)->next);
     }
 
     *current_node_ptr = 
@@ -275,10 +273,6 @@ int events__add_callback( events__type_e event_type,
     (*current_node_ptr)->record.callback = callback;
     (*current_node_ptr)->record.context = context;
     (*current_node_ptr)->next = NULL;
-
-    if ( previous_node ){
-      previous_node->next = *current_node_ptr;
-    }
 
     return SUCCESS;
   }

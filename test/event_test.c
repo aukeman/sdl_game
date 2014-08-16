@@ -162,10 +162,47 @@ void register_invoke_remove_callbacks(){
 
 }
 
+void deregister_head_callbacks(){
+  
+  int ctx_1 = 1;
+  int ctx_2 = 2;
+
+  TEST_ASSERT_INT(events__add_callback(EVENTS__TYPE_QUIT, cb_double, &ctx_1), 
+		  SUCCESS );
+  TEST_ASSERT_INT(events__add_callback(EVENTS__TYPE_QUIT, cb_increment, &ctx_2), 
+		  SUCCESS );
+
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 2);
+  TEST_ASSERT_INT(ctx_2, 3);
+
+  TEST_ASSERT_INT(events__remove_callback(EVENTS__TYPE_QUIT, cb_double), 
+		  SUCCESS );
+  
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 2);
+  TEST_ASSERT_INT(ctx_2, 4);
+
+  TEST_ASSERT_INT(events__remove_callback(EVENTS__TYPE_QUIT, cb_increment), 
+		  SUCCESS );
+
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 2);
+  TEST_ASSERT_INT(ctx_2, 4);
+
+
+}
 
 
 TEST_SUITE_WITH_SETUP_START(Event Tests, setup, teardown)
   TEST_CASE(no_registered_callbacks)
   TEST_CASE(register_invoke_remove_callbacks)
+  TEST_CASE(deregister_head_callbacks)
 TEST_SUITE_END()
 
