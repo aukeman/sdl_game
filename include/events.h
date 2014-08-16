@@ -197,6 +197,7 @@ typedef void events__callback_fxn(events__type_e event,
 				  void* context); 
 
 int events__setup();
+int events__teardown();
 
 int events__process_events();
 

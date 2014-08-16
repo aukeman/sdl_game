@@ -163,7 +163,33 @@ struct events__callback_node_t* events__callbacks[EVENTS__TYPE_LAST];
 
 int events__setup(){
   memset(events__callbacks, '\0', sizeof(events__callbacks));
+
+  return SUCCESS;
 }
+
+int events__teardown(){
+
+  int idx;
+
+  for ( idx = 0; 
+	idx < EVENTS__TYPE_LAST; 
+	++idx ){
+    
+    struct events__callback_node_t* current_node = events__callbacks[idx];
+    while ( current_node ){
+
+      struct events__callback_node_t* node_to_free = current_node;
+      current_node = current_node->next;
+
+      free(node_to_free);
+    }
+
+    events__callbacks[idx] = NULL;
+  }
+
+  return SUCCESS;
+}
+
 
 int events__process_events() {
 
