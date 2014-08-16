@@ -29,7 +29,8 @@ typedef union{
 
 enum {
   EVENTS__ERROR_CODE_BASE = 0x10,
-  EVENTS__INVALID_EVENT_TYPE
+  EVENTS__INVALID_EVENT_TYPE,
+  EVENTS__CALLBACK_NOT_REGISTERED
 };
 
 typedef enum { 
@@ -195,11 +196,16 @@ typedef void events__callback_fxn(events__type_e event,
 				  const events__event_parameter_t* event_parameter, 
 				  void* context); 
 
+int events__setup();
+
 int events__process_events();
 
-int events__set_callback( events__type_e,
+int events__add_callback( events__type_e,
 			  events__callback_fxn callback, 
 			  void* context );
+
+int events__remove_callback( events__type_e,
+			     events__callback_fxn callback );
 
 
 #endif

@@ -28,8 +28,8 @@ int main( int argc, char** argv ) {
 
   int keep_looping = TRUE;
 
-  events__set_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
-  events__set_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
+  events__add_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
+  events__add_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
 
   struct video__texture_handle_t* texture;
   video__setup_texture("resources/img/testing.png", &texture);

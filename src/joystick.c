@@ -50,8 +50,8 @@ int js__setup(){
 
   SDL_Init(SDL_INIT_JOYSTICK);
 
-  events__set_callback( EVENTS__TYPE_JOYSTICK_AXIS, handle_axis_event, NULL );
-  events__set_callback( EVENTS__TYPE_JOYSTICK_BUTTON, handle_button_event, NULL );
+  events__add_callback( EVENTS__TYPE_JOYSTICK_AXIS, handle_axis_event, NULL );
+  events__add_callback( EVENTS__TYPE_JOYSTICK_BUTTON, handle_button_event, NULL );
 
   const int number_of_joysticks = SDL_NumJoysticks();
 
@@ -74,6 +74,9 @@ int js__teardown(){
   for ( joystick_idx = 0; joystick_idx < JS__MAX_JOYSTICKS; ++joystick_idx ){
     teardown_joystick(joystick_idx);
   }
+
+  events__remove_callback( EVENTS__TYPE_JOYSTICK_AXIS, handle_axis_event );
+  events__remove_callback( EVENTS__TYPE_JOYSTICK_BUTTON, handle_button_event );
   
   return SUCCESS;
 }

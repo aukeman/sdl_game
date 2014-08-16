@@ -149,17 +149,21 @@ const uint32_t EVENTS__KEY_LWIN = SDLK_LSUPER;
 const uint32_t EVENTS__KEY_RWIN = SDLK_RSUPER;
 
 
-typedef struct {
+struct  events__callback_record_t{
   events__callback_fxn* callback;
   void* context;
-} events__callback_record_t;
-
-events__callback_record_t events__callbacks[EVENTS__TYPE_LAST] = {
-  {NULL, NULL},
-  {NULL, NULL},
-  {NULL, NULL},
-  {NULL, NULL}
 };
+
+struct events__callback_node_t{
+  struct events__callback_record_t record;
+  struct events__callback_node_t* next;
+};
+
+struct events__callback_node_t* events__callbacks[EVENTS__TYPE_LAST];
+
+int events__setup(){
+  memset(events__callbacks, '\0', sizeof(events__callbacks));
+}
 
 int events__process_events() {
 
@@ -218,29 +222,89 @@ int events__process_events() {
       break;
     }
 
-    events__callback_fxn* callback = events__callbacks[event_type].callback;
-    void* context = events__callbacks[event_type].context;
+    struct events__callback_node_t* current_node = events__callbacks[event_type];
+    while ( current_node ){
+      events__callback_fxn* callback = current_node->record.callback;
+      void* context = current_node->record.context;
 
-    if ( callback != NULL ) {
-      (*callback)(event_type, param_ptr, context);
+      if ( callback != NULL ) {
+	(*callback)(event_type, param_ptr, context);
+      }
+
+      current_node = current_node->next;
     }
   }
 }
 
-int events__set_callback( events__type_e event_type,
+int events__add_callback( events__type_e event_type,
 			  events__callback_fxn callback, 
 			  void* context ) {
 
   if ( EVENTS__TYPE_NONE < event_type &&
        event_type < EVENTS__TYPE_LAST ) {
 
-    events__callbacks[event_type].callback = callback;
-    events__callbacks[event_type].context = context;
+    struct events__callback_node_t** current_node_ptr = &events__callbacks[event_type];
+    struct events__callback_node_t* previous_node = NULL;
+
+    while ( *current_node_ptr != NULL ){
+      previous_node = *current_node_ptr;
+      *current_node_ptr = (*current_node_ptr)->next;
+    }
+
+    *current_node_ptr = 
+      (struct events__callback_node_t*)
+      malloc(sizeof(struct events__callback_node_t));
+
+    (*current_node_ptr)->record.callback = callback;
+    (*current_node_ptr)->record.context = context;
+    (*current_node_ptr)->next = NULL;
+
+    if ( previous_node ){
+      previous_node->next = *current_node_ptr;
+    }
 
     return SUCCESS;
   }
   else {
     return EVENTS__INVALID_EVENT_TYPE;
   }
+}
 
+int events__remove_callback( events__type_e event_type,
+			     events__callback_fxn callback ) {
+
+  int result = EVENTS__CALLBACK_NOT_REGISTERED;
+
+  if ( EVENTS__TYPE_NONE < event_type &&
+       event_type < EVENTS__TYPE_LAST ) {
+
+    struct events__callback_node_t** current_node_ptr = &events__callbacks[event_type];
+    struct events__callback_node_t* previous_node = NULL;
+    struct events__callback_node_t* next_node = NULL;
+  
+    while ( *current_node_ptr != NULL &&
+	    (*current_node_ptr)->record.callback != callback ){
+      previous_node = *current_node_ptr;
+      *current_node_ptr = (*current_node_ptr)->next;
+    }
+  
+    if ( *current_node_ptr ){
+      next_node = (*current_node_ptr)->next;
+    
+      free(*current_node_ptr);
+      *current_node_ptr = NULL;
+
+      if ( previous_node ){
+	previous_node->next = next_node;
+      }
+
+      result = SUCCESS;
+    }
+  
+  }
+  else{
+    result = EVENTS__INVALID_EVENT_TYPE;
+  }
+
+  return result;
 }
