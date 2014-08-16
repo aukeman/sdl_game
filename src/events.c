@@ -222,17 +222,8 @@ int events__process_events() {
       break;
     }
 
-    struct events__callback_node_t* current_node = events__callbacks[event_type];
-    while ( current_node ){
-      events__callback_fxn* callback = current_node->record.callback;
-      void* context = current_node->record.context;
+    _invoke_callback(event_type, param_ptr);
 
-      if ( callback != NULL ) {
-	(*callback)(event_type, param_ptr, context);
-      }
-
-      current_node = current_node->next;
-    }
   }
 }
 
@@ -301,6 +292,35 @@ int events__remove_callback( events__type_e event_type,
       result = SUCCESS;
     }
   
+  }
+  else{
+    result = EVENTS__INVALID_EVENT_TYPE;
+  }
+
+  return result;
+}
+
+int _invoke_callback( events__type_e event_type,
+		      events__event_parameter_t* event_param ){
+
+  int result = EVENTS__CALLBACK_NOT_REGISTERED;
+
+  if ( EVENTS__TYPE_NONE < event_type &&
+       event_type < EVENTS__TYPE_LAST ) {
+
+    struct events__callback_node_t* current_node = events__callbacks[event_type];
+    while ( current_node ){
+      events__callback_fxn* callback = current_node->record.callback;
+      void* context = current_node->record.context;
+
+      if ( callback != NULL ) {
+	(*callback)(event_type, event_param, context);
+      }
+
+      current_node = current_node->next;
+
+      result = SUCCESS;
+    }
   }
   else{
     result = EVENTS__INVALID_EVENT_TYPE;
