@@ -35,7 +35,7 @@ void handle_button_event(events__type_e event,
 
   int joystick_id = param->js_button.joystick_id;
   int button_id = param->js_button.button_id; 
-  float value = param->js_button.value ? 1.0f : 0.0f; 
+  bool_t value = param->js_button.value;
 
   if ( joystick_id < JS__MAX_JOYSTICKS && button_id < JS__MAX_BUTTONS )
   {
