@@ -1,9 +1,9 @@
-#include <utils.h>
+#include <linked_list.h>
 #include <constants.h>
 #include <stdlib.h>
 
 
-bool_t referential_equality_check(const void* needle, const void* haystack){
+bool_t referential_equality(const void* needle, const void* haystack){
   return needle == haystack;
 }
 
@@ -63,6 +63,10 @@ void* linked_list__remove(void* item, item_equality_fxn item_equality, struct li
   struct linked_list__node_t* next_node = NULL;
   
   void* found_item = NULL;
+
+  if ( item_equality == NULL ){
+    item_equality = referential_equality;
+  }
 
   while ( *current_node_ptr != NULL &&
 	  !item_equality(item, (*current_node_ptr)->data) ){

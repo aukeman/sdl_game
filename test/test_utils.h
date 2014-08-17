@@ -63,4 +63,10 @@ if ( (a) ) {                          \
 #define TEST_ASSERT_PTR(  actual,expected) \
   __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, p )
 
+#define TEST_ASSERT_NULL( actual ) \
+  TEST_ASSERT_PTR(actual, NULL)
+
+#define TEST_ASSERT_SUCCESS( actual ) \
+  TEST_ASSERT_INT(actual, SUCCESS)
+
 #endif

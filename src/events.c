@@ -1,6 +1,6 @@
 #include <events.h>
 #include <constants.h>
-#include <utils.h>
+#include <linked_list.h>
 
 #include <SDL/SDL.h>
 
