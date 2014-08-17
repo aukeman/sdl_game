@@ -79,7 +79,7 @@ int control__setup(const char* mapping_file){
 
   up_mapping->type = ANALOG;
   up_mapping->min_input = 0.0f;
-  up_mapping->max_input = 1.0f;
+  up_mapping->max_input = -1.0f;
   up_mapping->analog = &control_state[0].up;
 
   struct control_mapping_t* down_mapping = 
@@ -87,7 +87,7 @@ int control__setup(const char* mapping_file){
 
   down_mapping->type = ANALOG;
   down_mapping->min_input = 0.0f;
-  down_mapping->max_input = -1.0f;
+  down_mapping->max_input = 1.0f;
   down_mapping->analog = &control_state[0].down;
 
   struct control_mapping_t* left_mapping = 
@@ -220,21 +220,22 @@ void _handle_axis(events__type_e event,
 
     float axis_value = _get_axis_value(param->js_axis.value, mapping);
     
-    if ( 0.0f <= axis_value && axis_value <= 1.0f ){
-
-      switch (mapping->type){
-      case NO_CONTROL_MAPPING:
-	break;
-      case ANALOG:
+    switch (mapping->type){
+    case NO_CONTROL_MAPPING:
+      break;
+    case ANALOG:
+      if ( mapping->analog->value != axis_value ){
 	mapping->analog->value = axis_value;
 	mapping->analog->timestamp = timing__get_top_of_frame();
-	break;
+      }
+      break;
  
-      case BINARY:
+    case BINARY:
+      if ( mapping->binary->value != (0.75f < axis_value) ){
 	mapping->binary->value = (0.75f < axis_value);
 	mapping->binary->timestamp = timing__get_top_of_frame();
-	break;
       }
+      break;
     }
 
     mapping = 
@@ -276,5 +277,5 @@ float _get_axis_value( float input_value,
   return fminf(1.0, 
 	       fmaxf(0.0, 
 		     (input_value-control_mapping->min_input) / 
-		     (control_mapping->max_input-control_mapping->max_input)));
+		     (control_mapping->max_input-control_mapping->min_input)));
 }

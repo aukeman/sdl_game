@@ -62,8 +62,8 @@ int main( int argc, char** argv ) {
     
     font__draw_string(font, 200, 0,
 		      "left: %4.1f  right: %4.1f",
-		      control->left,
-		      control->right);
+		      control->left.value,
+		      control->right.value);
 
     x_value -= (int)(control->left.value*10);
     x_value += (int)(control->right.value*10);
