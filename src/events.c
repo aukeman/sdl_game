@@ -1,8 +1,9 @@
 #include <events.h>
-
 #include <constants.h>
+#include <utils.h>
 
 #include <SDL/SDL.h>
+
 
 const uint32_t EVENTS__KEYMOD_LSHIFT = KMOD_LSHIFT;
 const uint32_t EVENTS__KEYMOD_RSHIFT = KMOD_RSHIFT;
@@ -150,20 +151,24 @@ const uint32_t EVENTS__KEY_RWIN = SDLK_RSUPER;
 const uint32_t EVENTS__KEY_LAST = SDLK_LAST;
 
 
-struct  events__callback_record_t{
+struct events__callback_record_t{
   events__callback_fxn* callback;
   void* context;
 };
 
-struct events__callback_node_t{
-  struct events__callback_record_t record;
-  struct events__callback_node_t* next;
-};
+struct linked_list_t events__callbacks[EVENTS__TYPE_LAST];
 
-struct events__callback_node_t* events__callbacks[EVENTS__TYPE_LAST];
+bool_t callback_record_equality(const void* a, const void* b){
+  return (((const struct events__callback_record_t*)a)->callback == 
+	  ((const struct events__callback_record_t*)b)->callback);
+}
 
 int events__setup(){
-  memset(events__callbacks, '\0', sizeof(events__callbacks));
+
+  int idx;
+  for ( idx = 0; idx < EVENTS__TYPE_LAST; ++idx ){
+    linked_list__setup(&events__callbacks[idx]);
+  }
 
   return SUCCESS;
 }
@@ -171,21 +176,8 @@ int events__setup(){
 int events__teardown(){
 
   int idx;
-
-  for ( idx = 0; 
-	idx < EVENTS__TYPE_LAST; 
-	++idx ){
-    
-    struct events__callback_node_t* current_node = events__callbacks[idx];
-    while ( current_node ){
-
-      struct events__callback_node_t* node_to_free = current_node;
-      current_node = current_node->next;
-
-      free(node_to_free);
-    }
-
-    events__callbacks[idx] = NULL;
+  for ( idx = 0; idx < EVENTS__TYPE_LAST; ++idx ){
+    linked_list__teardown(&events__callbacks[idx], TRUE);
   }
 
   return SUCCESS;
@@ -261,21 +253,14 @@ int events__add_callback( events__type_e event_type,
   if ( EVENTS__TYPE_NONE < event_type &&
        event_type < EVENTS__TYPE_LAST ) {
 
-    struct events__callback_node_t** current_node_ptr = &events__callbacks[event_type];
+    struct events__callback_record_t* record = 
+      (struct events__callback_record_t*)
+      malloc(sizeof(struct events__callback_record_t));
 
-    while ( *current_node_ptr != NULL ){
-      current_node_ptr = &((*current_node_ptr)->next);
-    }
+    record->callback = callback;
+    record->context = context;
 
-    *current_node_ptr = 
-      (struct events__callback_node_t*)
-      malloc(sizeof(struct events__callback_node_t));
-
-    (*current_node_ptr)->record.callback = callback;
-    (*current_node_ptr)->record.context = context;
-    (*current_node_ptr)->next = NULL;
-
-    return SUCCESS;
+    return linked_list__add(record, &events__callbacks[event_type]);
   }
   else {
     return EVENTS__INVALID_EVENT_TYPE;
@@ -290,23 +275,15 @@ int events__remove_callback( events__type_e event_type,
   if ( EVENTS__TYPE_NONE < event_type &&
        event_type < EVENTS__TYPE_LAST ) {
 
-    struct events__callback_node_t** current_node_ptr = &events__callbacks[event_type];
-    struct events__callback_node_t* next_node = NULL;
-  
-    while ( *current_node_ptr != NULL &&
-	    (*current_node_ptr)->record.callback != callback ){
-      current_node_ptr = &((*current_node_ptr)->next);
-    }
-  
-    if ( *current_node_ptr ){
-      next_node = (*current_node_ptr)->next;
-    
-      free(*current_node_ptr);
-      *current_node_ptr = next_node;
+    struct events__callback_record_t* record = 
+      linked_list__remove(callback, 
+			  callback_record_equality, 
+			  &events__callbacks[event_type] );
 
+    if ( record ){
+      free(record);
       result = SUCCESS;
     }
-  
   }
   else{
     result = EVENTS__INVALID_EVENT_TYPE;
@@ -321,20 +298,24 @@ int _invoke_callback( events__type_e event_type,
   int result = EVENTS__CALLBACK_NOT_REGISTERED;
 
   if ( EVENTS__TYPE_NONE < event_type &&
-       event_type < EVENTS__TYPE_LAST ) {
+       event_type < EVENTS__TYPE_LAST ){
 
-    struct events__callback_node_t* current_node = events__callbacks[event_type];
-    while ( current_node ){
-      events__callback_fxn* callback = current_node->record.callback;
-      void* context = current_node->record.context;
+    struct events__callback_record_t* record =
+      (struct events__callback_record_t*)
+      linked_list__begin(&events__callbacks[event_type]);
+
+    while ( record ){
+
+      events__callback_fxn* callback = record->callback;
+      void* context = record->context;
 
       if ( callback != NULL ) {
 	(*callback)(event_type, event_param, context);
+
+	result = SUCCESS;
       }
-
-      current_node = current_node->next;
-
-      result = SUCCESS;
+      
+      record = (struct events__callback_record_t*)linked_list__next();
     }
   }
   else{

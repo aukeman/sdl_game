@@ -80,13 +80,14 @@ void* linked_list__remove(void* item, item_equality_fxn item_equality, struct li
   return found_item;
 }
 
-int linked_list__begin_iteration(const struct linked_list_t* ll){
+void* linked_list__begin(struct linked_list_t* ll){
+
   _iterator = ll->head;
 
-  return SUCCESS;
+  return linked_list__next();
 }
 
-void* linked_list__next_iteration(){
+void* linked_list__next(){
 
   void* result = NULL;
 
