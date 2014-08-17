@@ -191,11 +191,109 @@ void deregister_head_callbacks(){
 		  SUCCESS );
 
   TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
-		   SUCCESS );
+		   EVENTS__CALLBACK_NOT_REGISTERED );
 
   TEST_ASSERT_INT(ctx_1, 2);
   TEST_ASSERT_INT(ctx_2, 4);
 
+
+}
+
+void deregister_tail_callbacks(){
+  
+  int ctx_1 = 1;
+  int ctx_2 = 2;
+
+  TEST_ASSERT_INT(events__add_callback(EVENTS__TYPE_QUIT, cb_double, &ctx_1), 
+		  SUCCESS );
+  TEST_ASSERT_INT(events__add_callback(EVENTS__TYPE_QUIT, cb_increment, &ctx_2), 
+		  SUCCESS );
+
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 2);
+  TEST_ASSERT_INT(ctx_2, 3);
+
+  TEST_ASSERT_INT(events__remove_callback(EVENTS__TYPE_QUIT, cb_increment), 
+		  SUCCESS );
+  
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 4);
+  TEST_ASSERT_INT(ctx_2, 3);
+
+  TEST_ASSERT_INT(events__remove_callback(EVENTS__TYPE_QUIT, cb_double), 
+		  SUCCESS );
+
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   EVENTS__CALLBACK_NOT_REGISTERED );
+
+  TEST_ASSERT_INT(ctx_1, 4);
+  TEST_ASSERT_INT(ctx_2, 3);
+}
+
+void deregister_middle_callbacks(){
+  
+  int ctx_1 = 1;
+  int ctx_2 = 2;
+  int ctx_3 = 3;
+
+  TEST_ASSERT_INT(events__add_callback(EVENTS__TYPE_QUIT, cb_double, &ctx_1), 
+		  SUCCESS );
+  TEST_ASSERT_INT(events__add_callback(EVENTS__TYPE_QUIT, cb_increment, &ctx_2), 
+		  SUCCESS );
+  TEST_ASSERT_INT(events__add_callback(EVENTS__TYPE_QUIT, cb_decrement, &ctx_2), 
+		  SUCCESS );
+
+
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 2);
+  TEST_ASSERT_INT(ctx_2, 3);
+  TEST_ASSERT_INT(ctx_3, 2);
+
+  TEST_ASSERT_INT(events__remove_callback(EVENTS__TYPE_QUIT, cb_increment), 
+		  SUCCESS );
+  
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 4);
+  TEST_ASSERT_INT(ctx_2, 3);
+  TEST_ASSERT_INT(ctx_3, 1);
+
+  TEST_ASSERT_INT(events__remove_callback(EVENTS__TYPE_QUIT, cb_double), 
+		  SUCCESS );
+
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 4);
+  TEST_ASSERT_INT(ctx_2, 3);
+  TEST_ASSERT_INT(ctx_3, 0);
+
+  TEST_ASSERT_INT(events__remove_callback(EVENTS__TYPE_QUIT, cb_decrement), 
+		  SUCCESS );
+
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   EVENTS__CALLBACK_NOT_REGISTERED );
+
+  TEST_ASSERT_INT(ctx_1, 4);
+  TEST_ASSERT_INT(ctx_2, 3);
+  TEST_ASSERT_INT(ctx_3, 0);
+
+  TEST_ASSERT_INT(events__add_callback(EVENTS__TYPE_QUIT, cb_double, &ctx_1), 
+		  SUCCESS );
+
+  TEST_ASSERT_INT( _invoke_callback(EVENTS__TYPE_QUIT, NULL), 
+		   SUCCESS );
+
+  TEST_ASSERT_INT(ctx_1, 8);
+  TEST_ASSERT_INT(ctx_2, 3);
+  TEST_ASSERT_INT(ctx_3, 0);
 
 }
 
@@ -204,5 +302,6 @@ TEST_SUITE_WITH_SETUP_START(Event Tests, setup, teardown)
   TEST_CASE(no_registered_callbacks)
   TEST_CASE(register_invoke_remove_callbacks)
   TEST_CASE(deregister_head_callbacks)
+  TEST_CASE(deregister_tail_callbacks)
 TEST_SUITE_END()
 

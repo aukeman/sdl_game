@@ -290,24 +290,18 @@ int events__remove_callback( events__type_e event_type,
        event_type < EVENTS__TYPE_LAST ) {
 
     struct events__callback_node_t** current_node_ptr = &events__callbacks[event_type];
-    struct events__callback_node_t* previous_node = NULL;
     struct events__callback_node_t* next_node = NULL;
   
     while ( *current_node_ptr != NULL &&
 	    (*current_node_ptr)->record.callback != callback ){
-      previous_node = *current_node_ptr;
-      *current_node_ptr = (*current_node_ptr)->next;
+      current_node_ptr = &((*current_node_ptr)->next);
     }
   
     if ( *current_node_ptr ){
       next_node = (*current_node_ptr)->next;
     
       free(*current_node_ptr);
-      *current_node_ptr = NULL;
-
-      if ( previous_node ){
-	previous_node->next = next_node;
-      }
+      *current_node_ptr = next_node;
 
       result = SUCCESS;
     }
