@@ -3,9 +3,9 @@
 
 #include <types.h>
 
-typedef bool_t item_equality_fxn(const void* item_a, const void* item_b);
+typedef bool_t item_equality_fxn(const void* needle, const void* haystack);
 
-bool_t referential_euality_check(const void* item_a, const void* item_b);
+bool_t referential_euality_check(const void* needle, const void* haystack);
 
 struct linked_list__node_t;
 

@@ -3,8 +3,8 @@
 #include <stdlib.h>
 
 
-bool_t referential_equality_check(const void* item_a, const void* item_b){
-  return item_a == item_b;
+bool_t referential_equality_check(const void* needle, const void* haystack){
+  return needle == haystack;
 }
 
 struct linked_list__node_t{
