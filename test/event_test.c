@@ -294,7 +294,6 @@ void deregister_middle_callbacks(){
   TEST_ASSERT_INT(ctx_1, 8);
   TEST_ASSERT_INT(ctx_2, 3);
   TEST_ASSERT_INT(ctx_3, 0);
-
 }
 
 

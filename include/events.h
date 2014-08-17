@@ -186,6 +186,7 @@ extern const uint32_t EVENTS__KEY_RMETA;
 extern const uint32_t EVENTS__KEY_LMETA;
 extern const uint32_t EVENTS__KEY_LWIN;
 extern const uint32_t EVENTS__KEY_RWIN;
+extern const uint32_t EVENTS__KEY_LAST;
 
 extern const uint32_t EVENTS__JS_AXIS;
 extern const uint32_t EVENTS__JS_BUTTON;

@@ -58,19 +58,18 @@ int main( int argc, char** argv ) {
       }
     }
 
-    struct control__state_t control;
-    control__get_state(0, &control);
+    const struct control__state_t* control = control__get_state(0);
     
     font__draw_string(font, 200, 0,
 		      "left: %4.1f  right: %4.1f",
-		      control.left,
-		      control.right);
+		      control->left,
+		      control->right);
 
-    x_value -= (int)(control.left.value*10);
-    x_value += (int)(control.right.value*10);
+    x_value -= (int)(control->left.value*10);
+    x_value += (int)(control->right.value*10);
 
-    y_value -= (int)(control.up.value*10);
-    y_value += (int)(control.down.value*10);
+    y_value -= (int)(control->up.value*10);
+    y_value += (int)(control->down.value*10);
 
     dest.x = x_value;
     dest.y = y_value;

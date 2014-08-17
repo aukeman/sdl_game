@@ -147,6 +147,7 @@ const uint32_t EVENTS__KEY_RMETA = SDLK_RMETA;
 const uint32_t EVENTS__KEY_LMETA = SDLK_LMETA;
 const uint32_t EVENTS__KEY_LWIN = SDLK_LSUPER;
 const uint32_t EVENTS__KEY_RWIN = SDLK_RSUPER;
+const uint32_t EVENTS__KEY_LAST = SDLK_LAST;
 
 
 struct  events__callback_record_t{

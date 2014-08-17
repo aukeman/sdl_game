@@ -19,7 +19,7 @@ struct control__analog_t{
   timestamp_t timestamp;
 };
 
-struct control__switch_t{
+struct control__binary_t{
   bool_t value;
   timestamp_t timestamp;
 };
@@ -29,12 +29,15 @@ struct control__state_t {
   struct control__analog_t down;
   struct control__analog_t left;
   struct control__analog_t right;
-  struct control__switch_t jump;
-  struct control__switch_t fire;
+  struct control__binary_t jump;
+  struct control__binary_t fire;
 };
 
 int control__setup(const char* mapping_file);
+int control__teardown();
 
-int control__get_state( uint32_t player, struct control__state_t* state );
+const struct control__state_t* control__get_state( uint32_t player );
+
+
 
 #endif
