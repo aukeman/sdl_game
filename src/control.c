@@ -3,6 +3,8 @@
 #include <events.h>
 #include <linked_list.h>
 #include <constants.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -53,6 +55,8 @@ float _get_axis_value( float input_value,
 
 int control__setup(const char* mapping_file){
 
+  int result = SUCCESS;
+
   events__add_callback( EVENTS__TYPE_KEYUP, _handle_keyup, NULL );
   events__add_callback( EVENTS__TYPE_KEYDOWN, _handle_keydown, NULL );
 
@@ -74,45 +78,103 @@ int control__setup(const char* mapping_file){
     }
   }
 
-  struct control_mapping_t* up_mapping = 
-    (struct control_mapping_t*)malloc(sizeof(struct control_mapping_t));
+  FILE* fin = fopen(mapping_file, "r");
 
-  up_mapping->type = ANALOG;
-  up_mapping->min_input = 0.0f;
-  up_mapping->max_input = -1.0f;
-  up_mapping->analog = &control_state[0].up;
+  if ( !fin ){
+    result = CONTROL__MAPPING_FILE_NOT_FOUND;
+  }
+  else{
 
-  struct control_mapping_t* down_mapping = 
-    (struct control_mapping_t*)malloc(sizeof(struct control_mapping_t));
+    while ( !feof(fin) ){
 
-  down_mapping->type = ANALOG;
-  down_mapping->min_input = 0.0f;
-  down_mapping->max_input = 1.0f;
-  down_mapping->analog = &control_state[0].down;
+      int player_idx;
 
-  struct control_mapping_t* left_mapping = 
-    (struct control_mapping_t*)malloc(sizeof(struct control_mapping_t));
+      int rc = fscanf(fin, "%d%*c", &player_idx);
 
-  left_mapping->type = ANALOG;
-  left_mapping->min_input = 0.0f;
-  left_mapping->max_input = -1.0f;
-  left_mapping->analog = &control_state[0].left;
+      if ( rc != 1 ){
+	result = CONTROL__BAD_MAPPING_FILE;
+	break;
+      }
+      else{
+	while ( 0 < rc ){
 
-  struct control_mapping_t* right_mapping = 
-    (struct control_mapping_t*)malloc(sizeof(struct control_mapping_t));
+	  struct control_mapping_t* mapping = 
+	    (struct control_mapping_t*)malloc(sizeof(struct control_mapping_t));
+	  memset(mapping, '\0', sizeof(struct control_mapping_t));
 
-  right_mapping->type = ANALOG;
-  right_mapping->min_input = 0.0f;
-  right_mapping->max_input = 1.0f;
-  right_mapping->analog = &control_state[0].right;
+	  char control_type[16];
+	  char device_type[16];
+	  
+	  rc = fscanf(fin, "%15s %15s", control_type, device_type);
 
-  linked_list__add( up_mapping, &js_axis_mappings[0][1] );
-  linked_list__add( down_mapping, &js_axis_mappings[0][1] );
-  
-  linked_list__add( left_mapping, &js_axis_mappings[0][0] );
-  linked_list__add( right_mapping, &js_axis_mappings[0][0] );
+	  if ( !strncmp(device_type, "joystick", sizeof(device_type)) ){
+	    int joystick_id;
+	    char input_type[16];
 
-  return SUCCESS;
+	    rc = fscanf(fin, "%d %15s", &joystick_id, input_type);
+
+	    if ( !strncmp(input_type, "axis", sizeof(input_type)) ){
+	      int axis_id;
+	      float min_input, max_input;
+
+	      rc = fscanf(fin, "%d %f %f%*c", &axis_id, &min_input, &max_input);
+
+	      mapping->min_input = min_input;
+	      mapping->max_input = max_input;
+
+	      linked_list__add( mapping,
+				&js_axis_mappings[joystick_id][axis_id] );
+	    }
+	    else if ( !strncmp(input_type, "button", sizeof(input_type)) ){
+
+	      int button_id;
+	      rc = fscanf(fin, "%d%*c", &button_id);
+
+	      linked_list__add( mapping,
+				&js_button_mappings[joystick_id][button_id] );
+	    }
+	  }
+	  else if ( !strncmp(device_type, "keyboard", sizeof(device_type) ) ){
+
+	      int key_id;
+	      rc = fscanf(fin, "%d%*c", &key_id);
+
+	      linked_list__add( mapping,
+				&keyboard_mappings[key_id] );
+	  }
+
+	  if ( !strncmp(control_type, "up", sizeof(control_type)) ){
+	    mapping->type = ANALOG;
+	    mapping->analog = &control_state[player_idx].up;
+	  }
+	  else if ( !strncmp(control_type, "down", sizeof(control_type)) ){
+	    mapping->type = ANALOG;
+	    mapping->analog = &control_state[player_idx].down;
+	  }
+	  else if ( !strncmp(control_type, "left", sizeof(control_type)) ){
+	    mapping->type = ANALOG;
+	    mapping->analog = &control_state[player_idx].left;
+	  }
+	  else if ( !strncmp(control_type, "right", sizeof(control_type)) ){
+	    mapping->type = ANALOG;
+	    mapping->analog = &control_state[player_idx].right;
+	  }
+	  else if ( !strncmp(control_type, "jump", sizeof(control_type)) ){
+	    mapping->type = BINARY;
+	    mapping->binary = &control_state[player_idx].jump;
+	  }
+	  else if ( !strncmp(control_type, "fire", sizeof(control_type)) ){
+	    mapping->type = BINARY;
+	    mapping->binary = &control_state[player_idx].fire;
+	  }
+	}
+      }
+    }
+
+    fclose(fin);
+  }
+
+  return result;
 }
 
 int control__teardown(){

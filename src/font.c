@@ -37,7 +37,7 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
     const int BUFFER_LENGTH=1023;
     char buffer[BUFFER_LENGTH+1];
 
-    int rc = fscanf(fin, "%s%*c", buffer);
+    int rc = fscanf(fin, "%1023s%*c", buffer);
 
     if ( rc < 1 ){
       result = FONT__BAD_CONFIG_FILE;
