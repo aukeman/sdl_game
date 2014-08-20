@@ -84,6 +84,10 @@ void* linked_list__remove(void* item, item_equality_fxn item_equality, struct li
   return found_item;
 }
 
+bool_t linked_list__empty(const struct linked_list_t* ll){
+  return !ll || (ll->head == NULL);
+}
+
 void* linked_list__begin(struct linked_list_t* ll){
 
   _iterator = ll->head;

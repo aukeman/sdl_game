@@ -3,6 +3,9 @@
 
 #include <constants.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+#include <math.h>
 
 typedef void test_fxn_t();
 typedef int setup_fxn_t();
@@ -42,6 +45,12 @@ if ( !(comparison_result) ) {						\
   fprintf(stderr, "\"%s\" expected: %"#fmt" actual: %"#fmt"\n", #actual" == "#expected, (expected), (actual));                     \
   __ASSERTION_FAIL; }
 
+#define __ASSERTION_INEQUALITY(comparison_result, actual, expected, fmt )	\
+if ( !(comparison_result) ) {						\
+  __ASSERTION_LOCATION;                  \
+  fprintf(stderr, "\"%s\" expected: %"#fmt" actual: %"#fmt"\n", #actual" != "#expected, (expected), (actual));                     \
+  __ASSERTION_FAIL; }
+
 #define TEST_CASE(tc) { tc, #tc },
 #define TEST_SUITE_END() {NULL, NULL} };
 
@@ -60,13 +69,24 @@ if ( (a) ) {                          \
 #define TEST_ASSERT_INT(actual,expected) \
   __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, d )
 
+#define TEST_ASSERT_FLOAT(actual,expected, epsilon) \
+  __ASSERTION_EQUALITY( fabs((actual)-(expected)) <= (epsilon), actual, expected, f )
+
 #define TEST_ASSERT_PTR(  actual,expected) \
   __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, p )
 
 #define TEST_ASSERT_NULL( actual ) \
   TEST_ASSERT_PTR(actual, NULL)
 
+#define TEST_ASSERT_NOT_NULL( actual ) \
+  __ASSERTION_INEQUALITY( (actual) != NULL, actual, NULL, p )
+
 #define TEST_ASSERT_SUCCESS( actual ) \
   TEST_ASSERT_INT(actual, SUCCESS)
 
+#define TEST_ASSERT_FAIL( actual ) \
+  __ASSERTION_INEQUALITY( (actual) != SUCCESS, actual, SUCCESS, d )
+
+
 #endif
+

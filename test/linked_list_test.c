@@ -262,6 +262,21 @@ void custom_equality_check(){
   TEST_ASSERT_NULL( linked_list__next() );
 }
 
+void test_empty(){
+
+  int one = 1;
+
+  TEST_ASSERT_TRUE( linked_list__empty(NULL) );
+  TEST_ASSERT_TRUE( linked_list__empty(&ll) );
+
+  TEST_ASSERT_SUCCESS( linked_list__add(&one, &ll) );
+
+  TEST_ASSERT_FALSE( linked_list__empty(&ll) );
+
+  TEST_ASSERT_PTR( linked_list__remove(&one, NULL, &ll), &one );
+
+  TEST_ASSERT_TRUE( linked_list__empty(&ll) );
+}
 
 TEST_SUITE_WITH_SETUP_START(Linked List Tests, setup, teardown)
   TEST_CASE(empty_list)
@@ -277,5 +292,6 @@ TEST_SUITE_WITH_SETUP_START(Linked List Tests, setup, teardown)
   TEST_CASE(failed_remove)
   TEST_CASE(free_on_teardown)
   TEST_CASE(custom_equality_check)
+  TEST_CASE(test_empty)
 TEST_SUITE_END()
 

@@ -17,6 +17,8 @@ int linked_list__teardown(struct linked_list_t* ll, bool_t free_data);
 int linked_list__add(void* item, struct linked_list_t* ll); 
 void* linked_list__remove(void* item, item_equality_fxn item_equality, struct linked_list_t* ll); 
 
+bool_t linked_list__empty(const struct linked_list_t* ll);
+
 void* linked_list__begin(struct linked_list_t* ll);
 void* linked_list__next();
 
