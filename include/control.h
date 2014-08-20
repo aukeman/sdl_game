@@ -13,7 +13,7 @@ enum {
 };
 
 enum {
-  CONTROL__MAX_PLAYERS = 1
+  CONTROL__MAX_PLAYERS = 8
 };
 
 struct control__analog_t{

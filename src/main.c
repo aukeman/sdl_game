@@ -41,8 +41,11 @@ int main( int argc, char** argv ) {
   fprintf( stderr, "font rc: %d\n",
 	   font__create("resources/font/test_font.dat", &font) );
 
-  int x_value = 175;
-  int y_value = 250;
+  int x_value_1 = 175;
+  int y_value_1 = 250;
+
+  int x_value_2 = 225;
+  int y_value_2 = 250;
 
   while ( keep_looping ) {
 
@@ -58,22 +61,29 @@ int main( int argc, char** argv ) {
       }
     }
 
-    const struct control__state_t* control = control__get_state(0);
+    const struct control__state_t* control_1 = control__get_state(0);
     
-    font__draw_string(font, 200, 0,
-		      "left: %4.1f  right: %4.1f",
-		      control->left.value,
-		      control->right.value);
+    x_value_1 -= (int)(control_1->left.value*10);
+    x_value_1 += (int)(control_1->right.value*10);
 
-    x_value -= (int)(control->left.value*10);
-    x_value += (int)(control->right.value*10);
+    y_value_1 -= (int)(control_1->up.value*10);
+    y_value_1 += (int)(control_1->down.value*10);
 
-    y_value -= (int)(control->up.value*10);
-    y_value += (int)(control->down.value*10);
-
-    dest.x = x_value;
-    dest.y = y_value;
+    dest.x = x_value_1;
+    dest.y = y_value_1;
     video__rect( &dest, 0, 0, 255, 255 );
+
+    const struct control__state_t* control_2 = control__get_state(1);
+    
+    x_value_2 -= (int)(control_2->left.value*10);
+    x_value_2 += (int)(control_2->right.value*10);
+
+    y_value_2 -= (int)(control_2->up.value*10);
+    y_value_2 += (int)(control_2->down.value*10);
+
+    dest.x = x_value_2;
+    dest.y = y_value_2;
+    video__rect( &dest, 255, 0, 0, 255 );
 
     geo__line_t line = { 30, 30, 350, 45 };
 
