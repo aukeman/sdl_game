@@ -53,9 +53,17 @@ void _handle_button(events__type_e event,
 float _get_axis_value( float input_value, 
 		       const struct control_mapping_t* control_mapping );
 
+
+int _map_player_controls(FILE* fin);
+bool_t _map_device(FILE* fin, int player_idx);
+struct control_mapping_t* _load_joystick(FILE* fin);
+struct control_mapping_t* _load_keyboard(FILE* fin);
+
+bool_t _apply_mapping( const char* control_type, int player_idx, struct control_mapping_t* mapping );
+
 int control__setup(const char* mapping_file){
 
-  int result = SUCCESS;
+  int result = CONTROL__BAD_MAPPING_FILE;
 
   events__add_callback( EVENTS__TYPE_KEYUP, _handle_keyup, NULL );
   events__add_callback( EVENTS__TYPE_KEYDOWN, _handle_keydown, NULL );
@@ -85,114 +93,8 @@ int control__setup(const char* mapping_file){
   }
   else{
 
-    int player_idx;
-    int rc = fscanf(fin, "%d%*c", &player_idx);
-
-    while ( result == SUCCESS && !feof(fin) ){
-
-      if ( rc != 1 ){
-	result = CONTROL__BAD_MAPPING_FILE;
-	break;
-      }
-      else{
-	while ( 0 < rc ){
-
-	  if ( 1 == fscanf(fin, "%d%*c", &player_idx) ){
-	    break;
-	  }
-	  
-	  struct control_mapping_t* mapping = 
-	    (struct control_mapping_t*)malloc(sizeof(struct control_mapping_t));
-	  memset(mapping, '\0', sizeof(struct control_mapping_t));
-
-	  char control_type[16];
-	  char device_type[16];
-
-	  memset(control_type, '\0', sizeof(control_type));
-	  memset(device_type, '\0', sizeof(device_type));
-
-	  rc = fscanf(fin, "%15s %15s", control_type, device_type);
-
-	  if ( !strncmp(device_type, "joystick", sizeof(device_type)) ){
-	    int joystick_id;
-	    char input_type[16];
-
-	    rc = fscanf(fin, "%d %15s", &joystick_id, input_type);
-
-	    if ( !strncmp(input_type, "axis", sizeof(input_type)) ){
-	      int axis_id;
-	      float min_input, max_input;
-
-	      rc = fscanf(fin, "%d %f %f%*c", &axis_id, &min_input, &max_input);
-
-	      mapping->min_input = min_input;
-	      mapping->max_input = max_input;
-
-	      linked_list__add( mapping,
-				&js_axis_mappings[joystick_id][axis_id] );
-	    }
-	    else if ( !strncmp(input_type, "button", sizeof(input_type)) ){
-
-	      int button_id;
-	      rc = fscanf(fin, "%d%*c", &button_id);
-
-	      linked_list__add( mapping,
-				&js_button_mappings[joystick_id][button_id] );
-	    }
-	    else{
-	      result = CONTROL__BAD_MAPPING_FILE;
-	      free(mapping);
-	      break;
-	    }
-	  }
-	  else if ( !strncmp(device_type, "keyboard", sizeof(device_type) ) ){
-
-	      int key_id;
-	      rc = fscanf(fin, "%d%*c", &key_id);
-
-	      linked_list__add( mapping,
-				&keyboard_mappings[key_id] );
-	  }
-	  else{
-	    result = CONTROL__BAD_MAPPING_FILE;
-	    free(mapping);
-	    break;
-	  }
-
-	  if ( 0 < rc ){
-
-	    if ( !strncmp(control_type, "up", sizeof(control_type)) ){
-	      mapping->type = ANALOG;
-	      mapping->analog = &control_state[player_idx].up;
-	    }
-	    else if ( !strncmp(control_type, "down", sizeof(control_type)) ){
-	      mapping->type = ANALOG;
-	      mapping->analog = &control_state[player_idx].down;
-	    }
-	    else if ( !strncmp(control_type, "left", sizeof(control_type)) ){
-	      mapping->type = ANALOG;
-	      mapping->analog = &control_state[player_idx].left;
-	    }
-	    else if ( !strncmp(control_type, "right", sizeof(control_type)) ){
-	      mapping->type = ANALOG;
-	      mapping->analog = &control_state[player_idx].right;
-	    }
-	    else if ( !strncmp(control_type, "jump", sizeof(control_type)) ){
-	      mapping->type = BINARY;
-	      mapping->binary = &control_state[player_idx].jump;
-	    }
-	    else if ( !strncmp(control_type, "fire", sizeof(control_type)) ){
-	      mapping->type = BINARY;
-	      mapping->binary = &control_state[player_idx].fire;
-	    }
-	    else{
-	      result = CONTROL__BAD_MAPPING_FILE;
-	      free(mapping);
-	      break;
-	    }
-	  }
-	}
-      }
+    while ( !feof(fin) ){ 
+      result = _map_player_controls(fin);
     }
 
     fclose(fin);
@@ -365,3 +267,173 @@ float _get_axis_value( float input_value,
 		     (input_value-control_mapping->min_input) / 
 		     (control_mapping->max_input-control_mapping->min_input)));
 }
+
+bool_t _apply_mapping( const char* control_type, int player_idx, struct control_mapping_t* mapping ){
+
+  int result = TRUE;
+
+  if ( !strcmp("up", control_type) ){
+    mapping->type = ANALOG;
+    mapping->analog = &control_state[player_idx].up;
+  }
+  else if ( !strcmp("down", control_type) ){
+    mapping->type = ANALOG;
+    mapping->analog = &control_state[player_idx].down;
+  }
+  else if ( !strcmp("left", control_type) ){
+    mapping->type = ANALOG;
+    mapping->analog = &control_state[player_idx].left;
+  }
+  else if ( !strcmp("right", control_type) ){
+    mapping->type = ANALOG;
+    mapping->analog = &control_state[player_idx].right;
+  }
+  else if ( !strcmp("jump", control_type) ){
+    mapping->type = BINARY;
+    mapping->binary = &control_state[player_idx].jump;
+  }
+  else if ( !strcmp("fire", control_type) ){
+    mapping->type = BINARY;
+    mapping->binary = &control_state[player_idx].fire;
+  }
+  else{
+    result = FALSE;
+  }
+
+  return result;
+}
+
+int _map_player_controls(FILE* fin){
+  
+  int player_idx = 0;
+
+  int result = CONTROL__BAD_MAPPING_FILE;
+
+  if ( 1 == fscanf(fin, "%d%*c", &player_idx) ){
+
+    fpos_t fin_pos;
+    fgetpos(fin, &fin_pos);
+
+    while ( !feof(fin) &&
+	    0 == fscanf(fin, "%d%*c", &player_idx) ){
+
+      fsetpos(fin, &fin_pos);
+
+      if ( _map_device(fin, player_idx) ){
+	result = SUCCESS;
+	fgetpos(fin, &fin_pos);
+      }
+      else{
+	result = CONTROL__BAD_MAPPING_FILE;
+	fseek(fin, 0, SEEK_END);
+	fgetc(fin);
+      }
+
+    }
+
+    fsetpos(fin, &fin_pos);
+  }
+
+  if ( result != SUCCESS ){
+    fseek(fin, 0, SEEK_END);
+    fgetc(fin);
+  }
+
+  return result;
+}
+
+bool_t _map_device(FILE* fin, int player_idx){
+
+  char control_type[16];
+  char device_type[16];
+
+  bool_t result = FALSE;
+  struct control_mapping_t* mapping = NULL;
+      
+  memset(control_type, '\0', sizeof(control_type));
+  memset(device_type, '\0', sizeof(device_type));
+
+  if (2 == fscanf(fin, "%15s %15s", control_type, device_type) ){
+
+    if ( !strcmp(device_type, "joystick") ){
+      mapping = _load_joystick(fin);
+    }
+    else if ( !strcmp(device_type, "keyboard") ){
+      mapping = _load_keyboard(fin);
+    }
+
+    if ( mapping ){
+      result = _apply_mapping(control_type, player_idx, mapping);
+    }
+  }
+
+  return result;
+}
+
+struct control_mapping_t* _load_joystick(FILE* fin){
+
+  int joystick_id;
+  char input_type[16];
+
+  struct control_mapping_t* mapping = NULL;
+
+  memset(input_type, '\0', sizeof(input_type));
+  
+  if ( 2 == fscanf(fin, "%d %15s", &joystick_id, input_type) ){
+
+    if ( !strcmp("axis", input_type) ){
+
+      int axis_id;
+      float min_input, max_input;
+      
+      if ( 2 == fscanf(fin, "%d %f %f%*c", &axis_id, &min_input, &max_input) ){
+
+	mapping = 
+	  (struct control_mapping_t*)
+	  malloc(sizeof(struct control_mapping_t));
+
+	mapping->min_input = min_input;
+	mapping->max_input = max_input;
+
+	linked_list__add( mapping,
+			  &js_axis_mappings[joystick_id][axis_id] );
+      }
+    }
+    else if ( !strcmp("button", input_type) ){
+
+      int button_id;
+      if ( 1 == fscanf(fin, "%d%*c", &button_id) ){
+      
+	mapping = 
+	  (struct control_mapping_t*)
+	  malloc(sizeof(struct control_mapping_t));
+
+	linked_list__add( mapping,
+			  &js_button_mappings[joystick_id][button_id] );
+      }
+    }
+  }
+
+  return mapping;
+}
+
+struct control_mapping_t* _load_keyboard(FILE* fin){
+
+  int key_id;
+
+  struct control_mapping_t* mapping = NULL;
+
+  if ( 1 == fscanf(fin, "%d%*c", &key_id) ){
+
+    mapping = 
+      (struct control_mapping_t*)
+      malloc(sizeof(struct control_mapping_t));
+
+    linked_list__add( mapping,
+		      &keyboard_mappings[key_id] );
+
+  }
+
+  return mapping;
+}
+

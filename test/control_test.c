@@ -84,7 +84,7 @@ void no_mappings(){
 void map_up_to_axis(){
   
   const char* mapping_file = setup("0\n"
-				   "up joystick 3 axis 4 0.0 1.0");
+				   "up joystick 3 axis 4 0.0 1.0\n");
 
 
   int idx1, idx2;
