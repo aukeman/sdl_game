@@ -115,7 +115,7 @@ int control__teardown(){
 
   int idx1, idx2;
   for (idx1 = 0; idx1 < 512; ++idx1){
-    linked_list__teardown( &keyboard_mappings[512], TRUE );
+    linked_list__teardown( &keyboard_mappings[idx1], TRUE );
   }
 
   for (idx1 = 0; idx1 < JS__MAX_JOYSTICKS; ++idx1){
