@@ -1,6 +1,7 @@
 #include <test_utils.h>
 #include <control.h>
 #include <joystick.h>
+#include <events.h>
 #include <linked_list.h>
 #include <constants.h>
 
@@ -243,18 +244,198 @@ void map_directions_to_buttons(){
 
   TEST_ASSERT_NULL( linked_list__next() );
 
+  teardown(mapping_file);
+}
+
+void map_directions_to_keys(){
   
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, 
+				   "1\n"
+				   "up keyboard 273\n"
+				   "down keyboard 274\n"
+				   "left keyboard 276\n"
+				   "right keyboard 275\n");
+  TEST_ASSERT_SUCCESS(setup_result);
+
+  const struct control_mapping_t* mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&keyboard_mappings[EVENTS__KEY_UP]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, ANALOG );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_NOT_NULL( control__get_state(1) );
+  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->up );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&keyboard_mappings[EVENTS__KEY_DOWN]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, ANALOG );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->down );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&keyboard_mappings[EVENTS__KEY_LEFT]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, ANALOG );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->left );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&keyboard_mappings[EVENTS__KEY_RIGHT]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, ANALOG );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->right );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+  teardown(mapping_file);
+}
+
+void map_jump_and_fire_to_axes(){
+  
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, 
+				   "2\n"
+				   "jump joystick 5 axis 0 -1.0 1.0\n"
+				   "fire joystick 5 axis 1 -1.0 1.0\n");
+  TEST_ASSERT_SUCCESS(setup_result);
+
+  const struct control_mapping_t* mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&js_axis_mappings[5][0]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, BINARY );
+  TEST_ASSERT_FLOAT( mapping->min_input, -1.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
+  TEST_ASSERT_NOT_NULL( control__get_state(2) );
+  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->jump );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&js_axis_mappings[5][1]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, BINARY );
+  TEST_ASSERT_FLOAT( mapping->min_input, -1.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
+  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->fire );
+
+  TEST_ASSERT_NULL( linked_list__next() );
 
   teardown(mapping_file);
 }
 
 
+void map_jump_and_fire_to_buttons(){
+  
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, 
+				   "2\n"
+				   "jump joystick 5 button 3\n"
+				   "fire joystick 5 button 10\n");
+  TEST_ASSERT_SUCCESS(setup_result);
+
+  const struct control_mapping_t* mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&js_button_mappings[5][3]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, BINARY );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_NOT_NULL( control__get_state(2) );
+  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->jump );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&js_button_mappings[5][10]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, BINARY );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->fire );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+  teardown(mapping_file);
+}
+
+void map_jump_and_fire_to_keys(){
+  
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, 
+				   "2\n"
+				   "jump keyboard 306\n"
+				   "fire keyboard 32\n");
+  TEST_ASSERT_SUCCESS(setup_result);
+
+  const struct control_mapping_t* mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&keyboard_mappings[306]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, BINARY );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_NOT_NULL( control__get_state(2) );
+  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->jump );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&keyboard_mappings[32]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, BINARY );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->fire );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+  teardown(mapping_file);
+}
 
 TEST_SUITE_START(Control Tests)
  TEST_CASE(no_mapping_file)
  TEST_CASE(no_mappings)
  TEST_CASE(map_directions_to_axes)
  TEST_CASE(map_directions_to_buttons)
+ TEST_CASE(map_directions_to_keys)
+ TEST_CASE(map_jump_and_fire_to_axes)
+ TEST_CASE(map_jump_and_fire_to_buttons)
+ TEST_CASE(map_jump_and_fire_to_keys)
 TEST_SUITE_END()
 
 const char* setup(int* setup_result, const char* contents, ...){
