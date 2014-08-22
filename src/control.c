@@ -86,6 +86,8 @@ int control__setup(const char* mapping_file){
     }
   }
 
+  memset(control_state, '\0', sizeof(control_state));
+
   FILE* fin = fopen(mapping_file, "r");
 
   if ( !fin ){
@@ -307,7 +309,7 @@ int _map_player_controls(FILE* fin){
   
   int player_idx = 0;
 
-  int result = CONTROL__BAD_MAPPING_FILE;
+  int result = CONTROL__NO_DEVICES_TO_MAP;
 
   if ( 1 == fscanf(fin, "%d%*c", &player_idx) ){
 
@@ -331,7 +333,9 @@ int _map_player_controls(FILE* fin){
 
     }
 
-    fsetpos(fin, &fin_pos);
+    if ( !feof(fin) ){
+      fsetpos(fin, &fin_pos);
+    }
   }
 
   if ( result != SUCCESS ){
@@ -386,11 +390,13 @@ struct control_mapping_t* _load_joystick(FILE* fin){
       int axis_id;
       float min_input, max_input;
       
-      if ( 2 == fscanf(fin, "%d %f %f%*c", &axis_id, &min_input, &max_input) ){
+      if ( 3 == fscanf(fin, "%d %f %f%*c", &axis_id, &min_input, &max_input) ){
 
 	mapping = 
 	  (struct control_mapping_t*)
 	  malloc(sizeof(struct control_mapping_t));
+
+	memset(mapping, '\0', sizeof(*mapping));
 
 	mapping->min_input = min_input;
 	mapping->max_input = max_input;
@@ -407,6 +413,8 @@ struct control_mapping_t* _load_joystick(FILE* fin){
 	mapping = 
 	  (struct control_mapping_t*)
 	  malloc(sizeof(struct control_mapping_t));
+
+	memset(mapping, '\0', sizeof(*mapping));
 
 	linked_list__add( mapping,
 			  &js_button_mappings[joystick_id][button_id] );
@@ -428,6 +436,8 @@ struct control_mapping_t* _load_keyboard(FILE* fin){
     mapping = 
       (struct control_mapping_t*)
       malloc(sizeof(struct control_mapping_t));
+
+    memset(mapping, '\0', sizeof(*mapping));
 
     linked_list__add( mapping,
 		      &keyboard_mappings[key_id] );

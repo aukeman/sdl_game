@@ -69,8 +69,11 @@ if ( (a) ) {                          \
 #define TEST_ASSERT_INT(actual,expected) \
   __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, d )
 
-#define TEST_ASSERT_FLOAT(actual,expected, epsilon) \
+#define TEST_ASSERT_FLOAT_EPSILON(actual,expected, epsilon) \
   __ASSERTION_EQUALITY( fabs((actual)-(expected)) <= (epsilon), actual, expected, f )
+
+#define TEST_ASSERT_FLOAT(actual,expected) \
+  TEST_ASSERT_FLOAT_EPSILON(actual, expected, 0.000001f)
 
 #define TEST_ASSERT_PTR(  actual,expected) \
   __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, p )

@@ -2,6 +2,7 @@
 #include <control.h>
 #include <joystick.h>
 #include <linked_list.h>
+#include <constants.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -14,7 +15,7 @@ extern struct linked_list_t js_button_mappings[JS__MAX_JOYSTICKS][JS__MAX_BUTTON
 
 const char* write_config_file(const char* contents, ...);
 
-const char* setup(const char* contents, ...);
+const char* setup(int* setup_result, const char* contents, ...);
 void teardown(const char* mapping_filename);
 
 enum control_type_e {
@@ -60,7 +61,9 @@ void no_mapping_file(){
 
 void no_mappings(){
 
-  const char* mapping_file = setup("");
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, "");
+  TEST_ASSERT_INT(setup_result, CONTROL__NO_DEVICES_TO_MAP);
 
   int idx1, idx2;
   for ( idx1 = 0; idx1 < 512; ++idx1 ){
@@ -81,10 +84,16 @@ void no_mappings(){
   teardown(mapping_file);
 }
 
-void map_up_to_axis(){
+void map_directions_to_axes(){
   
-  const char* mapping_file = setup("0\n"
-				   "up joystick 3 axis 4 0.0 1.0\n");
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, 
+				   "0\n"
+				   "up joystick 3 axis 4 0.0 1.0\n"
+				   "down joystick 3 axis 4 0.0 -1.0\n"
+				   "left joystick 3 axis 5 0.0 1.0\n"
+				   "right joystick 3 axis 5 0.0 -1.0\n");
+  TEST_ASSERT_SUCCESS(setup_result);
 
 
   int idx1, idx2;
@@ -105,12 +114,58 @@ void map_up_to_axis(){
 	TEST_ASSERT_NOT_NULL( mapping );
 
 	TEST_ASSERT_INT( mapping->type, ANALOG );
-	TEST_ASSERT_FLOAT( mapping->min_input, 0.0f, 0 );
-	TEST_ASSERT_FLOAT( mapping->max_input, 1.0f, 0 );
+	TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+	TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
 	
 	TEST_ASSERT_NOT_NULL( control__get_state(0) );
 	TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->up );
 
+	mapping = 
+	  (const struct control_mapping_t*)linked_list__next();
+
+	TEST_ASSERT_NOT_NULL( mapping );
+
+	TEST_ASSERT_INT( mapping->type, ANALOG );
+	TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+	TEST_ASSERT_FLOAT( mapping->max_input, -1.0f );
+	
+	TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->down );
+
+	mapping = 
+	  (const struct control_mapping_t*)linked_list__next();
+
+	TEST_ASSERT_NULL( mapping );
+      }
+      else if ( idx1 == 3 && idx2 == 5 ){
+
+	const struct control_mapping_t* mapping = 
+	  (const struct control_mapping_t*)
+	  linked_list__begin(&js_axis_mappings[idx1][idx2]);
+
+	TEST_ASSERT_NOT_NULL( mapping );
+
+	TEST_ASSERT_INT( mapping->type, ANALOG );
+	TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+	TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
+	
+	TEST_ASSERT_NOT_NULL( control__get_state(0) );
+	TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->left );
+
+	mapping = 
+	  (const struct control_mapping_t*)linked_list__next();
+
+	TEST_ASSERT_NOT_NULL( mapping );
+
+	TEST_ASSERT_INT( mapping->type, ANALOG );
+	TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+	TEST_ASSERT_FLOAT( mapping->max_input, -1.0f );
+	
+	TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->right );
+
+	mapping = 
+	  (const struct control_mapping_t*)linked_list__next();
+
+	TEST_ASSERT_NULL( mapping );
       }
       else{
 	TEST_ASSERT_TRUE( linked_list__empty( &js_axis_mappings[idx1][idx2] ) );
@@ -126,14 +181,83 @@ void map_up_to_axis(){
 }
 
 
+void map_directions_to_buttons(){
+  
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, 
+				   "1\n"
+				   "up joystick 4 button 10\n"
+				   "down joystick 4 button 11\n"
+				   "left joystick 4 button 12\n"
+				   "right joystick 4 button 13\n");
+  TEST_ASSERT_SUCCESS(setup_result);
+
+  const struct control_mapping_t* mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&js_button_mappings[4][10]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, ANALOG );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_NOT_NULL( control__get_state(1) );
+  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->up );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&js_button_mappings[4][11]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, ANALOG );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->down );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&js_button_mappings[4][12]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, ANALOG );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->left );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+  mapping = 
+    (const struct control_mapping_t*)
+    linked_list__begin(&js_button_mappings[4][13]);
+
+  TEST_ASSERT_NOT_NULL( mapping );
+  TEST_ASSERT_INT( mapping->type, ANALOG );
+  TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
+  TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
+  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->right );
+
+  TEST_ASSERT_NULL( linked_list__next() );
+
+  
+
+  teardown(mapping_file);
+}
+
+
 
 TEST_SUITE_START(Control Tests)
  TEST_CASE(no_mapping_file)
  TEST_CASE(no_mappings)
-TEST_CASE(map_up_to_axis)
+ TEST_CASE(map_directions_to_axes)
+ TEST_CASE(map_directions_to_buttons)
 TEST_SUITE_END()
 
-const char* setup(const char* contents, ...){
+const char* setup(int* setup_result, const char* contents, ...){
 
   static char filename_buffer[1024];
   snprintf( filename_buffer, 1023, "%s", tmpnam(NULL) );
@@ -141,6 +265,8 @@ const char* setup(const char* contents, ...){
   FILE* fout = fopen(filename_buffer, "w");
 
   size_t len = strlen(contents);
+  
+  *setup_result = UNKNOWN_FAILURE;
 
   if ( !fout ){
     return NULL;
@@ -159,7 +285,7 @@ const char* setup(const char* contents, ...){
   }
   else{
 
-    TEST_ASSERT_SUCCESS(control__setup(filename_buffer));
+    *setup_result = control__setup(filename_buffer);
     return filename_buffer;
   }
 }
