@@ -14,6 +14,8 @@ typedef struct {
   int y;
 } geo__point_t;
 
+typedef geo__point_t geo__vector_t;
+
 typedef struct {
   int x1;
   int y1;

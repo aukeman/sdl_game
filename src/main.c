@@ -4,6 +4,7 @@
 #include <timing.h>
 #include <font.h>
 #include <control.h>
+#include <player.h>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -18,6 +19,37 @@ void on_quit( events__type_e type,
     *((int*)context) = FALSE;
   }
 }
+
+void draw_player( const geo__point_t* position, void* context ){
+  
+  static geo__rect_t dest = { 0, 0, 32, 32 };
+
+  dest.x = position->x;
+  dest.y = position->y;
+
+  const struct player_t* player = (const struct player_t*)context;
+
+  video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
+}
+
+void update_player( milliseconds_t length_of_frame,
+		    const geo__rect_t* bounding_box,
+		    const geo__point_t* position,
+		    geo__vector_t* velocity,
+		    void* context ){
+  
+  struct player_t* player = (struct player_t*)context;
+
+  const struct control__state_t* control = control__get_state(player->player_idx);
+
+  static const int pps = 100;
+
+  velocity->x = (control->right.value*pps) - (control->left.value*pps);
+  velocity->y = (control->down.value*pps) - (control->up.value*pps);
+}
+
+
+
 
 int main( int argc, char** argv ) {
 
@@ -38,14 +70,18 @@ int main( int argc, char** argv ) {
   geo__rect_t dest = {0, 0, 32, 32};
 
   struct font__handle_t* font = NULL;
-  fprintf( stderr, "font rc: %d\n",
-	   font__create("resources/font/test_font.dat", &font) );
+  font__create("resources/font/test_font.dat", &font);
 
-  int x_value_1 = 175;
-  int y_value_1 = 250;
+  struct player_t players[2] = {
+    { 0, { 175, 225 }, { 0, 0 }, { 255, 0,   0 } },
+    { 1, { 225, 225 }, { 0, 0 }, {   0, 0, 255 } }
+  };
 
-  int x_value_2 = 225;
-  int y_value_2 = 250;
+  struct entity_t player_entity;
+  entity__setup(&player_entity);
+
+  entity__add_update_fxn(&player_entity, update_player);
+  entity__add_draw_fxn(&player_entity, draw_player);
 
   while ( keep_looping ) {
 
@@ -61,29 +97,19 @@ int main( int argc, char** argv ) {
       }
     }
 
-    const struct control__state_t* control_1 = control__get_state(0);
-    
-    x_value_1 -= (int)(control_1->left.value*10);
-    x_value_1 += (int)(control_1->right.value*10);
+    int player_idx = 0;
+    for ( player_idx = 0; player_idx < 2; ++player_idx ){
+      entity__update( &player_entity, 
+		      timing__get_frame_length(),
+		      &players[player_idx].position, 
+		      &players[player_idx].velocity, 
+		      &players[player_idx] );
 
-    y_value_1 -= (int)(control_1->up.value*10);
-    y_value_1 += (int)(control_1->down.value*10);
-
-    dest.x = x_value_1;
-    dest.y = y_value_1;
-    video__rect( &dest, 0, 0, 255, 255 );
-
-    const struct control__state_t* control_2 = control__get_state(1);
-    
-    x_value_2 -= (int)(control_2->left.value*10);
-    x_value_2 += (int)(control_2->right.value*10);
-
-    y_value_2 -= (int)(control_2->up.value*10);
-    y_value_2 += (int)(control_2->down.value*10);
-
-    dest.x = x_value_2;
-    dest.y = y_value_2;
-    video__rect( &dest, 255, 0, 0, 255 );
+      entity__draw( &player_entity, 
+		    &players[player_idx].position, 
+		    &players[player_idx] );
+    }
+		    
 
     geo__line_t line = { 30, 30, 350, 45 };
 
@@ -107,6 +133,9 @@ int main( int argc, char** argv ) {
 	   timing__get_top_of_frame() / 1000.0f,
 	   timing__get_average_fps(),
 	   timing__get_instantaneous_fps());
+
+  entity__teardown(&player_entity);
+
 	   
   font__free(font);
 
