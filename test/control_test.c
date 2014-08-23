@@ -780,6 +780,29 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   teardown(mapping_file);
 }
 
+void malformed_control(){
+  
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, 
+				   "0\n"
+				   "up\n");
+  TEST_ASSERT_INT(setup_result, CONTROL__BAD_MAPPING_FILE);
+
+  unlink(mapping_file);
+}
+
+void buffer_overflow(){
+  
+  int setup_result;
+  const char* mapping_file = setup(&setup_result, 
+				   "0\n"
+				   "upppppppppppppppx pppppppppppppppppx\n");
+  TEST_ASSERT_INT(setup_result, CONTROL__BAD_MAPPING_FILE);
+
+  unlink(mapping_file);
+}
+
+
 TEST_SUITE_START(Control Tests)
  TEST_CASE(no_mapping_file)
  TEST_CASE(no_mappings)
@@ -791,6 +814,8 @@ TEST_SUITE_START(Control Tests)
  TEST_CASE(map_jump_and_fire_to_keys)
  TEST_CASE(map_to_both_joystick_and_keyboard)
  TEST_CASE(map_player_1_to_joystick_and_player_2_to_keyboard)
+ TEST_CASE(malformed_control)
+ TEST_CASE(buffer_overflow)
 TEST_SUITE_END()
 
 const char* setup(int* setup_result, const char* contents, ...){
