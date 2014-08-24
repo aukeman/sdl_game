@@ -13,9 +13,13 @@ typedef void entity__update_fxn( milliseconds_t length_of_frame,
 				 geo__vector_t* velocity,
 				 void* context );
 
+struct video__texture_handle_t;
+
 struct entity_t{
 
   geo__rect_t bounding_box;
+
+  const struct video__texture_handle_t* texture;
 
   struct linked_list_t update_fxns;
   struct linked_list_t draw_fxns;

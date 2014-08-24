@@ -5,6 +5,7 @@
 #include <font.h>
 #include <control.h>
 #include <player.h>
+#include <background.h>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -48,6 +49,19 @@ void update_player( milliseconds_t length_of_frame,
   velocity->y = (control->down.value*pps) - (control->up.value*pps);
 }
 
+void draw_background( const geo__point_t* position, void* context ){
+  
+  const struct background_t* background = (const struct background_t*)context;
+
+  geo__rect_t dest = { position->x, 
+		       position->y, 
+		       background->prototype->bounding_box.width, 
+		       background->prototype->bounding_box.height };
+
+  video__blit( background->prototype->texture, 
+	       &background->prototype->bounding_box,
+	       &dest );
+}
 
 
 
@@ -72,16 +86,34 @@ int main( int argc, char** argv ) {
   struct font__handle_t* font = NULL;
   font__create("resources/font/test_font.dat", &font);
 
-  struct player_t players[2] = {
-    { 0, { 175, 225 }, { 0, 0 }, { 255, 0,   0 } },
-    { 1, { 225, 225 }, { 0, 0 }, {   0, 0, 255 } }
-  };
+  struct entity_t background_entity;
+  entity__setup(&background_entity);
+  background_entity.texture = texture;
+  entity__add_draw_fxn(&background_entity, draw_background);
+
+  const int number_of_columns = 400/32+1;
+  const int number_of_rows = 300/32+1;
+  struct background_t background[number_of_columns][number_of_rows];
+
+  int col_idx, row_idx;
+  for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
+    for ( row_idx = 0; row_idx < number_of_columns; ++row_idx ){
+      background[col_idx][row_idx].position.x = col_idx*32;
+      background[col_idx][row_idx].position.y = row_idx*32;
+      background[col_idx][row_idx].prototype = &background_entity;
+    }
+  }
 
   struct entity_t player_entity;
   entity__setup(&player_entity);
 
   entity__add_update_fxn(&player_entity, update_player);
   entity__add_draw_fxn(&player_entity, draw_player);
+
+  struct player_t players[2] = {
+    { 0, { 175, 225 }, { 0, 0 }, { 255, 0,   0 } },
+    { 1, { 225, 225 }, { 0, 0 }, {   0, 0, 255 } }
+  };
 
   while ( keep_looping ) {
 
@@ -90,6 +122,15 @@ int main( int argc, char** argv ) {
     events__process_events();
 
     video__clearscreen();
+
+    for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
+      for ( row_idx = 0; row_idx < number_of_columns; ++row_idx ){
+	entity__draw( &background_entity,
+		      &background[col_idx][row_idx].position,
+		      &background[col_idx][row_idx] );
+      }
+    }
+
 
     for ( dest.x = 0; dest.x < 400; dest.x += 32 ){
       for ( dest.y = 0; dest.y < 300; dest.y += 32 ){
