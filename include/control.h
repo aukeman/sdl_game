@@ -32,6 +32,12 @@ struct control__state_t {
   struct control__analog_t down;
   struct control__analog_t left;
   struct control__analog_t right;
+
+  struct control__analog_t up2;
+  struct control__analog_t down2;
+  struct control__analog_t left2;
+  struct control__analog_t right2;
+
   struct control__binary_t jump;
   struct control__binary_t fire;
 };

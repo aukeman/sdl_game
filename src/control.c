@@ -290,6 +290,22 @@ bool_t _apply_mapping( const char* control_type, int player_idx, struct control_
     mapping->type = ANALOG;
     mapping->analog = &control_state[player_idx].right;
   }
+  else   if ( !strcmp("up2", control_type) ){
+    mapping->type = ANALOG;
+    mapping->analog = &control_state[player_idx].up2;
+  }
+  else if ( !strcmp("down2", control_type) ){
+    mapping->type = ANALOG;
+    mapping->analog = &control_state[player_idx].down2;
+  }
+  else if ( !strcmp("left2", control_type) ){
+    mapping->type = ANALOG;
+    mapping->analog = &control_state[player_idx].left2;
+  }
+  else if ( !strcmp("right2", control_type) ){
+    mapping->type = ANALOG;
+    mapping->analog = &control_state[player_idx].right2;
+  }
   else if ( !strcmp("jump", control_type) ){
     mapping->type = BINARY;
     mapping->binary = &control_state[player_idx].jump;

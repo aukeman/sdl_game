@@ -9,6 +9,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <math.h>
 
 void on_quit( events__type_e type, 
 	      const events__event_parameter_t* parameter, 
@@ -31,6 +32,18 @@ void draw_player( const geo__point_t* position, void* context ){
   const struct player_t* player = (const struct player_t*)context;
 
   video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
+
+  int gunx = player->gun_x;
+  int guny = player->gun_y;
+
+  float gunlength = sqrt(gunx*gunx + guny*guny);
+
+  geo__line_t gun = { position->x + 16, 
+		      position->y + 16, 
+		      position->x + 16 + rintf(16* (gunx / gunlength)),
+		      position->y + 16 + rintf(16* (guny / gunlength)) };
+
+  video__line( &gun, 255, 255, 255, 255 );
 }
 
 void update_player( milliseconds_t length_of_frame,
@@ -47,6 +60,12 @@ void update_player( milliseconds_t length_of_frame,
 
   velocity->x = (control->right.value*pps) - (control->left.value*pps);
   velocity->y = (control->down.value*pps) - (control->up.value*pps);
+
+  if (( 0.1f < control->left2.value || 0.1f < control->right2.value) &&
+      ( 0.1f < control->down2.value || 0.1f < control->up2.value)){
+    player->gun_x = rintf(10*control->right2.value - 10*control->left2.value);
+    player->gun_y = rintf(10*control->down2.value - 10*control->up2.value);
+  }
 }
 
 void draw_background( const geo__point_t* position, void* context ){
@@ -111,8 +130,8 @@ int main( int argc, char** argv ) {
   entity__add_draw_fxn(&player_entity, draw_player);
 
   struct player_t players[2] = {
-    { 0, { 175, 225 }, { 0, 0 }, { 255, 0,   0 } },
-    { 1, { 225, 225 }, { 0, 0 }, {   0, 0, 255 } }
+    { 0, { 175, 225 }, { 0, 0 }, 0, -10, { 255, 0,   0 } },
+    { 1, { 225, 225 }, { 0, 0 }, 0, -10, {   0, 0, 255 } }
   };
 
   while ( keep_looping ) {

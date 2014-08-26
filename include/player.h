@@ -12,6 +12,9 @@ struct player_t{
   geo__point_t position;
   geo__point_t velocity;
 
+  int gun_x;
+  int gun_y;
+
   uint8_t color[3];
 };
 
