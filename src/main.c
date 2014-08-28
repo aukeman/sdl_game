@@ -26,8 +26,8 @@ void draw_player( const geo__point_t* position, void* context ){
   
   static geo__rect_t dest = { 0, 0, 32, 32 };
 
-  dest.x = position->x;
-  dest.y = position->y;
+  dest.x = (position->x >> 2);
+  dest.y = (position->y >> 2);
 
   const struct player_t* player = (const struct player_t*)context;
 
@@ -38,10 +38,10 @@ void draw_player( const geo__point_t* position, void* context ){
 
   float gunlength = sqrt(gunx*gunx + guny*guny);
 
-  geo__line_t gun = { position->x + 16, 
-		      position->y + 16, 
-		      position->x + 16 + rintf(16* (gunx / gunlength)),
-		      position->y + 16 + rintf(16* (guny / gunlength)) };
+  geo__line_t gun = { (position->x >> 2) + 16, 
+		      (position->y >> 2) + 16, 
+		      (position->x >> 2) + 16 + rintf(16* (gunx / gunlength)),
+		      (position->y >> 2) + 16 + rintf(16* (guny / gunlength)) };
 
   video__line( &gun, 255, 255, 255, 255 );
 }
@@ -56,7 +56,7 @@ void update_player( milliseconds_t length_of_frame,
 
   const struct control__state_t* control = control__get_state(player->player_idx);
 
-  static const int pps = 100;
+  static const int pps = 200;
 
   velocity->x = (control->right.value*pps) - (control->left.value*pps);
   velocity->y = (control->down.value*pps) - (control->up.value*pps);
