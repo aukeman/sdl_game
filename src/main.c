@@ -58,14 +58,25 @@ void update_player( milliseconds_t length_of_frame,
 
   static const int pps = 200;
 
-  velocity->x = (control->right.value*pps) - (control->left.value*pps);
-  velocity->y = (control->down.value*pps) - (control->up.value*pps);
+  velocity->x += (control->right.value*pps) - (control->left.value*pps);
+  velocity->y += (control->down.value*pps) - (control->up.value*pps);
 
   if (( 0.1f < control->left2.value || 0.1f < control->right2.value) &&
       ( 0.1f < control->down2.value || 0.1f < control->up2.value)){
     player->gun_x = rintf(10*control->right2.value - 10*control->left2.value);
     player->gun_y = rintf(10*control->down2.value - 10*control->up2.value);
   }
+}
+
+void apply_gravity( milliseconds_t length_of_frame,
+		    const geo__rect_t* bounding_box,
+		    const geo__point_t* position,
+		    geo__vector_t* velocity,
+		    void* context ){
+
+  static const int g = 100.0;
+
+  velocity->y += (g*length_of_frame)*0.001f;
 }
 
 void draw_background( const geo__point_t* position, void* context ){
@@ -126,6 +137,7 @@ int main( int argc, char** argv ) {
   struct entity_t player_entity;
   entity__setup(&player_entity);
 
+  entity__add_update_fxn(&player_entity, apply_gravity);
   entity__add_update_fxn(&player_entity, update_player);
   entity__add_draw_fxn(&player_entity, draw_player);
 
