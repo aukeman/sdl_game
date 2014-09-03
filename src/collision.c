@@ -232,6 +232,47 @@ bool_t collision__line_intersects_rectangle( const geo__line_t* line,
   return result;
 }
 
+bool_t collision__moving_rectangle_intersects_rectangle( 
+					       const geo__rect_t* a,
+					       const geo__vector_t* a_motion,
+					       const geo__rect_t* b,
+					       int* distance_until_collision ){
+
+  if ( distance_until_collision ){
+    *distance_until_collision = INT_MAX;
+  }
+
+  const int amx = a_motion->x;
+  const int amy = a_motion->y;
+
+  const int ax = a->x;
+  const int ay = a->y;
+  const int w = a->width;
+  const int h = a->height;
+
+  geo__line_t motion_lines[] = 
+    { { ax,     ay,        ax + amx,     ay + amy },
+      { ax + w, ay,        ax + w + amx, ay + amy },
+      { ax,     a->y + h,  ax + amx,     a->y + h + amy },
+      { ax + w, a->y + h,  ax + w + amx, a->y + h + amy } };
+
+  int idx;
+  for ( idx = 0; idx < 4; ++idx ){
+
+    geo__point_t cp;
+
+    if ( collision__line_intersects_rectangle( &motion_lines[idx],
+					       b,
+					       &cp ) ){
+      if ( distance_until_collision ){
+	/*	int distance_squared = cp.x- */
+      }
+
+    }
+  }
+}
+
+
 bool_t __parallel_line_collision( const geo__line_t* a, 
 				  const geo__line_t* b, 
 				  geo__point_t* intersection ){

@@ -79,6 +79,20 @@ void apply_gravity( milliseconds_t length_of_frame,
   velocity->y += (g*length_of_frame)*0.001f;
 }
 
+void background_collision(  milliseconds_t length_of_frame,
+			    const geo__rect_t* bounding_box,
+			    const geo__point_t* position,
+			    geo__vector_t* velocity,
+			    void* context ){
+
+  struct player_t* player = (struct player_t*)context;
+  
+  
+
+  
+}
+
+
 void draw_background( const geo__point_t* position, void* context ){
   
   const struct background_t* background = (const struct background_t*)context;
@@ -88,9 +102,14 @@ void draw_background( const geo__point_t* position, void* context ){
 		       background->prototype->bounding_box.width, 
 		       background->prototype->bounding_box.height };
 
-  video__blit( background->prototype->texture, 
-	       &background->prototype->bounding_box,
-	       &dest );
+  if ( background->collidable ){
+    video__rect( &dest, 0, 0, 0, 255 );
+  }
+  else{
+    video__blit( background->prototype->texture, 
+		 &background->prototype->bounding_box,
+		 &dest );
+  }
 }
 
 
@@ -110,15 +129,16 @@ int main( int argc, char** argv ) {
   struct video__texture_handle_t* texture;
   video__setup_texture("resources/img/testing.png", &texture);
   
-  geo__rect_t source = {0, 0, 32, 32};
-  geo__rect_t dest = {0, 0, 32, 32};
-
   struct font__handle_t* font = NULL;
   font__create("resources/font/test_font.dat", &font);
 
   struct entity_t background_entity;
   entity__setup(&background_entity);
   background_entity.texture = texture;
+  background_entity.bounding_box.x = 0;
+  background_entity.bounding_box.y = 0;
+  background_entity.bounding_box.width = 32;
+  background_entity.bounding_box.height = 32;
   entity__add_draw_fxn(&background_entity, draw_background);
 
   const int number_of_columns = 400/32+1;
@@ -127,10 +147,12 @@ int main( int argc, char** argv ) {
 
   int col_idx, row_idx;
   for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
-    for ( row_idx = 0; row_idx < number_of_columns; ++row_idx ){
+    for ( row_idx = 0; row_idx < number_of_rows; ++row_idx ){
       background[col_idx][row_idx].position.x = col_idx*32;
       background[col_idx][row_idx].position.y = row_idx*32;
       background[col_idx][row_idx].prototype = &background_entity;
+
+      background[col_idx][row_idx].collidable = (row_idx == number_of_rows - 1);
     }
   }
 
@@ -155,17 +177,10 @@ int main( int argc, char** argv ) {
     video__clearscreen();
 
     for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
-      for ( row_idx = 0; row_idx < number_of_columns; ++row_idx ){
+      for ( row_idx = 0; row_idx < number_of_rows; ++row_idx ){
 	entity__draw( &background_entity,
 		      &background[col_idx][row_idx].position,
 		      &background[col_idx][row_idx] );
-      }
-    }
-
-
-    for ( dest.x = 0; dest.x < 400; dest.x += 32 ){
-      for ( dest.y = 0; dest.y < 300; dest.y += 32 ){
-    	video__blit(texture, &source, &dest);
       }
     }
 
