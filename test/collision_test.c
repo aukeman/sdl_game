@@ -4,6 +4,8 @@
 
 #include <test_utils.h>
 
+#include <limits.h>
+
 void rectangle_overlap_colocated(){
   
   geo__rect_t a = { 0, 0, 10, 10 };
@@ -1304,6 +1306,192 @@ void point_on_diagonal_line(){
 
 }
  
+void moving_rect_doesnt_intersect_no_distance(){
+
+  geo__rect_t a = { 0, 0, 10, 10 };
+  geo__rect_t b = { -100, -100, 10, 10 };
+
+  geo__vector_t v = { 10, 0 };
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, NULL );
+
+  TEST_ASSERT_FALSE( result );
+}
+
+void moving_rect_doesnt_intersect(){
+
+  geo__rect_t a = { 0, 0, 10, 10 };
+  geo__rect_t b = { -100, -100, 10, 10 };
+
+  geo__vector_t v = { 10, 0 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_FALSE( result );
+  TEST_ASSERT_INT( distance, INT_MAX );
+}
+
+void moving_rect_intersects_no_distance(){
+
+  geo__rect_t a = { 0, 0, 10, 10 };
+  geo__rect_t b = { 0, 0, 20, 10 };
+
+  geo__vector_t v = { 10, 0 };
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, NULL );
+
+  TEST_ASSERT_TRUE( result );
+}
+
+void moving_rect_intersects(){
+
+  geo__rect_t a = {  0, 0, 10, 10 };
+  geo__rect_t b = { 20, 0, 10, 10 };
+
+  geo__vector_t v = { 10, 0 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
+
+void moving_rect_left_to_right_intersects_top(){
+
+  geo__rect_t a = {  0, 0, 10, 10 };
+  geo__rect_t b = { 20, -5, 10, 10 };
+
+  geo__vector_t v = { 100, 0 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
+
+void moving_rect_left_to_right_intersects_bottom(){
+
+  geo__rect_t a = {  0, 0, 10, 10 };
+  geo__rect_t b = { 20, 5, 10, 10 };
+
+  geo__vector_t v = { 100, 0 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
+
+
+void moving_rect_right_to_left_intersects_top(){
+
+  geo__rect_t a = {  40, 0, 10, 10 };
+  geo__rect_t b = { 20, -5, 10, 10 };
+
+  geo__vector_t v = { -100, 0 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
+
+void moving_rect_right_to_left_intersects_bottom(){
+
+  geo__rect_t a = {  40, 0, 10, 10 };
+  geo__rect_t b = { 20, 5, 10, 10 };
+
+  geo__vector_t v = { -100, 0 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
+
+void moving_rect_top_to_bottom_intersects_left(){
+
+  geo__rect_t a = {  15, 15, 10, 10 };
+  geo__rect_t b = { 20, -5, 10, 10 };
+
+  geo__vector_t v = { 0, -100 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
+
+void moving_rect_top_to_bottom_intersects_right(){
+
+  geo__rect_t a = {  25, 15, 10, 10 };
+  geo__rect_t b = { 20, -5, 10, 10 };
+
+  geo__vector_t v = { 0, -100 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
+
+void moving_rect_bottom_to_top_intersects_left(){
+
+  geo__rect_t a = {  15, -25, 10, 10 };
+  geo__rect_t b = { 20, -5, 10, 10 };
+
+  geo__vector_t v = { 0, 100 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
+
+void moving_rect_bottom_to_top_intersects_right(){
+
+  geo__rect_t a = {  25, -25, 10, 10 };
+  geo__rect_t b = { 20, -5, 10, 10 };
+
+  geo__vector_t v = { 0, 100 };
+
+  int distance = 0;
+
+  bool_t result = 
+    collision__moving_rectangle_intersects_rectangle( &a, &v, &b, &distance );
+
+  TEST_ASSERT_TRUE( result );
+  TEST_ASSERT_INT( distance, 10 );
+}
 
 
 TEST_SUITE_START(Collision Tests)
@@ -1367,6 +1555,18 @@ TEST_CASE(point_on_vertical_line)
 TEST_CASE(point_on_horizontal_line)
 TEST_CASE(point_on_diagonal_line)
 
+TEST_CASE(moving_rect_doesnt_intersect_no_distance)
+TEST_CASE(moving_rect_doesnt_intersect)
+TEST_CASE(moving_rect_intersects_no_distance)
+TEST_CASE(moving_rect_intersects)
+TEST_CASE(moving_rect_left_to_right_intersects_top)
+TEST_CASE(moving_rect_left_to_right_intersects_bottom)
+TEST_CASE(moving_rect_right_to_left_intersects_top)
+TEST_CASE(moving_rect_right_to_left_intersects_bottom)
+TEST_CASE(moving_rect_top_to_bottom_intersects_left)
+TEST_CASE(moving_rect_top_to_bottom_intersects_right)
+TEST_CASE(moving_rect_bottom_to_top_intersects_left)
+TEST_CASE(moving_rect_bottom_to_top_intersects_right)
 
 TEST_SUITE_END()
 			     
