@@ -1,5 +1,6 @@
 #include <collision.h>
 #include <geometry.h>
+#include <utils.h>
 #include <constants.h>
 #include <math.h>
 #include <limits.h>
@@ -238,6 +239,8 @@ bool_t collision__moving_rectangle_intersects_rectangle(
 					       const geo__rect_t* b,
 					       int* distance_until_collision ){
 
+  bool_t result = FALSE;
+
   if ( distance_until_collision ){
     *distance_until_collision = INT_MAX;
   }
@@ -264,12 +267,29 @@ bool_t collision__moving_rectangle_intersects_rectangle(
     if ( collision__line_intersects_rectangle( &motion_lines[idx],
 					       b,
 					       &cp ) ){
-      if ( distance_until_collision ){
-	/*	int distance_squared = cp.x- */
-      }
+      result = TRUE;
 
+      if ( distance_until_collision ){
+
+	geo__point_t start = { motion_lines[idx].x1, motion_lines[idx].y1 };
+
+	int d_sqrd = geo__distance_squared( &start, &cp );
+
+	if ( d_sqrd < *distance_until_collision ){
+	  *distance_until_collision = d_sqrd;
+	}
+      }
+      else{
+	return TRUE;
+      }
     }
   }
+
+  if ( result ){
+    *distance_until_collision = utils__sqrt(*distance_until_collision);
+  }
+  
+  return result;
 }
 
 
@@ -301,8 +321,8 @@ bool_t __parallel_line_collision( const geo__line_t* a,
 
       if ( intersection ){
 
-	uint32_t distance_to_b1 = __distance_squared( &a1, &b1 );
-	uint32_t distance_to_b2 = __distance_squared( &a1, &b2 );
+	uint32_t distance_to_b1 = geo__distance_squared( &a1, &b1 );
+	uint32_t distance_to_b2 = geo__distance_squared( &a1, &b2 );
 
 	*intersection = distance_to_b1 < distance_to_b2 ? b1 : b2;
       }
@@ -330,10 +350,3 @@ bool_t __parallel_line_collision( const geo__line_t* a,
   return result;
 }
 
-uint32_t __distance_squared( const geo__point_t* a, const geo__point_t* b ){
-
-  int x_term = abs(b->x - a->x);
-  int y_term = abs(b->y - a->y);
-
-  return (x_term*x_term + y_term*y_term);
-}
