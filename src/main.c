@@ -87,9 +87,6 @@ void background_collision(  milliseconds_t length_of_frame,
 
   struct player_t* player = (struct player_t*)context;
   
-  
-
-  
 }
 
 

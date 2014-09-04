@@ -27,4 +27,9 @@ typedef struct {
 int geo__distance( const geo__point_t* a, const geo__point_t* b );
 int geo__distance_squared( const geo__point_t* a, const geo__point_t* b );
 
+int geo__length( const geo__line_t* l );
+int geo__length_squared( const geo__line_t* l );
+
+void geo__point_on_line_at_distance( const geo__line_t* l, int distance, geo__point_t* p );
+
 #endif
