@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include <entity.h>
+#include <moveable.h>
 
 #include <stdint.h>
 
@@ -9,8 +10,7 @@ struct player_t{
   
   int player_idx;
 
-  geo__point_t position;
-  geo__point_t velocity;
+  struct moveable_t moveable;
 
   int gun_x;
   int gun_y;

@@ -6,6 +6,9 @@
 #include <control.h>
 #include <player.h>
 #include <background.h>
+#include <moveable.h>
+
+#include <update_functions.h>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -68,17 +71,6 @@ void update_player( milliseconds_t length_of_frame,
   }
 }
 
-void apply_gravity( milliseconds_t length_of_frame,
-		    const geo__rect_t* bounding_box,
-		    const geo__point_t* position,
-		    geo__vector_t* velocity,
-		    void* context ){
-
-  static const int g = 100.0;
-
-  velocity->y += (g*length_of_frame)*0.001f;
-}
-
 void background_collision(  milliseconds_t length_of_frame,
 			    const geo__rect_t* bounding_box,
 			    const geo__point_t* position,
@@ -87,26 +79,6 @@ void background_collision(  milliseconds_t length_of_frame,
 
   struct player_t* player = (struct player_t*)context;
   
-}
-
-
-void draw_background( const geo__point_t* position, void* context ){
-  
-  const struct background_t* background = (const struct background_t*)context;
-
-  geo__rect_t dest = { position->x, 
-		       position->y, 
-		       background->prototype->bounding_box.width, 
-		       background->prototype->bounding_box.height };
-
-  if ( background->collidable ){
-    video__rect( &dest, 0, 0, 0, 255 );
-  }
-  else{
-    video__blit( background->prototype->texture, 
-		 &background->prototype->bounding_box,
-		 &dest );
-  }
 }
 
 
@@ -129,14 +101,9 @@ int main( int argc, char** argv ) {
   struct font__handle_t* font = NULL;
   font__create("resources/font/test_font.dat", &font);
 
-  struct entity_t background_entity;
-  entity__setup(&background_entity);
-  background_entity.texture = texture;
-  background_entity.bounding_box.x = 0;
-  background_entity.bounding_box.y = 0;
-  background_entity.bounding_box.width = 32;
-  background_entity.bounding_box.height = 32;
-  entity__add_draw_fxn(&background_entity, draw_background);
+  struct background_prototype_t default_background = { &background__basic_draw,
+						       texture,
+						       BACKGROUND__COLLISION_NONE };
 
   const int number_of_columns = 400/32+1;
   const int number_of_rows = 300/32+1;
@@ -145,24 +112,22 @@ int main( int argc, char** argv ) {
   int col_idx, row_idx;
   for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
     for ( row_idx = 0; row_idx < number_of_rows; ++row_idx ){
-      background[col_idx][row_idx].position.x = col_idx*32;
-      background[col_idx][row_idx].position.y = row_idx*32;
-      background[col_idx][row_idx].prototype = &background_entity;
-
-      background[col_idx][row_idx].collidable = (row_idx == number_of_rows - 1);
+      background[col_idx][row_idx].prototype = &default_background;
+      background[col_idx][row_idx].render_flags = 0;
     }
   }
 
   struct entity_t player_entity;
   entity__setup(&player_entity);
 
-  entity__add_update_fxn(&player_entity, apply_gravity);
+  /*  entity__add_update_fxn(&player_entity, update__apply_gravity); */
+  entity__add_update_fxn(&player_entity, update__apply_drag);
   entity__add_update_fxn(&player_entity, update_player);
   entity__add_draw_fxn(&player_entity, draw_player);
 
   struct player_t players[2] = {
-    { 0, { 175, 225 }, { 0, 0 }, 0, -10, { 255, 0,   0 } },
-    { 1, { 225, 225 }, { 0, 0 }, 0, -10, {   0, 0, 255 } }
+    { 0, { { 175, 225 }, { 0, 0 } }, 0, -10, { 255, 0,   0 } },
+    { 1, { { 225, 225 }, { 0, 0 } }, 0, -10, {   0, 0, 255 } }
   };
 
   while ( keep_looping ) {
@@ -175,9 +140,9 @@ int main( int argc, char** argv ) {
 
     for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
       for ( row_idx = 0; row_idx < number_of_rows; ++row_idx ){
-	entity__draw( &background_entity,
-		      &background[col_idx][row_idx].position,
-		      &background[col_idx][row_idx] );
+	background[col_idx][row_idx].prototype->draw_fxn( row_idx, 
+							  col_idx,
+							  &background[col_idx][row_idx] );
       }
     }
 
@@ -185,12 +150,12 @@ int main( int argc, char** argv ) {
     for ( player_idx = 0; player_idx < 2; ++player_idx ){
       entity__update( &player_entity, 
 		      timing__get_frame_length(),
-		      &players[player_idx].position, 
-		      &players[player_idx].velocity, 
+		      &players[player_idx].moveable.position, 
+		      &players[player_idx].moveable.velocity, 
 		      &players[player_idx] );
 
       entity__draw( &player_entity, 
-		    &players[player_idx].position, 
+		    &players[player_idx].moveable.position, 
 		    &players[player_idx] );
     }
 		    
