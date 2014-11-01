@@ -85,6 +85,8 @@ int video__setup( uint32_t screen_width,
 
     glColor4f(1.0, 1.0, 1.0, 1.0);
 
+    glClearColor(1.0, 0.0f, 1.0f, 0.0f);
+
     result = video__surface ? SUCCESS : VIDEO__COULD_NOT_CREATE_SURFACE;
   }
 
@@ -98,8 +100,14 @@ int video__teardown() {
 }
 
 int video__clearscreen(){
-  glClearColor(1.0, 0.0f, 1.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+
+  /* static geo__rect_t screen = { 0, 0, 0, 0 }; */
+
+  /* screen.width = video__screen_extents.width; */
+  /* screen.height = video__screen_extents.height; */
+
+  /* video__rect( &screen, 255, 0, 255, 0 ); */
 
   return SUCCESS;
 }

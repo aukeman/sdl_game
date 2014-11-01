@@ -9,16 +9,18 @@ TEST_MAIN=test/main.c
 TEST_HEADERS=$(wildcard test/*.h)
 TEST_EXES=$(patsubst test/%.c, test/bin/%, $(TEST_CASES))
 
+C_DEFS=-DSTOPWATCH_ENABLED
+
 all: sdl_game 
 
 sdl_game: $(SOURCES) $(HEADERS) $(MAIN) 
-	gcc -g -I./include -o sdl_game $(SOURCES) $(MAIN) -lSDL -lSDL_image -lGL
+	gcc -g -I./include -o sdl_game $(C_DEFS) $(SOURCES) $(MAIN) -lSDL -lSDL_image -lGL
 
 test/bin: 
 	mkdir -p test/bin
 
-test/bin/% : test/%.c $(SOURCES) $(HEADERS) $(TEST_MAIN) $(TEST_HEADERS) test/bin
-	gcc -g -I./include -I./test -o $@ $(SOURCES) $(TEST_MAIN) $<  -lSDL -lSDL_image -lGL
+test/bin/% : test/%.c  $(C_DEFS) $(SOURCES) $(HEADERS) $(TEST_MAIN) $(TEST_HEADERS) test/bin
+	gcc -g -I./include -I./test -o $@  $(C_DEFS) $(SOURCES) $(TEST_MAIN) $<  -lSDL -lSDL_image -lGL
 
 build_tests: $(TEST_EXES)
 
