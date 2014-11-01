@@ -4,7 +4,7 @@
 
 void player__basic_draw( const struct player_t* player )
 {
-  static geo__rect_t dest = { 0, 0, 32, 32 };
+  static geo__rect_t dest = { 0, 0, 16, 16 };
 
   dest.x = utils__pos2screen(player->position.x);
   dest.y = utils__pos2screen(player->position.y);

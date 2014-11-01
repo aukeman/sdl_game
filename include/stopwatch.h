@@ -25,7 +25,9 @@ void stopwatch__init( struct stopwatch_t* sw )
 
   timerclear( &(sw->total) );
   timerclear( &(sw->longest) );
-  timerclear( &(sw->shortest) );
+
+  sw->shortest.tv_sec = 0x7FFFFFFF;
+  sw->shortest.tv_usec = 0x7FFFFFFF;
 
   sw->invocations = 0;
 }
@@ -52,8 +54,7 @@ void stopwatch__stop( struct stopwatch_t* sw ){
     sw->longest = diff;
   }
 
-  if ( !timerisset( &(sw->shortest) ) ||
-       timercmp( &diff, &(sw->shortest), < ) ){
+  if ( timercmp( &diff, &(sw->shortest), < ) ){
     sw->shortest = diff;
   }
 

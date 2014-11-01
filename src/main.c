@@ -39,7 +39,7 @@ int main( int argc, char** argv ) {
   events__add_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
 
   struct video__texture_handle_t* texture;
-  video__setup_texture("resources/img/testing.png", &texture);
+  video__setup_texture("resources/img/brick.png", &texture);
   
   struct font__handle_t* font = NULL;
   font__create("resources/font/test_font.dat", &font);
@@ -48,8 +48,8 @@ int main( int argc, char** argv ) {
 						       texture,
 						       BACKGROUND__COLLISION_NONE };
 
-  const int number_of_columns = 400/32+1;
-  const int number_of_rows = 300/32+1;
+  const int number_of_columns = 400/16+1;
+  const int number_of_rows = 300/16+1;
   struct background_t background[number_of_columns][number_of_rows];
 
   int col_idx, row_idx;
@@ -69,12 +69,11 @@ int main( int argc, char** argv ) {
     { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), {   0, 0, 255 } }
   };
 
-  struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, draw_stats_sw, clear_page_sw, flip_page_sw;
+  struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, draw_stats_sw, flip_page_sw;
   stopwatch__init(&process_events_sw);
   stopwatch__init(&draw_bg_sw);
   stopwatch__init(&draw_players_sw);
   stopwatch__init(&draw_stats_sw);
-  stopwatch__init(&clear_page_sw);
   stopwatch__init(&flip_page_sw);
 
   while ( keep_looping ) {
@@ -86,10 +85,6 @@ int main( int argc, char** argv ) {
     stopwatch__start(&process_events_sw);
     events__process_events();
     stopwatch__stop(&process_events_sw);
-
-    stopwatch__start(&clear_page_sw);
-    video__clearscreen();
-    stopwatch__stop(&clear_page_sw);
 
     stopwatch__start(&draw_bg_sw);
     for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
@@ -132,7 +127,6 @@ int main( int argc, char** argv ) {
 	   timing__get_instantaneous_fps());
 
   stopwatch__dump(&process_events_sw, "Process Events", stdout);
-  stopwatch__dump(&clear_page_sw, "Clear Page", stdout);
   stopwatch__dump(&draw_bg_sw, "Draw Background", stdout);
   stopwatch__dump(&draw_players_sw, "Draw Players", stdout);
   stopwatch__dump(&draw_stats_sw, "Draw Stats", stdout);

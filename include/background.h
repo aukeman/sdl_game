@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define BACKGROUND_TILE_WIDTH 32
-#define BACKGROUND_TILE_HEIGHT 32
+#define BACKGROUND_TILE_WIDTH 16
+#define BACKGROUND_TILE_HEIGHT 16
 
 enum background__collision_type_e{
   BACKGROUND__COLLISION_NONE,
