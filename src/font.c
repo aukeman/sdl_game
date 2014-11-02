@@ -146,6 +146,8 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 
   int original_x = dest->x;
 
+  video__begin_blits(handle->texture);
+
   const char* iter = buffer;
   while ( *iter != '\0' ){
     const geo__rect_t* src = &handle->ascii_to_rect[*iter];
@@ -192,6 +194,8 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 
     ++iter;
   }
+
+  video__end_blits();
 
   if ( iter != buffer ){
     dest->y += handle->ascii_to_rect['\n'].height;

@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define BACKGROUND_TILE_WIDTH 16
-#define BACKGROUND_TILE_HEIGHT 16
+#define BACKGROUND_TILE_WIDTH 8
+#define BACKGROUND_TILE_HEIGHT 8
 
 enum background__collision_type_e{
   BACKGROUND__COLLISION_NONE,
@@ -25,11 +25,13 @@ struct background_prototype_t{
   const struct video__texture_handle_t* texture;
 
   enum background__collision_type_e collision_type;
+  
+  uint32_t tile_idx_x;
+  uint32_t tile_idx_y;
 };
 
 struct background_t{
   const struct background_prototype_t* prototype;
-  uint8_t render_flags;
 };
 
 void background__basic_draw( size_t idx_x, size_t idx_y, const struct background_t* background );

@@ -43,9 +43,11 @@ int video__setup_texture(const char* file_directory,
 
 int video__teardown_texture(struct video__texture_handle_t* texture_handle);
 
+int video__begin_blits();
 int video__blit(const struct video__texture_handle_t* texture_handle, 
 		const geo__rect_t* src,
 		const geo__rect_t* dest);
+int video__end_blits();
 
 int video__rect(const geo__rect_t* rect,
 		uint8_t red,

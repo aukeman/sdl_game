@@ -39,24 +39,51 @@ int main( int argc, char** argv ) {
   events__add_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
 
   struct video__texture_handle_t* texture;
-  video__setup_texture("resources/img/brick.png", &texture);
+  video__setup_texture("resources/img/background.png", &texture);
   
   struct font__handle_t* font = NULL;
   font__create("resources/font/test_font.dat", &font);
 
-  struct background_prototype_t default_background = { &background__basic_draw,
-						       texture,
-						       BACKGROUND__COLLISION_NONE };
+  struct background_prototype_t backgrounds[] = {
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 0, 0 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 0, 1 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 1, 0 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 1, 1 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 2, 0 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 2, 1 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 3, 0 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 3, 1 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 0, 2 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 0, 3 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 1, 2 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 1, 3 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 2, 2 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 2, 3 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 3, 2 },
+    { &background__basic_draw, texture, BACKGROUND__COLLISION_NONE, 3, 3 },
+  };
 
-  const int number_of_columns = 400/16+1;
-  const int number_of_rows = 300/16+1;
+  const int number_of_columns = 400/BACKGROUND_TILE_WIDTH+1;
+  const int number_of_rows = 300/BACKGROUND_TILE_HEIGHT+1;
+
   struct background_t background[number_of_columns][number_of_rows];
 
   int col_idx, row_idx;
   for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
     for ( row_idx = 0; row_idx < number_of_rows; ++row_idx ){
-      background[col_idx][row_idx].prototype = &default_background;
-      background[col_idx][row_idx].render_flags = 0;
+
+      size_t prototype_idx_base;
+
+      switch ( (col_idx >> 2) % 4 ){
+      case 0: prototype_idx_base =  0; break;
+      case 1: prototype_idx_base =  4; break;
+      case 2: prototype_idx_base =  8; break;
+      case 3: prototype_idx_base = 12; break;
+      }
+
+      size_t prototype_idx =  2*(col_idx % 2) + (row_idx % 2);
+
+      background[col_idx][row_idx].prototype = &backgrounds[prototype_idx_base + prototype_idx];
     }
   }
 
@@ -87,6 +114,7 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&process_events_sw);
 
     stopwatch__start(&draw_bg_sw);
+    video__begin_blits(NULL);
     for ( col_idx = 0; col_idx < number_of_columns; ++col_idx ){
       for ( row_idx = 0; row_idx < number_of_rows; ++row_idx ){
     	background[col_idx][row_idx].prototype->draw_fxn( col_idx,
@@ -94,6 +122,7 @@ int main( int argc, char** argv ) {
     							  &background[col_idx][row_idx] );
       }
     }
+    video__end_blits();
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
@@ -105,13 +134,13 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&draw_players_sw);
 
     stopwatch__start(&draw_stats_sw);
-    font__draw_string(font, 0, 0, 
-		      "FPS:         %5.1f\n"
-		      "Frame Count: %5d\n"
-		      "Fame Length: %5d",
-		      timing__get_instantaneous_fps(),
-		      timing__get_frame_count(),
-		      timing__get_frame_length());
+    font__draw_string(font, 0, 0,
+    		      "FPS:         %5.1f\n"
+    		      "Frame Count: %5d\n"
+    		      "Fame Length: %5d",
+    		      timing__get_instantaneous_fps(),
+    		      timing__get_frame_count(),
+    		      timing__get_frame_length());
     stopwatch__stop(&draw_stats_sw);
 
     stopwatch__start(&flip_page_sw);

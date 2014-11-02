@@ -13,7 +13,14 @@ SDL_Surface* video__surface = NULL;
 
 uint32_t last_rendered_texture_id = 0;
 
+int blit_operations_in_progress = FALSE;
+
 video__screen_extents_t video__screen_extents = {0, 0, FALSE};
+
+void render_textured_quad( float src_x1, float src_y1,
+			   float src_x2, float src_y2,
+			   float dst_x1, float dst_y1, 
+			   float dst_x2, float dst_y2 ); 
 
 struct video__texture_handle_t {
   uint32_t texture_id;
@@ -134,6 +141,7 @@ int video__flip() {
 
 #endif
 
+
 int video__setup_texture(const char* file, 
 			 struct video__texture_handle_t** texture_handle_ptr){
   uint32_t red_mask = 0;
@@ -217,42 +225,66 @@ int video__teardown_texture(struct video__texture_handle_t* texture_handle){
   return SUCCESS;
 }
 
-int video__blit(const struct video__texture_handle_t* texture_handle, 
-		const geo__rect_t* src,
-		const geo__rect_t* dest){
+int video__begin_blits(const struct video__texture_handle_t* texture_handle){
+  
+  glColor4f(1.0, 1.0, 1.0, 1.0);
 
-  float src_x = (float)src->x / (float)(texture_handle->width);
-  float src_y = (float)src->y / (float)(texture_handle->height);
-
-  float src_x2 = src_x + (float)src->width / (float)(texture_handle->width);
-  float src_y2 = src_y + (float)src->height / (float)(texture_handle->height);
-
-  if ( texture_handle->texture_id != last_rendered_texture_id ){
+  if ( texture_handle ){
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture_handle->texture_id);
     last_rendered_texture_id = texture_handle->texture_id;
   }
-
-  glColor4f(1.0, 1.0, 1.0, 1.0);
+  else{
+    last_rendered_texture_id = -1;
+  }
 
   glBegin(GL_QUADS);
-  glTexCoord2f(src_x, src_y);
-  glVertex2i(dest->x, 
-	     dest->y);
 
-  glTexCoord2f(src_x2, src_y);
-  glVertex2i(dest->x + dest->width, 
-	     dest->y);
+  blit_operations_in_progress = TRUE;
+}
 
-  glTexCoord2f(src_x2, src_y2);  
-  glVertex2i(dest->x + dest->width, 
-	     dest->y + dest->height);
+int video__end_blits(){
 
-  glTexCoord2f(src_x, src_y2);
-  glVertex2i(dest->x, 
-	     dest->y + dest->height);
-  
   glEnd();
+  blit_operations_in_progress = FALSE;
+}
+
+int video__blit(const struct video__texture_handle_t* texture_handle, 
+		const geo__rect_t* src,
+		const geo__rect_t* dest){
+
+  float src_x1 = (float)src->x / (float)(texture_handle->width);
+  float src_y1 = (float)src->y / (float)(texture_handle->height);
+
+  float src_x2 = src_x1 + (float)src->width / (float)(texture_handle->width);
+  float src_y2 = src_y1 + (float)src->height / (float)(texture_handle->height);
+
+  if ( blit_operations_in_progress ) {
+
+    if ( texture_handle->texture_id != last_rendered_texture_id ){
+      video__end_blits();
+      video__begin_blits(texture_handle);
+    }
+
+    render_textured_quad( src_x1, src_y1, 
+			  src_x2, src_y2,
+			  dest->x, dest->y, 
+			  dest->x + dest->width, 
+			  dest->y + dest->height ); 
+
+  }
+  else {
+
+    video__begin_blits(texture_handle);
+
+    render_textured_quad( src_x1, src_y1, 
+			  src_x2, src_y2,
+			  dest->x, dest->y, 
+			  dest->x + dest->width, 
+			  dest->y + dest->height ); 
+
+    video__end_blits();
+  }
 
   return SUCCESS;
 }
@@ -306,4 +338,26 @@ int video__line(const geo__line_t* line,
   glEnd();
 
   return SUCCESS;
+}
+
+void render_textured_quad( float src_x1, float src_y1,
+			   float src_x2, float src_y2,
+			   float dst_x1, float dst_y1, 
+			   float dst_x2, float dst_y2 ){ 
+
+  glTexCoord2f(src_x1, src_y1);
+  glVertex2i(dst_x1, 
+	     dst_y1);
+
+  glTexCoord2f(src_x2, src_y1);
+  glVertex2i(dst_x2, 
+	     dst_y1);
+
+  glTexCoord2f(src_x2, src_y2);  
+  glVertex2i(dst_x2, 
+	     dst_y2);
+
+  glTexCoord2f(src_x1, src_y2);
+  glVertex2i(dst_x1, 
+	     dst_y2);
 }
