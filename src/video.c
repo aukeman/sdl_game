@@ -28,7 +28,7 @@ struct video__texture_handle_t {
   uint32_t height;
 };
 
-const video__screen_extents_t* video__get_video_extents() {
+const video__screen_extents_t* video__get_screen_extents() {
   return &video__screen_extents;
 }
 
@@ -44,6 +44,8 @@ int video__setup( uint32_t screen_width,
 
   video__screen_extents.width = screen_width;
   video__screen_extents.height = screen_height;
+  video__screen_extents.viewport_width = viewport_width;
+  video__screen_extents.viewport_height = viewport_height;
   video__screen_extents.fullscreen = fullscreen;
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {

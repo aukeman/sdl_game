@@ -64,6 +64,8 @@ int main( int argc, char** argv ) {
   stopwatch__init(&draw_stats_sw);
   stopwatch__init(&flip_page_sw);
 
+  video__clearscreen();
+
   while ( keep_looping ) {
 
     timing__declare_top_of_frame();
@@ -75,7 +77,7 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&process_events_sw);
 
     stopwatch__start(&draw_bg_sw);
-    background__draw(background);
+    background__draw(0, 0, background);
     stopwatch__stop(&draw_bg_sw);
 
     /* int player_idx = 0; */

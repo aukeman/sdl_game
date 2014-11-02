@@ -31,7 +31,10 @@ struct background__tile_prototype_t;
 int background__create( const char* background_config_file, struct background_t** handle_ptr );
 int background__free( struct background_t* handle );
 
-void background__draw( const struct background_t* background );
+void background__draw( int32_t pos_x, 
+		       int32_t pos_y, 
+		       const struct background_t* background );
+
 void background__update( struct background_t* background );
 
 struct background_t {
@@ -66,6 +69,8 @@ struct background__tile_t{
   const struct background__tile_prototype_t* prototype;
 };
 
-void background__tile_basic_draw( size_t idx_x, size_t idx_y, const struct background__tile_t* background );
+void background__tile_basic_draw( size_t idx_x, 
+				  size_t idx_y, 
+				  const struct background__tile_t* background );
 
 #endif

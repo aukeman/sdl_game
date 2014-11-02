@@ -1,10 +1,12 @@
 #include <background.h>
 #include <constants.h>
 #include <video.h>
+#include <utils.h>
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 int background__create( const char* background_config_file, 
 			struct background_t** handle_ptr ){
@@ -176,13 +178,33 @@ int background__free( struct background_t* handle ){
   return SUCCESS;
 }
 
-void background__draw( const struct background_t* background ){
+void background__draw( int32_t pos_x, 
+		       int32_t pos_y, 
+		       const struct background_t* background ){
 
-  int col_idx, row_idx;
+  int32_t screen_pos_x = utils__pos2screen(pos_x);
+  int32_t screen_pos_y = utils__pos2screen(pos_y);
+
+  int32_t min_col_idx = screen_pos_x / background->tile_width;
+  int32_t min_row_idx = screen_pos_y / background->tile_height;
+
+  int32_t max_col_idx = min_col_idx + (video__get_screen_extents()->viewport_width / background->tile_width) + 1;
+  int32_t max_row_idx = min_row_idx + (video__get_screen_extents()->viewport_height / background->tile_height) + 1;
+
+  if ( background->tiles_wide < max_col_idx ){
+    max_col_idx = background->tiles_wide;
+  }
+  
+  if ( background->tiles_high < max_row_idx ){
+    max_row_idx = background->tiles_high;
+  }
+
+  int32_t col_idx, row_idx;
 
   video__begin_blits(NULL);
-  for ( col_idx = 0; col_idx < background->tiles_wide; ++col_idx ){
-    for ( row_idx = 0; row_idx < background->tiles_high; ++row_idx ){
+  for ( col_idx = min_col_idx; col_idx < max_col_idx; ++col_idx ){
+    for ( row_idx = min_row_idx; row_idx < max_row_idx; ++row_idx ){
+
       if ( background->tiles[col_idx][row_idx].prototype ){
 	background->tiles[col_idx][row_idx].prototype->
 	  tile_draw_fxn( col_idx,

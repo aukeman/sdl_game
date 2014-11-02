@@ -19,6 +19,9 @@ typedef struct {
   uint32_t width;
   uint32_t height;
   
+  uint32_t viewport_width;
+  uint32_t viewport_height;
+
   int fullscreen;
 } video__screen_extents_t;
 
