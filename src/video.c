@@ -235,7 +235,7 @@ int video__begin_blits(const struct video__texture_handle_t* texture_handle){
     last_rendered_texture_id = texture_handle->texture_id;
   }
   else{
-    last_rendered_texture_id = -1;
+    last_rendered_texture_id = 0;
   }
 
   glBegin(GL_QUADS);
