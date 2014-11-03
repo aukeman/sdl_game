@@ -227,6 +227,10 @@ int video__teardown_texture(struct video__texture_handle_t* texture_handle){
   return SUCCESS;
 }
 
+int video__translate( int32_t x, int32_t y ){
+  glTranslatef(x, y, 0);
+}
+
 int video__begin_blits(const struct video__texture_handle_t* texture_handle){
   
   glColor4f(1.0, 1.0, 1.0, 1.0);

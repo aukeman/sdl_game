@@ -201,6 +201,7 @@ void background__draw( int32_t pos_x,
 
   int32_t col_idx, row_idx;
 
+  video__translate( -screen_pos_x, -screen_pos_y );
   video__begin_blits(NULL);
   for ( col_idx = min_col_idx; col_idx < max_col_idx; ++col_idx ){
     for ( row_idx = min_row_idx; row_idx < max_row_idx; ++row_idx ){
@@ -214,6 +215,8 @@ void background__draw( int32_t pos_x,
     }
   }
   video__end_blits();
+  video__translate( screen_pos_x, screen_pos_y );
+
 }
 
 void background__tile_basic_draw( size_t idx_x, 
