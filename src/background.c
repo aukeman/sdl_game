@@ -103,6 +103,25 @@ int background__create( const char* background_config_file,
     prototype->tile_draw_fxn = &background__tile_basic_draw;
     prototype->background = *handle_ptr;
 
+    uint32_t texture_width = video__get_texture_width((*handle_ptr)->texture);
+    uint32_t texture_height = video__get_texture_height((*handle_ptr)->texture);
+
+    prototype->texture_src.x1 = 
+      (float)(prototype->tile_idx_x * (*handle_ptr)->tile_width) / 
+      (float)texture_width;
+
+    prototype->texture_src.y1 = 
+      (float)(prototype->tile_idx_y * (*handle_ptr)->tile_height) / 
+      (float)texture_height;
+
+    prototype->texture_src.x2 = 
+      (float)((prototype->tile_idx_x+1) * (*handle_ptr)->tile_width) / 
+      (float)texture_width;
+
+    prototype->texture_src.y2 = 
+      (float)((prototype->tile_idx_y+1) * (*handle_ptr)->tile_height) / 
+      (float)texture_height;
+
     prototype_dictionary[prototype_label] = prototype;
   }
 
@@ -227,20 +246,15 @@ void background__draw( int32_t pos_x,
 void background__tile_basic_draw( size_t idx_x, 
 				  size_t idx_y, 
 				  const struct background__tile_t* tile ){
-  geo__rect_t src = { 0, 0, 
-		      tile->prototype->background->tile_width, 
-		      tile->prototype->background->tile_height };
 
-  geo__rect_t dest = { 0, 0, 
-		      tile->prototype->background->tile_width, 
-		      tile->prototype->background->tile_height };
-
-  src.x = tile->prototype->tile_idx_x * tile->prototype->background->tile_width;
-  src.y = tile->prototype->tile_idx_y * tile->prototype->background->tile_height;
-
-  dest.x = idx_x * tile->prototype->background->tile_width;
-  dest.y = idx_y * tile->prototype->background->tile_height;
-
-  video__blit( &src, &dest );
+  video__blit_verts( tile->prototype->texture_src.x1, 
+		     tile->prototype->texture_src.y1, 
+		     tile->prototype->texture_src.x2, 
+		     tile->prototype->texture_src.y2,
+		     idx_x * tile->prototype->background->tile_width,
+		     idx_y * tile->prototype->background->tile_height,
+		     (idx_x+1) * tile->prototype->background->tile_width,
+		     (idx_y+1) * tile->prototype->background->tile_height );
+		     
 }
 

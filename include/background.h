@@ -63,9 +63,17 @@ struct background__tile_prototype_t{
 
   uint32_t tile_idx_x;
   uint32_t tile_idx_y;
+
+  struct{
+    float x1;
+    float y1;
+    float x2;
+    float y2;
+  } texture_src;
 };
 
 struct background__tile_t{
+
   const struct background__tile_prototype_t* prototype;
 };
 

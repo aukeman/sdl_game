@@ -21,11 +21,6 @@ struct {
 
 video__screen_extents_t video__screen_extents = {0, 0, FALSE};
 
-void render_textured_quad( float src_x1, float src_y1,
-			   float src_x2, float src_y2,
-			   int dst_x1,   int dst_y1, 
-			   int dst_x2,   int dst_y2 ); 
-
 struct video__texture_handle_t {
   uint32_t texture_id;
   uint32_t width;
@@ -334,6 +329,14 @@ int video__blit_single(const struct video__texture_handle_t* texture_handle,
   video__end_blits();
 
   return SUCCESS;
+}
+
+uint32_t video__get_texture_width( const struct video__texture_handle_t* texture_handle ){
+  return texture_handle->width;
+}
+
+uint32_t video__get_texture_height( const struct video__texture_handle_t* texture_handle ){
+  return texture_handle->height;
 }
 
 int video__rect(const geo__rect_t* rect,

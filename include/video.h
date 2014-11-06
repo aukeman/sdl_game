@@ -53,7 +53,6 @@ int video__setup(uint32_t screen_width,
 		 int fullscreen);
 int video__teardown();
 
-
 int video__clearscreen();
 
 int video__flip();
@@ -80,6 +79,10 @@ int video__end_blits();
 int video__blit_single(const struct video__texture_handle_t* texture_handle, 
 		       const geo__rect_t* src,
 		       const geo__rect_t* dest);
+
+uint32_t video__get_texture_width( const struct video__texture_handle_t* texture_handle );
+
+uint32_t video__get_texture_height( const struct video__texture_handle_t* texture_handle );
 
 int video__rect(const geo__rect_t* rect,
 		uint8_t red,
