@@ -18,6 +18,9 @@ struct font__handle_t {
 
 } ;
 
+static struct 
+video__blit_params_t blit_params = { NULL, FALSE, { 0, 0, 0, 0 }, FALSE };
+
 int font__create( const char* font_config_file, struct font__handle_t** handle_ptr){
   int result = SUCCESS;
 
@@ -146,7 +149,9 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 
   int original_x = dest->x;
 
-  video__begin_blits(handle->texture);
+  blit_params.texture_handle = handle->texture;
+
+  video__begin_blits(&blit_params);
 
   const char* iter = buffer;
   while ( *iter != '\0' ){
@@ -160,7 +165,7 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 	dest->width = src->width;
 	dest->height = src->height;
 
-	video__blit(handle->texture, src, dest);
+	video__blit(src, dest);
       }
       dest->x += src->width;
       break;
@@ -172,7 +177,7 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 	dest->width = src->width;
 	dest->height = src->height;
 
-	video__blit(handle->texture, src, dest);
+	video__blit(src, dest);
       }
 
       dest->x = original_x;
@@ -185,7 +190,7 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 	dest->height = src->height;
 
 	if ( render ){
-	  video__blit(handle->texture, src, dest);
+	  video__blit(src, dest);
 	}
       }
 

@@ -2,7 +2,7 @@
 #define VIDEO_H
 
 #include <geometry.h>
-
+#include <types.h>
 #include <stdint.h>
 
 enum {
@@ -27,6 +27,23 @@ typedef struct {
 
 struct video__texture_handle_t;
 
+struct video__blit_params_t{
+
+  const struct video__texture_handle_t* texture_handle;
+
+  bool_t set_color;
+
+  struct {
+    float red;
+    float green;
+    float blue;
+    float alpha;
+  } color;
+
+  bool_t suppress_transparency;
+
+};
+
 const video__screen_extents_t* video__get_screen_extents();
 
 int video__setup(uint32_t screen_width, 
@@ -48,11 +65,21 @@ int video__teardown_texture(struct video__texture_handle_t* texture_handle);
 
 int video__translate( int32_t x, int32_t y );
 
-int video__begin_blits();
-int video__blit(const struct video__texture_handle_t* texture_handle, 
-		const geo__rect_t* src,
-		const geo__rect_t* dest);
+int video__begin_blits( const struct video__blit_params_t* params );
+
+int video__blit( const geo__rect_t* src,
+		 const geo__rect_t* dest);
+
+int video__blit_verts( float src_x1, float src_y1,
+		       float src_x2, float src_y2,
+		       int dst_x1,   int dst_y1, 
+		       int dst_x2,   int dst_y2 );
+
 int video__end_blits();
+
+int video__blit_single(const struct video__texture_handle_t* texture_handle, 
+		       const geo__rect_t* src,
+		       const geo__rect_t* dest);
 
 int video__rect(const geo__rect_t* rect,
 		uint8_t red,

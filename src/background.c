@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include <math.h>
 
+static struct 
+video__blit_params_t blit_params = { NULL, FALSE, {0, 0, 0, 0}, TRUE };
+
 int background__create( const char* background_config_file, 
 			struct background_t** handle_ptr ){
 
@@ -202,7 +205,10 @@ void background__draw( int32_t pos_x,
   int32_t col_idx, row_idx;
 
   video__translate( -screen_pos_x, -screen_pos_y );
-  video__begin_blits(NULL);
+
+  blit_params.texture_handle = background->texture;
+  video__begin_blits(&blit_params);
+
   for ( col_idx = min_col_idx; col_idx < max_col_idx; ++col_idx ){
     for ( row_idx = min_row_idx; row_idx < max_row_idx; ++row_idx ){
 
@@ -216,7 +222,6 @@ void background__draw( int32_t pos_x,
   }
   video__end_blits();
   video__translate( screen_pos_x, screen_pos_y );
-
 }
 
 void background__tile_basic_draw( size_t idx_x, 
@@ -236,6 +241,6 @@ void background__tile_basic_draw( size_t idx_x,
   dest.x = idx_x * tile->prototype->background->tile_width;
   dest.y = idx_y * tile->prototype->background->tile_height;
 
-  video__blit( tile->prototype->background->texture, &src, &dest );
+  video__blit( &src, &dest );
 }
 
