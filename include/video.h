@@ -66,8 +66,8 @@ int video__translate( int32_t x, int32_t y );
 
 int video__begin_blits( const struct video__blit_params_t* params );
 
-int video__blit( const geo__rect_t* src,
-		 const geo__rect_t* dest);
+int video__blit( const struct geo__rect_t* src,
+		 const struct geo__rect_t* dest);
 
 int video__blit_verts( float src_x1, float src_y1,
 		       float src_x2, float src_y2,
@@ -77,20 +77,20 @@ int video__blit_verts( float src_x1, float src_y1,
 int video__end_blits();
 
 int video__blit_single(const struct video__texture_handle_t* texture_handle, 
-		       const geo__rect_t* src,
-		       const geo__rect_t* dest);
+		       const struct geo__rect_t* src,
+		       const struct geo__rect_t* dest);
 
 uint32_t video__get_texture_width( const struct video__texture_handle_t* texture_handle );
 
 uint32_t video__get_texture_height( const struct video__texture_handle_t* texture_handle );
 
-int video__rect(const geo__rect_t* rect,
+int video__rect(const struct geo__rect_t* rect,
 		uint8_t red,
 		uint8_t green,
 		uint8_t blue,
 		uint8_t alpha);
 
-int video__line(const geo__line_t* line,
+int video__line(const struct geo__line_t* line,
 		uint8_t red,
 		uint8_t green,
 		uint8_t blue,

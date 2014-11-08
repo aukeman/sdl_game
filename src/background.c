@@ -2,6 +2,7 @@
 #include <constants.h>
 #include <video.h>
 #include <utils.h>
+#include <geometry.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -86,11 +87,11 @@ int background__create( const char* background_config_file,
     struct background__tile_prototype_t* prototype = 
       &(*handle_ptr)->tile_prototypes[prototype_idx];
 
-    rc = fscanf(fin, "%c %d %d %d%*c", 
+    rc = fscanf(fin, "%c %d %d %x%*c", 
 		&prototype_label,
 		&(prototype->tile_idx_x),
 		&(prototype->tile_idx_y),
-		(int*)&(prototype->collision_type));
+		(unsigned int*)&(prototype->collision_type));
 
     if ( rc != 4 ) {
       background__free(*handle_ptr);
@@ -256,5 +257,56 @@ void background__tile_basic_draw( size_t idx_x,
 		     (idx_x+1) * tile->prototype->background->tile_width,
 		     (idx_y+1) * tile->prototype->background->tile_height );
 		     
+}
+
+bool_t background__collision_test( const struct background_t* background,
+				   const struct geo__rect_t* position,
+				   struct geo__vector_t* velocity ){
+
+  /* get the range of background tiles to check */
+  int32_t ul_idx_x = utils__pos2screen(position->x) / background->tile_width;
+  int32_t ul_idx_y = utils__pos2screen(position->y) / background->tile_height;
+  
+  int32_t lr_idx_x = utils__pos2screen(position->x + position->width) / background->tile_width;
+  int32_t lr_idx_y = utils__pos2screen(position->y + position->height) / background->tile_height;
+    
+  if ( velocity->x < 0 ){
+    ul_idx_x = utils__pos2screen(position->x + velocity->x) / background->tile_width;
+  }
+  else{
+    lr_idx_x = utils__pos2screen(position->x + velocity->x) / background->tile_width;
+  }
+  
+  if ( velocity->y < 0 ){
+    ul_idx_y = utils__pos2screen(position->y + velocity->y) / background->tile_height;
+  }
+  else{
+    lr_idx_y = utils__pos2screen(position->x + velocity->x) / background->tile_height;
+  }
+
+  if ( ul_idx_x < 0 ){
+    ul_idx_x = 0;
+  }
+
+  if ( ul_idx_y < 0 ){
+    ul_idx_y = 0;
+  }
+
+  if ( lr_idx_x < 0 ){
+    lr_idx_x = 0;
+  }
+
+  if ( lr_idx_y < 0 ){
+    lr_idx_y = 0;
+  }
+
+  int32_t idx_x, idx_y;
+  for ( idx_x = ul_idx_x; idx_x < lr_idx_x; ++idx_x ){
+    for ( idx_y = ul_idx_y; idx_y < lr_idx_y; ++idx_y ){
+      
+    }
+  }
+
+  return FALSE;
 }
 

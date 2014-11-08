@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-typedef geo__rect_t ascii_to_rect_t[256];
+typedef struct geo__rect_t ascii_to_rect_t[256];
 
 struct font__handle_t {
 
@@ -107,7 +107,7 @@ int font__free( struct font__handle_t* handle ){
 
 int font__draw_string( const struct font__handle_t* handle, int x, int y, const char* fmt, ... ){
 
-  geo__rect_t dest = {x, y, 0, 0};
+  struct geo__rect_t dest = {x, y, 0, 0};
 
   va_list ap;
   va_start(ap, fmt);
@@ -119,7 +119,7 @@ int font__draw_string( const struct font__handle_t* handle, int x, int y, const 
 
 int font__dimensions( const struct font__handle_t* handle, int* width, int* height, const char* fmt, ... ){
 
-  geo__rect_t dest = {0, 0, 0, 0};
+  struct geo__rect_t dest = {0, 0, 0, 0};
 
   *width = 0;
   *height = 0;
@@ -137,7 +137,7 @@ int font__dimensions( const struct font__handle_t* handle, int* width, int* heig
   return result;
 }
 
-int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, bool_t render, const char* fmt, va_list ap ){
+int _process_string( const struct font__handle_t* handle, struct geo__rect_t* dest, bool_t render, const char* fmt, va_list ap ){
 
   static char buffer[1024];
 
@@ -155,7 +155,7 @@ int _process_string( const struct font__handle_t* handle, geo__rect_t* dest, boo
 
   const char* iter = buffer;
   while ( *iter != '\0' ){
-    const geo__rect_t* src = &handle->ascii_to_rect[*iter];
+    const struct geo__rect_t* src = &handle->ascii_to_rect[*iter];
 
     switch (*iter){
     case ' ':

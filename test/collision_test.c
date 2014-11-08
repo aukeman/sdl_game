@@ -8,8 +8,8 @@
 
 void rectangle_overlap_colocated(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 0, 0, 10, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 0, 0, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
 
@@ -18,8 +18,8 @@ void rectangle_overlap_colocated(){
 
 void rectangle_overlap_contains(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 3, 3, 4, 4 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 3, 3, 4, 4 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -29,8 +29,8 @@ void rectangle_overlap_contains(){
 
 void rectangle_overlap_spans_horizontal(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { -5, 3, 20, 4 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { -5, 3, 20, 4 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -40,8 +40,8 @@ void rectangle_overlap_spans_horizontal(){
 
 void rectangle_overlap_spans_vertical(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 3, -5, 4, 20 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 3, -5, 4, 20 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -51,11 +51,11 @@ void rectangle_overlap_spans_vertical(){
 
 void rectangle_overlap_top(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 0, -5, 10, 10 };
-  geo__rect_t c = { 3, -5, 4, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 0, -5, 10, 10 };
+  struct geo__rect_t c = { 3, -5, 4, 10 };
 
-  geo__rect_t d = { 0, -10, 10, 10 };
+  struct geo__rect_t d = { 0, -10, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -71,11 +71,11 @@ void rectangle_overlap_top(){
 
 void rectangle_overlap_bottom(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 0, 5, 10, 10 };
-  geo__rect_t c = { 3, 5, 4, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 0, 5, 10, 10 };
+  struct geo__rect_t c = { 3, 5, 4, 10 };
 
-  geo__rect_t d = { 0, 10, 10, 10 };
+  struct geo__rect_t d = { 0, 10, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -91,11 +91,11 @@ void rectangle_overlap_bottom(){
 
 void rectangle_overlap_left(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { -5, 0, 10, 10 };
-  geo__rect_t c = { -5, 3, 10, 4 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { -5, 0, 10, 10 };
+  struct geo__rect_t c = { -5, 3, 10, 4 };
 
-  geo__rect_t d = { -10, 0, 10, 10 };
+  struct geo__rect_t d = { -10, 0, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -111,11 +111,11 @@ void rectangle_overlap_left(){
 
 void rectangle_overlap_right(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 5, 0, 10, 10 };
-  geo__rect_t c = { 5, 3, 10, 4 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 5, 0, 10, 10 };
+  struct geo__rect_t c = { 5, 3, 10, 4 };
 
-  geo__rect_t d = { 10, 0, 10, 10 };
+  struct geo__rect_t d = { 10, 0, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -131,10 +131,10 @@ void rectangle_overlap_right(){
 
 void rectangle_overlap_upper_left(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { -5, -5, 10, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { -5, -5, 10, 10 };
 
-  geo__rect_t c = { -5, -10, 5, 10 };
+  struct geo__rect_t c = { -5, -10, 5, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -147,10 +147,10 @@ void rectangle_overlap_upper_left(){
 
 void rectangle_overlap_upper_right(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 5, -5, 10, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 5, -5, 10, 10 };
 
-  geo__rect_t c = { 10, -10, 3, 10 };
+  struct geo__rect_t c = { 10, -10, 3, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -163,10 +163,10 @@ void rectangle_overlap_upper_right(){
 
 void rectangle_overlap_lower_left(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { -5, 5, 10, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { -5, 5, 10, 10 };
 
-  geo__rect_t c = { -10, 10, 10, 10 };
+  struct geo__rect_t c = { -10, 10, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -179,10 +179,10 @@ void rectangle_overlap_lower_left(){
 
 void rectangle_overlap_lower_right(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 5, 5, 10, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 5, 5, 10, 10 };
 
-  geo__rect_t c = { 10, 10, 10, 10 };
+  struct geo__rect_t c = { 10, 10, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -195,16 +195,16 @@ void rectangle_overlap_lower_right(){
 
 void rectangle_overlap_touching(){
   
-  geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
 
-  geo__rect_t b = { -10, -10, 10, 10 };
-  geo__rect_t c = { -10,   0, 10, 10 };
-  geo__rect_t d = { -10,  10, 10, 10 };
-  geo__rect_t e = {   0,  10, 10, 10 };
-  geo__rect_t f = {  10,  10, 10, 10 };
-  geo__rect_t g = {  10,   0, 10, 10 };
-  geo__rect_t h = {  10, -10, 10, 10 };
-  geo__rect_t i = {   0, -10, 10, 10 };
+  struct geo__rect_t b = { -10, -10, 10, 10 };
+  struct geo__rect_t c = { -10,   0, 10, 10 };
+  struct geo__rect_t d = { -10,  10, 10, 10 };
+  struct geo__rect_t e = {   0,  10, 10, 10 };
+  struct geo__rect_t f = {  10,  10, 10, 10 };
+  struct geo__rect_t g = {  10,   0, 10, 10 };
+  struct geo__rect_t h = {  10, -10, 10, 10 };
+  struct geo__rect_t i = {   0, -10, 10, 10 };
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
@@ -235,12 +235,12 @@ void rectangle_overlap_touching(){
 
 void rectangle_doesnt_overlap_top(){
   
-  geo__rect_t a = { 0,   0, 10, 10 };
+  struct geo__rect_t a = { 0,   0, 10, 10 };
 
-  geo__rect_t b = { 0, -10, 10, 9 };
-  geo__rect_t c = { 3, -10,  4, 5 };
-  geo__rect_t d = { 0, -20, 10, 3 };
-  geo__rect_t e = { 3, -20,  4, 10 };
+  struct geo__rect_t b = { 0, -10, 10, 9 };
+  struct geo__rect_t c = { 3, -10,  4, 5 };
+  struct geo__rect_t d = { 0, -20, 10, 3 };
+  struct geo__rect_t e = { 3, -20,  4, 10 };
 
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
@@ -259,11 +259,11 @@ void rectangle_doesnt_overlap_top(){
 
 void rectangle_doesnt_overlap_bottom(){
   
-  geo__rect_t a = { 0,   0, 10, 10 };
-  geo__rect_t b = { 0,  11, 10, 10 };
-  geo__rect_t c = { 3,  11,  4, 10 };
-  geo__rect_t d = { 0,  20, 10, 10 };
-  geo__rect_t e = { 3,  20,  4, 10 };
+  struct geo__rect_t a = { 0,   0, 10, 10 };
+  struct geo__rect_t b = { 0,  11, 10, 10 };
+  struct geo__rect_t c = { 3,  11,  4, 10 };
+  struct geo__rect_t d = { 0,  20, 10, 10 };
+  struct geo__rect_t e = { 3,  20,  4, 10 };
 
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
@@ -282,11 +282,11 @@ void rectangle_doesnt_overlap_bottom(){
 
 void rectangle_doesnt_overlap_left(){
   
-  geo__rect_t a = {   0, 0, 10, 10 };
-  geo__rect_t b = { -10, 0, 9, 10 };
-  geo__rect_t c = { -10, 3, 9,  4 };
-  geo__rect_t d = { -20, 0, 10, 10 };
-  geo__rect_t e = { -20, 3, 10,  4 };
+  struct geo__rect_t a = {   0, 0, 10, 10 };
+  struct geo__rect_t b = { -10, 0, 9, 10 };
+  struct geo__rect_t c = { -10, 3, 9,  4 };
+  struct geo__rect_t d = { -20, 0, 10, 10 };
+  struct geo__rect_t e = { -20, 3, 10,  4 };
 
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
@@ -305,11 +305,11 @@ void rectangle_doesnt_overlap_left(){
 
 void rectangle_doesnt_overlap_right(){
   
-  geo__rect_t a = {  0, 0, 10, 10 };
-  geo__rect_t b = { 11, 0, 10, 10 };
-  geo__rect_t c = { 11, 3, 10,  4 };
-  geo__rect_t d = { 20, 0, 10, 10 };
-  geo__rect_t e = { 20, 3, 10,  4 };
+  struct geo__rect_t a = {  0, 0, 10, 10 };
+  struct geo__rect_t b = { 11, 0, 10, 10 };
+  struct geo__rect_t c = { 11, 3, 10,  4 };
+  struct geo__rect_t d = { 20, 0, 10, 10 };
+  struct geo__rect_t e = { 20, 3, 10,  4 };
 
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
@@ -328,11 +328,11 @@ void rectangle_doesnt_overlap_right(){
 
 void rectangle_doesnt_overlap_upper_left_corner(){
   
-  geo__rect_t a = {   0,   0, 10, 10 };
-  geo__rect_t b = { -10, -10, 9, 9 };
-  geo__rect_t c = { -20, -10, 10, 10 };
-  geo__rect_t d = { -10, -20, 9, 10 };
-  geo__rect_t e = { -20, -20, 10, 10 };
+  struct geo__rect_t a = {   0,   0, 10, 10 };
+  struct geo__rect_t b = { -10, -10, 9, 9 };
+  struct geo__rect_t c = { -20, -10, 10, 10 };
+  struct geo__rect_t d = { -10, -20, 9, 10 };
+  struct geo__rect_t e = { -20, -20, 10, 10 };
 
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
@@ -351,11 +351,11 @@ void rectangle_doesnt_overlap_upper_left_corner(){
 
 void rectangle_doesnt_overlap_upper_right_corner(){
   
-  geo__rect_t a = {  0,   0, 10, 10 };
-  geo__rect_t b = { 11, -11, 10, 10 };
-  geo__rect_t c = { 20, -10, 10, 10 };
-  geo__rect_t d = { 10, -20, 10, 10 };
-  geo__rect_t e = { 20, -20, 10, 10 };
+  struct geo__rect_t a = {  0,   0, 10, 10 };
+  struct geo__rect_t b = { 11, -11, 10, 10 };
+  struct geo__rect_t c = { 20, -10, 10, 10 };
+  struct geo__rect_t d = { 10, -20, 10, 10 };
+  struct geo__rect_t e = { 20, -20, 10, 10 };
 
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
@@ -374,11 +374,11 @@ void rectangle_doesnt_overlap_upper_right_corner(){
 
 void rectangle_doesnt_overlap_lower_left_corner(){
   
-  geo__rect_t a = {   0,   0, 10, 10 };
-  geo__rect_t b = { -10, 10, 9, 9 };
-  geo__rect_t c = { -20, 10, 10, 10 };
-  geo__rect_t d = { -10, 20, 10, 10 };
-  geo__rect_t e = { -20, 20, 10, 10 };
+  struct geo__rect_t a = {   0,   0, 10, 10 };
+  struct geo__rect_t b = { -10, 10, 9, 9 };
+  struct geo__rect_t c = { -20, 10, 10, 10 };
+  struct geo__rect_t d = { -10, 20, 10, 10 };
+  struct geo__rect_t e = { -20, 20, 10, 10 };
 
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
@@ -397,11 +397,11 @@ void rectangle_doesnt_overlap_lower_left_corner(){
 
 void rectangle_doesnt_overlap_lower_right_corner(){
   
-  geo__rect_t a = {  0,  0, 10, 10 };
-  geo__rect_t b = { 11, 11, 10, 10 };
-  geo__rect_t c = { 20, 10, 10, 10 };
-  geo__rect_t d = { 10, 20, 10, 10 };
-  geo__rect_t e = { 20, 20, 10, 10 };
+  struct geo__rect_t a = {  0,  0, 10, 10 };
+  struct geo__rect_t b = { 11, 11, 10, 10 };
+  struct geo__rect_t c = { 20, 10, 10, 10 };
+  struct geo__rect_t d = { 10, 20, 10, 10 };
+  struct geo__rect_t e = { 20, 20, 10, 10 };
 
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
   TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
@@ -420,10 +420,10 @@ void rectangle_doesnt_overlap_lower_right_corner(){
 
 void perpendicular_lines_intersect(){
 
-  geo__line_t v = { 5, -5,  5, 5 };
-  geo__line_t h = { 0,  0, 10, 0 };
+  struct geo__line_t v = { 5, -5,  5, 5 };
+  struct geo__line_t h = { 0,  0, 10, 0 };
 
-  geo__point_t p = {0, 0};
+  struct geo__point_t p = {0, 0};
 
   TEST_ASSERT_TRUE(collision__line_intersects_line(&v, &h, NULL));
   TEST_ASSERT_TRUE(collision__line_intersects_line(&v, &h, &p));
@@ -441,12 +441,12 @@ void perpendicular_lines_intersect(){
 
 void perpendicular_lines_dont_intersect(){
 
-  geo__line_t v =  {  5, -5,    5,  5 };
-  geo__line_t h1 = { -5,  0,    4,  0 };
-  geo__line_t h2 = {  0, -6,   10, -6 };
-  geo__line_t h3 = {  0,  6,   10,  6 };
+  struct geo__line_t v =  {  5, -5,    5,  5 };
+  struct geo__line_t h1 = { -5,  0,    4,  0 };
+  struct geo__line_t h2 = {  0, -6,   10, -6 };
+  struct geo__line_t h3 = {  0,  6,   10,  6 };
 
-  geo__point_t p = {0, 0};
+  struct geo__point_t p = {0, 0};
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_FALSE(collision__line_intersects_line(&v, &h1, NULL));
@@ -489,9 +489,9 @@ void perpendicular_lines_dont_intersect(){
 
 void diagonal_lines_intersect(){
 
-  geo__line_t l1 = { 0,   0, 10, -10 };
-  geo__line_t l2 = { 0, -10, 10,  0  };
-  geo__point_t p = {0, 0};
+  struct geo__line_t l1 = { 0,   0, 10, -10 };
+  struct geo__line_t l2 = { 0, -10, 10,  0  };
+  struct geo__point_t p = {0, 0};
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_line(&l1, &l2, NULL));
@@ -510,10 +510,10 @@ void diagonal_lines_intersect(){
 
 void diagonal_lines_intersect_2(){
 
-  geo__line_t a  = { 0,  0, 20, 10 };
-  geo__line_t b =  { 0, 10, 20,  0 };
+  struct geo__line_t a  = { 0,  0, 20, 10 };
+  struct geo__line_t b =  { 0, 10, 20,  0 };
 
-  geo__point_t p = {0, 0};
+  struct geo__point_t p = {0, 0};
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_line(&a, &b, NULL));
@@ -532,10 +532,10 @@ void diagonal_lines_intersect_2(){
 
 void diagonal_lines_intersect_3(){
 
-  geo__line_t a  = { 0,   0, 20, 10 };
-  geo__line_t b =  { 0, -10, 20, 30 };
+  struct geo__line_t a  = { 0,   0, 20, 10 };
+  struct geo__line_t b =  { 0, -10, 20, 30 };
 
-  geo__point_t p = {0, 0};
+  struct geo__point_t p = {0, 0};
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_line(&a, &b, NULL));
@@ -554,13 +554,13 @@ void diagonal_lines_intersect_3(){
 
 void diagonal_lines_dont_intersect(){
 
-  geo__line_t l  = { 0,  0, 10, 10 };
+  struct geo__line_t l  = { 0,  0, 10, 10 };
  
-  geo__line_t la = {  0, 10,  4, 6 };
-  geo__line_t lb = { -5,  5,  -1, 1 };
-  geo__line_t lc = { 11, 9, 20, 0 };
+  struct geo__line_t la = {  0, 10,  4, 6 };
+  struct geo__line_t lb = { -5,  5,  -1, 1 };
+  struct geo__line_t lc = { 11, 9, 20, 0 };
 
-  geo__point_t p = {0, 0};
+  struct geo__point_t p = {0, 0};
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_FALSE(collision__line_intersects_line(&l, &la, NULL));
@@ -603,10 +603,10 @@ void diagonal_lines_dont_intersect(){
 
 void diagonal_lines_dont_intersect_2(){
 
-  geo__line_t a = { 0,  0,   20, 10 };
-  geo__line_t b = { 0, 10,   20, 40 };
+  struct geo__line_t a = { 0,  0,   20, 10 };
+  struct geo__line_t b = { 0, 10,   20, 40 };
 
-  geo__point_t p = { 0, 0 };
+  struct geo__point_t p = { 0, 0 };
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, NULL));
@@ -623,11 +623,11 @@ void diagonal_lines_dont_intersect_2(){
 
 void vertical_parallel_lines_dont_intersect(){
 
-  geo__line_t a = { -10, 100,  -10, -100 };
-  geo__line_t b = {  30,  10,  30,    12 };
-  geo__line_t c = {  -30,  -1000,  -30,    -1200 };
+  struct geo__line_t a = { -10, 100,  -10, -100 };
+  struct geo__line_t b = {  30,  10,  30,    12 };
+  struct geo__line_t c = {  -30,  -1000,  -30,    -1200 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 99; p.y = 99;
   TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, NULL));
@@ -656,11 +656,11 @@ void vertical_parallel_lines_dont_intersect(){
 
 void horizontal_parallel_lines_dont_intersect(){
 
-  geo__line_t a = { -100,    10,  100,  10 };
-  geo__line_t b = {  10,     30,  12,    30 };
-  geo__line_t c = { -1000,  -30, -1200, -30 };
+  struct geo__line_t a = { -100,    10,  100,  10 };
+  struct geo__line_t b = {  10,     30,  12,    30 };
+  struct geo__line_t c = { -1000,  -30, -1200, -30 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 99; p.y = 99;
   TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, NULL));
@@ -689,11 +689,11 @@ void horizontal_parallel_lines_dont_intersect(){
 
 void diagonal_parallel_lines_dont_intersect(){
 
-  geo__line_t a = { -100,    10,  -120,  15 };
-  geo__line_t b = { -100,    30,  -120,  35 };
-  geo__line_t c = { -1000,  -30, -1020, -25 };
+  struct geo__line_t a = { -100,    10,  -120,  15 };
+  struct geo__line_t b = { -100,    30,  -120,  35 };
+  struct geo__line_t c = { -1000,  -30, -1020, -25 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 99; p.y = 99;
   TEST_ASSERT_FALSE(collision__line_intersects_line(&a, &b, NULL));
@@ -722,17 +722,17 @@ void diagonal_parallel_lines_dont_intersect(){
 
 void vertical_overlapping_lines_intersect(){
 
-  geo__line_t a = { -10, -100,  -10, 100 };
+  struct geo__line_t a = { -10, -100,  -10, 100 };
 
-  geo__line_t b = { -10,   10,  -10,  20 };
+  struct geo__line_t b = { -10,   10,  -10,  20 };
 
-  geo__line_t c = { -10, -100,  -10, -90 };
-  geo__line_t d = { -10,  -90,  -10, -100 };
+  struct geo__line_t c = { -10, -100,  -10, -90 };
+  struct geo__line_t d = { -10,  -90,  -10, -100 };
 
-  geo__line_t e = { -10,  110,  -10,  90 };
-  geo__line_t f = { -10,   90,  -10, 110 };
+  struct geo__line_t e = { -10,  110,  -10,  90 };
+  struct geo__line_t f = { -10,   90,  -10, 110 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_line(&a, &a, NULL));
@@ -773,17 +773,17 @@ void vertical_overlapping_lines_intersect(){
 }
 void horizontal_overlapping_lines_intersect(){
 
-  geo__line_t a = { -100, -10,  100, -10 };
+  struct geo__line_t a = { -100, -10,  100, -10 };
 
-  geo__line_t b = { 10,  -10,  20,  -10 };
+  struct geo__line_t b = { 10,  -10,  20,  -10 };
 
-  geo__line_t c = { -100, -10,  -90, -10 };
-  geo__line_t d = { -90,  -10,  -100, -10 };
+  struct geo__line_t c = { -100, -10,  -90, -10 };
+  struct geo__line_t d = { -90,  -10,  -100, -10 };
 
-  geo__line_t e = { 110, -10,  90,  -10 };
-  geo__line_t f = { 90,  -10,  110, -10 };
+  struct geo__line_t e = { 110, -10,  90,  -10 };
+  struct geo__line_t f = { 90,  -10,  110, -10 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_line(&b, &a, NULL));
@@ -817,14 +817,14 @@ void horizontal_overlapping_lines_intersect(){
 }
 void diagonal_overlapping_lines_intersect(){
 
-  geo__line_t a = {10, 10,   100, 100 };
+  struct geo__line_t a = {10, 10,   100, 100 };
 
-  geo__line_t b = {  0,   0,  100, 100 };
-  geo__line_t c = {110, 110,    0,   0 };
-  geo__line_t d = { 20,  20,   30,  30 };
-  geo__line_t e = { 30, 30,    20,  20 };
+  struct geo__line_t b = {  0,   0,  100, 100 };
+  struct geo__line_t c = {110, 110,    0,   0 };
+  struct geo__line_t d = { 20,  20,   30,  30 };
+  struct geo__line_t e = { 30, 30,    20,  20 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_line( &a, &a, NULL ));
@@ -861,12 +861,12 @@ void diagonal_overlapping_lines_intersect(){
 
 void horizontal_line_intersects_rectangle(){
 
-  geo__rect_t r = { 0, 0, 10, 10 };
+  struct geo__rect_t r = { 0, 0, 10, 10 };
 
-  geo__line_t l1 = { -5, 5,   15, 5 };
-  geo__line_t l2 = { 15, 5,   -5, 5 };
+  struct geo__line_t l1 = { -5, 5,   15, 5 };
+  struct geo__line_t l2 = { 15, 5,   -5, 5 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
@@ -885,12 +885,12 @@ void horizontal_line_intersects_rectangle(){
 
 void vertical_line_intersects_rectangle(){
 
-  geo__rect_t r = { 0, 0, 10, 10 };
+  struct geo__rect_t r = { 0, 0, 10, 10 };
 
-  geo__line_t l1 = { 5, -5,   5, 15 };
-  geo__line_t l2 = { 5, 15,   5, -5 };
+  struct geo__line_t l1 = { 5, -5,   5, 15 };
+  struct geo__line_t l2 = { 5, 15,   5, -5 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
@@ -909,13 +909,13 @@ void vertical_line_intersects_rectangle(){
 
 void diagonal_line_intersects_rectangle(){
 
-  geo__rect_t r = { 0, 0, 10, 10 };
+  struct geo__rect_t r = { 0, 0, 10, 10 };
 
-  geo__line_t l1 = { -5, -5,   15, 15 };
-  geo__line_t l2 = { 15, 15,   -5, -5 };
-  geo__line_t l3 = { 10, 10,   -5, -5 };
+  struct geo__line_t l1 = { -5, -5,   15, 15 };
+  struct geo__line_t l2 = { 15, 15,   -5, -5 };
+  struct geo__line_t l3 = { 10, 10,   -5, -5 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
@@ -933,25 +933,25 @@ void diagonal_line_intersects_rectangle(){
 
 void orthogonal_line_intersects_rectangle_corner(){
 
-  geo__rect_t r = { 3, 4, 5, 6 };
+  struct geo__rect_t r = { 3, 4, 5, 6 };
 
   /* lower left */
-  geo__line_t l1 = { 0, 4,  4, 4 }; geo__point_t i1 = { 3, 4 };
-  geo__line_t l2 = { 3, 0,  3, 4 }; geo__point_t i2 = { 3, 4 };
+  struct geo__line_t l1 = { 0, 4,  4, 4 }; struct geo__point_t i1 = { 3, 4 };
+  struct geo__line_t l2 = { 3, 0,  3, 4 }; struct geo__point_t i2 = { 3, 4 };
 
   /* lower right */
-  geo__line_t l3 = { 10, 4,  8, 4 }; geo__point_t i3 = { 8, 4 };
-  geo__line_t l4 = {  8, 0,  8, 8 }; geo__point_t i4 = { 8, 4 };
+  struct geo__line_t l3 = { 10, 4,  8, 4 }; struct geo__point_t i3 = { 8, 4 };
+  struct geo__line_t l4 = {  8, 0,  8, 8 }; struct geo__point_t i4 = { 8, 4 };
 
   /* upper left */
-  geo__line_t l5 = { 0, 10,  4, 10 }; geo__point_t i5 = { 3, 10 };
-  geo__line_t l6 = { 3, 15,  3, 4 }; geo__point_t i6 = { 3, 10 };
+  struct geo__line_t l5 = { 0, 10,  4, 10 }; struct geo__point_t i5 = { 3, 10 };
+  struct geo__line_t l6 = { 3, 15,  3, 4 }; struct geo__point_t i6 = { 3, 10 };
 
   /* upper right */
-  geo__line_t l7 = { 15, 10,  5, 10 }; geo__point_t i7 = { 8, 10 };
-  geo__line_t l8 = { 8, 15,  8, 4 }; geo__point_t i8 = { 8, 10 };
+  struct geo__line_t l7 = { 15, 10,  5, 10 }; struct geo__point_t i7 = { 8, 10 };
+  struct geo__line_t l8 = { 8, 15,  8, 4 }; struct geo__point_t i8 = { 8, 10 };
 
-  geo__point_t p = {0, 0};
+  struct geo__point_t p = {0, 0};
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
@@ -1004,17 +1004,17 @@ void orthogonal_line_intersects_rectangle_corner(){
 
 void line_from_inside_intersects_rectangle_at_origin(){
   
-  geo__rect_t r = { -50, -11, 10, 10 };
+  struct geo__rect_t r = { -50, -11, 10, 10 };
 
-  geo__line_t l1 = { -45, -5,  10,  -5 };  geo__point_t i1 = { -45, -5 };
-  geo__line_t l2 = { -45, -5,  -60, -5 };  geo__point_t i2 = { -45, -5 };
-  geo__line_t l3 = { -45, -5,  -45, -15 }; geo__point_t i3 = { -45, -5 };
-  geo__line_t l4 = { -45, -5,  -45, 15 };  geo__point_t i4 = { -45, -5 };
+  struct geo__line_t l1 = { -45, -5,  10,  -5 };  struct geo__point_t i1 = { -45, -5 };
+  struct geo__line_t l2 = { -45, -5,  -60, -5 };  struct geo__point_t i2 = { -45, -5 };
+  struct geo__line_t l3 = { -45, -5,  -45, -15 }; struct geo__point_t i3 = { -45, -5 };
+  struct geo__line_t l4 = { -45, -5,  -45, 15 };  struct geo__point_t i4 = { -45, -5 };
 
-  geo__line_t l5 = { -45, -5,  -45, -6 };  geo__point_t i5 = { -45, -5 };
+  struct geo__line_t l5 = { -45, -5,  -45, -6 };  struct geo__point_t i5 = { -45, -5 };
 
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
@@ -1049,25 +1049,25 @@ void line_from_inside_intersects_rectangle_at_origin(){
 
 void line_on_side_intersects_rectangle_at_origin(){
 
-  geo__rect_t r = { -100, 10, 30, 5 };
+  struct geo__rect_t r = { -100, 10, 30, 5 };
 
-  geo__line_t l1 = { -100, 12,  -110, 12 }; geo__point_t i1 = { -100, 12 };
-  geo__line_t l2 = { -100, 12,  -100, 10 }; geo__point_t i2 = { -100, 12 };
-  geo__line_t l3 = { -100, 12,  -100, 8 };  geo__point_t i3 = { -100, 12 };
+  struct geo__line_t l1 = { -100, 12,  -110, 12 }; struct geo__point_t i1 = { -100, 12 };
+  struct geo__line_t l2 = { -100, 12,  -100, 10 }; struct geo__point_t i2 = { -100, 12 };
+  struct geo__line_t l3 = { -100, 12,  -100, 8 };  struct geo__point_t i3 = { -100, 12 };
 
-  geo__line_t l4 = { -90, 15,  -100, 12 }; geo__point_t i4  = { -90, 15 };
-  geo__line_t l5 = { -90, 15,  -80,  15 }; geo__point_t i5  = { -90, 15 };
-  geo__line_t l6 = { -90, 15,  -100, 15 };  geo__point_t i6 = { -90, 15 };
+  struct geo__line_t l4 = { -90, 15,  -100, 12 }; struct geo__point_t i4  = { -90, 15 };
+  struct geo__line_t l5 = { -90, 15,  -80,  15 }; struct geo__point_t i5  = { -90, 15 };
+  struct geo__line_t l6 = { -90, 15,  -100, 15 };  struct geo__point_t i6 = { -90, 15 };
 
-  geo__line_t l7 = { -70, 12,  -60, 12 }; geo__point_t i7  = { -70, 12 };
-  geo__line_t l8 = { -70, 12,  -70,  15 }; geo__point_t i8 = { -70, 12 };
-  geo__line_t l9 = { -70, 12,  -70, 8 };  geo__point_t i9  = { -70, 12 };
+  struct geo__line_t l7 = { -70, 12,  -60, 12 }; struct geo__point_t i7  = { -70, 12 };
+  struct geo__line_t l8 = { -70, 12,  -70,  15 }; struct geo__point_t i8 = { -70, 12 };
+  struct geo__line_t l9 = { -70, 12,  -70, 8 };  struct geo__point_t i9  = { -70, 12 };
 
-  geo__line_t l10 = { -90, 10,  -90, 5 }; geo__point_t i10 = { -90, 10 };
-  geo__line_t l11 = { -90, 10,  -80, 10 }; geo__point_t i11 = { -90, 10 };
-  geo__line_t l12 = { -90, 10,  -100, 10 }; geo__point_t i12 = { -90, 10 };
+  struct geo__line_t l10 = { -90, 10,  -90, 5 }; struct geo__point_t i10 = { -90, 10 };
+  struct geo__line_t l11 = { -90, 10,  -80, 10 }; struct geo__point_t i11 = { -90, 10 };
+  struct geo__line_t l12 = { -90, 10,  -100, 10 }; struct geo__point_t i12 = { -90, 10 };
 
-  geo__point_t p;
+  struct geo__point_t p;
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));
@@ -1144,11 +1144,11 @@ void line_on_side_intersects_rectangle_at_origin(){
 
 
 void point_in_rectangle_middle(){
-  geo__rect_t r = { -5, -5, 10, 5 };
+  struct geo__rect_t r = { -5, -5, 10, 5 };
 
-  geo__point_t p1 = { -3, -3 };
-  geo__point_t p2 = {  0, -2 };
-  geo__point_t p3 = {  3, -1 };
+  struct geo__point_t p1 = { -3, -3 };
+  struct geo__point_t p2 = {  0, -2 };
+  struct geo__point_t p3 = {  3, -1 };
 
   TEST_ASSERT_TRUE(collision__point_in_rectangle( &p1, &r ));
   TEST_ASSERT_TRUE(collision__point_in_rectangle( &p2, &r ));
@@ -1156,17 +1156,17 @@ void point_in_rectangle_middle(){
 }
 
 void point_in_rectangle_edge(){
-  geo__rect_t r = { -5, -5, 10, 5 };
+  struct geo__rect_t r = { -5, -5, 10, 5 };
 
-  geo__point_t p1 = { -5, -5 };
-  geo__point_t p2 = {  5, -5 };
-  geo__point_t p3 = {  5, 0 };
-  geo__point_t p4 = {  -5, 0 };
+  struct geo__point_t p1 = { -5, -5 };
+  struct geo__point_t p2 = {  5, -5 };
+  struct geo__point_t p3 = {  5, 0 };
+  struct geo__point_t p4 = {  -5, 0 };
 
-  geo__point_t p5 = { 0, -5 };
-  geo__point_t p6 = {  5, -3 };
-  geo__point_t p7 = {  0, 0 };
-  geo__point_t p8 = {  -5, -2 };
+  struct geo__point_t p5 = { 0, -5 };
+  struct geo__point_t p6 = {  5, -3 };
+  struct geo__point_t p7 = {  0, 0 };
+  struct geo__point_t p8 = {  -5, -2 };
 
   TEST_ASSERT_TRUE(collision__point_in_rectangle( &p1, &r ));
   TEST_ASSERT_TRUE(collision__point_in_rectangle( &p2, &r ));
@@ -1180,17 +1180,17 @@ void point_in_rectangle_edge(){
 }
 
 void point_outside_rectangle(){
-  geo__rect_t r = { -5, -5, 10, 5 };
+  struct geo__rect_t r = { -5, -5, 10, 5 };
 
-  geo__point_t p1 = { -6, -6 };
-  geo__point_t p2 = {  6, -6 };
-  geo__point_t p3 = {  6, 0 };
-  geo__point_t p4 = {  -6, 0 };
+  struct geo__point_t p1 = { -6, -6 };
+  struct geo__point_t p2 = {  6, -6 };
+  struct geo__point_t p3 = {  6, 0 };
+  struct geo__point_t p4 = {  -6, 0 };
 
-  geo__point_t p5 = { 0, -6 };
-  geo__point_t p6 = {  6, -3 };
-  geo__point_t p7 = {  0, 1 };
-  geo__point_t p8 = {  -6, -2 };
+  struct geo__point_t p5 = { 0, -6 };
+  struct geo__point_t p6 = {  6, -3 };
+  struct geo__point_t p7 = {  0, 1 };
+  struct geo__point_t p8 = {  -6, -2 };
 
   TEST_ASSERT_FALSE(collision__point_in_rectangle( &p1, &r ));
   TEST_ASSERT_FALSE(collision__point_in_rectangle( &p2, &r ));
@@ -1205,18 +1205,18 @@ void point_outside_rectangle(){
 
 void point_on_vertical_line(){
 
-  geo__line_t l1 = { 1, 5,    1, 100 };
-  geo__line_t l2 = { 1, 100,  1,   5 };
+  struct geo__line_t l1 = { 1, 5,    1, 100 };
+  struct geo__line_t l2 = { 1, 100,  1,   5 };
 
-  geo__point_t end1 = { 1, 5 };
-  geo__point_t end2 = { 1, 100 };
+  struct geo__point_t end1 = { 1, 5 };
+  struct geo__point_t end2 = { 1, 100 };
 
-  geo__point_t middle = { 1, 50 };
+  struct geo__point_t middle = { 1, 50 };
 
-  geo__point_t off_end1 = { 1, 0 };
-  geo__point_t off_end2 = { 1, 110 };
+  struct geo__point_t off_end1 = { 1, 0 };
+  struct geo__point_t off_end2 = { 1, 110 };
 
-  geo__point_t off_middle = { 0, 50 };
+  struct geo__point_t off_middle = { 0, 50 };
 
   TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l1 ) );
   TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l2 ) );
@@ -1239,18 +1239,18 @@ void point_on_vertical_line(){
 
 void point_on_horizontal_line(){
 
-  geo__line_t l1 = { 5,   1,    100, 1 };
-  geo__line_t l2 = { 100, 1,      5, 1 };
+  struct geo__line_t l1 = { 5,   1,    100, 1 };
+  struct geo__line_t l2 = { 100, 1,      5, 1 };
 
-  geo__point_t end1 = { 5, 1 };
-  geo__point_t end2 = { 100, 1 };
+  struct geo__point_t end1 = { 5, 1 };
+  struct geo__point_t end2 = { 100, 1 };
 
-  geo__point_t middle = { 50, 1 };
+  struct geo__point_t middle = { 50, 1 };
 
-  geo__point_t off_end1 = { 0, 1 };
-  geo__point_t off_end2 = { 110, 1 };
+  struct geo__point_t off_end1 = { 0, 1 };
+  struct geo__point_t off_end2 = { 110, 1 };
 
-  geo__point_t off_middle = { 50, 0 };
+  struct geo__point_t off_middle = { 50, 0 };
 
   TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l1 ) );
   TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l2 ) );
@@ -1273,18 +1273,18 @@ void point_on_horizontal_line(){
 
 void point_on_diagonal_line(){
 
-  geo__line_t l1 = { 5,   1,    105, 5 };
-  geo__line_t l2 = { 105, 5,      5, 1 };
+  struct geo__line_t l1 = { 5,   1,    105, 5 };
+  struct geo__line_t l2 = { 105, 5,      5, 1 };
 
-  geo__point_t end1 = { 5, 1 };
-  geo__point_t end2 = { 105, 5 };
+  struct geo__point_t end1 = { 5, 1 };
+  struct geo__point_t end2 = { 105, 5 };
 
-  geo__point_t middle = { 55, 3 };
+  struct geo__point_t middle = { 55, 3 };
 
-  geo__point_t off_end1 = { 205, 9 };
-  geo__point_t off_end2 = { -95, -3 };
+  struct geo__point_t off_end1 = { 205, 9 };
+  struct geo__point_t off_end2 = { -95, -3 };
 
-  geo__point_t off_middle = { 50, 0 };
+  struct geo__point_t off_middle = { 50, 0 };
 
   TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l1 ) );
   TEST_ASSERT_TRUE( collision__point_on_line( &end1, &l2 ) );
@@ -1308,10 +1308,10 @@ void point_on_diagonal_line(){
  
 void moving_rect_doesnt_intersect_no_distance(){
 
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { -100, -100, 10, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { -100, -100, 10, 10 };
 
-  geo__vector_t v = { 10, 0 };
+  struct geo__vector_t v = { 10, 0 };
 
   bool_t result = 
     collision__moving_rectangle_intersects_rectangle( &a, &v, &b, NULL );
@@ -1321,10 +1321,10 @@ void moving_rect_doesnt_intersect_no_distance(){
 
 void moving_rect_doesnt_intersect(){
 
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { -100, -100, 10, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { -100, -100, 10, 10 };
 
-  geo__vector_t v = { 10, 0 };
+  struct geo__vector_t v = { 10, 0 };
 
   int distance = 0;
 
@@ -1337,10 +1337,10 @@ void moving_rect_doesnt_intersect(){
 
 void moving_rect_intersects_no_distance(){
 
-  geo__rect_t a = { 0, 0, 10, 10 };
-  geo__rect_t b = { 0, 0, 20, 10 };
+  struct geo__rect_t a = { 0, 0, 10, 10 };
+  struct geo__rect_t b = { 0, 0, 20, 10 };
 
-  geo__vector_t v = { 10, 0 };
+  struct geo__vector_t v = { 10, 0 };
 
   bool_t result = 
     collision__moving_rectangle_intersects_rectangle( &a, &v, &b, NULL );
@@ -1350,10 +1350,10 @@ void moving_rect_intersects_no_distance(){
 
 void moving_rect_intersects(){
 
-  geo__rect_t a = {  0, 0, 10, 10 };
-  geo__rect_t b = { 20, 0, 10, 10 };
+  struct geo__rect_t a = {  0, 0, 10, 10 };
+  struct geo__rect_t b = { 20, 0, 10, 10 };
 
-  geo__vector_t v = { 10, 0 };
+  struct geo__vector_t v = { 10, 0 };
 
   int distance = 0;
 
@@ -1366,10 +1366,10 @@ void moving_rect_intersects(){
 
 void moving_rect_left_to_right_intersects_top(){
 
-  geo__rect_t a = {  0, 0, 10, 10 };
-  geo__rect_t b = { 20, -5, 10, 10 };
+  struct geo__rect_t a = {  0, 0, 10, 10 };
+  struct geo__rect_t b = { 20, -5, 10, 10 };
 
-  geo__vector_t v = { 100, 0 };
+  struct geo__vector_t v = { 100, 0 };
 
   int distance = 0;
 
@@ -1382,10 +1382,10 @@ void moving_rect_left_to_right_intersects_top(){
 
 void moving_rect_left_to_right_intersects_bottom(){
 
-  geo__rect_t a = {  0, 0, 10, 10 };
-  geo__rect_t b = { 20, 5, 10, 10 };
+  struct geo__rect_t a = {  0, 0, 10, 10 };
+  struct geo__rect_t b = { 20, 5, 10, 10 };
 
-  geo__vector_t v = { 100, 0 };
+  struct geo__vector_t v = { 100, 0 };
 
   int distance = 0;
 
@@ -1399,10 +1399,10 @@ void moving_rect_left_to_right_intersects_bottom(){
 
 void moving_rect_right_to_left_intersects_top(){
 
-  geo__rect_t a = {  40, 0, 10, 10 };
-  geo__rect_t b = { 20, -5, 10, 10 };
+  struct geo__rect_t a = {  40, 0, 10, 10 };
+  struct geo__rect_t b = { 20, -5, 10, 10 };
 
-  geo__vector_t v = { -100, 0 };
+  struct geo__vector_t v = { -100, 0 };
 
   int distance = 0;
 
@@ -1415,10 +1415,10 @@ void moving_rect_right_to_left_intersects_top(){
 
 void moving_rect_right_to_left_intersects_bottom(){
 
-  geo__rect_t a = {  40, 0, 10, 10 };
-  geo__rect_t b = { 20, 5, 10, 10 };
+  struct geo__rect_t a = {  40, 0, 10, 10 };
+  struct geo__rect_t b = { 20, 5, 10, 10 };
 
-  geo__vector_t v = { -100, 0 };
+  struct geo__vector_t v = { -100, 0 };
 
   int distance = 0;
 
@@ -1431,10 +1431,10 @@ void moving_rect_right_to_left_intersects_bottom(){
 
 void moving_rect_top_to_bottom_intersects_left(){
 
-  geo__rect_t a = {  15, 15, 10, 10 };
-  geo__rect_t b = { 20, -5, 10, 10 };
+  struct geo__rect_t a = {  15, 15, 10, 10 };
+  struct geo__rect_t b = { 20, -5, 10, 10 };
 
-  geo__vector_t v = { 0, -100 };
+  struct geo__vector_t v = { 0, -100 };
 
   int distance = 0;
 
@@ -1447,10 +1447,10 @@ void moving_rect_top_to_bottom_intersects_left(){
 
 void moving_rect_top_to_bottom_intersects_right(){
 
-  geo__rect_t a = {  25, 15, 10, 10 };
-  geo__rect_t b = { 20, -5, 10, 10 };
+  struct geo__rect_t a = {  25, 15, 10, 10 };
+  struct geo__rect_t b = { 20, -5, 10, 10 };
 
-  geo__vector_t v = { 0, -100 };
+  struct geo__vector_t v = { 0, -100 };
 
   int distance = 0;
 
@@ -1463,10 +1463,10 @@ void moving_rect_top_to_bottom_intersects_right(){
 
 void moving_rect_bottom_to_top_intersects_left(){
 
-  geo__rect_t a = {  15, -25, 10, 10 };
-  geo__rect_t b = { 20, -5, 10, 10 };
+  struct geo__rect_t a = {  15, -25, 10, 10 };
+  struct geo__rect_t b = { 20, -5, 10, 10 };
 
-  geo__vector_t v = { 0, 100 };
+  struct geo__vector_t v = { 0, 100 };
 
   int distance = 0;
 
@@ -1479,10 +1479,10 @@ void moving_rect_bottom_to_top_intersects_left(){
 
 void moving_rect_bottom_to_top_intersects_right(){
 
-  geo__rect_t a = {  25, -25, 10, 10 };
-  geo__rect_t b = { 20, -5, 10, 10 };
+  struct geo__rect_t a = {  25, -25, 10, 10 };
+  struct geo__rect_t b = { 20, -5, 10, 10 };
 
-  geo__vector_t v = { 0, 100 };
+  struct geo__vector_t v = { 0, 100 };
 
   int distance = 0;
 

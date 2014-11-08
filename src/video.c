@@ -241,6 +241,9 @@ int video__begin_blits( const struct video__blit_params_t* params ){
 	      params->color.blue, 
 	      params->color.alpha);
   }
+  else{
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+  }
 
   if ( params->suppress_transparency ){
       glDisable(GL_BLEND);
@@ -269,8 +272,8 @@ int video__end_blits(){
   blit_operation.params = NULL;
 }
 
-int video__blit( const geo__rect_t* src,
-		 const geo__rect_t* dest ){
+int video__blit( const struct geo__rect_t* src,
+		 const struct geo__rect_t* dest ){
 
   if ( !blit_operation.in_progress ) {
     return UNKNOWN_FAILURE;
@@ -312,8 +315,8 @@ int video__blit_verts( float src_x1, float src_y1,
 }
 
 int video__blit_single(const struct video__texture_handle_t* texture_handle, 
-		       const geo__rect_t* src,
-		       const geo__rect_t* dest){
+		       const struct geo__rect_t* src,
+		       const struct geo__rect_t* dest){
 
   if ( blit_operation.in_progress ) {
     return UNKNOWN_FAILURE;
@@ -339,7 +342,7 @@ uint32_t video__get_texture_height( const struct video__texture_handle_t* textur
   return texture_handle->height;
 }
 
-int video__rect(const geo__rect_t* rect,
+int video__rect(const struct geo__rect_t* rect,
 		uint8_t red,
 		uint8_t green,
 		uint8_t blue,
@@ -370,7 +373,7 @@ int video__rect(const geo__rect_t* rect,
   return SUCCESS;
 }
 
-int video__line(const geo__line_t* line,
+int video__line(const struct geo__line_t* line,
 		uint8_t red,
 		uint8_t green,
 		uint8_t blue,

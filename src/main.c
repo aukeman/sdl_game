@@ -8,8 +8,6 @@
 #include <background.h>
 #include <stopwatch.h>
 
-#include <update_functions.h>
-
 #include <unistd.h>
 #include <stdio.h>
 #include <math.h>
@@ -67,7 +65,7 @@ int main( int argc, char** argv ) {
 
   video__clearscreen();
 
-  uint32_t pos_x = 1 << 2;
+  uint32_t pos_x = 0;
   uint32_t pos_y = 0;
 
   while ( keep_looping ) {
@@ -102,16 +100,16 @@ int main( int argc, char** argv ) {
     background__draw(pos_x, pos_y, background);
     stopwatch__stop(&draw_bg_sw);
 
-    /* int player_idx = 0; */
-    /* for ( player_idx = 0; player_idx < 2; ++player_idx ){ */
-    /*   stopwatch__start(&draw_players_sw); */
-    /*   players[player_idx].prototype->draw_fxn( &players[player_idx] ); */
-    /*   stopwatch__stop(&draw_players_sw); */
+    int player_idx = 0;
+    for ( player_idx = 0; player_idx < 2; ++player_idx ){
+      stopwatch__start(&draw_players_sw);
+      players[player_idx].prototype->draw_fxn( &players[player_idx] );
+      stopwatch__stop(&draw_players_sw);
       
-    /*   stopwatch__start(&update_players_sw); */
-    /*   players[player_idx].prototype->update_fxn( &players[player_idx], frame_length ); */
-    /*   stopwatch__stop(&update_players_sw); */
-    /* } */
+      stopwatch__start(&update_players_sw);
+      players[player_idx].prototype->update_fxn( &players[player_idx], frame_length );
+      stopwatch__stop(&update_players_sw);
+    }
 
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
@@ -139,8 +137,8 @@ int main( int argc, char** argv ) {
 
   stopwatch__dump(&process_events_sw, "Process Events", stdout);
   stopwatch__dump(&draw_bg_sw, "Draw Background", stdout);
-  /* stopwatch__dump(&draw_players_sw, "Draw Players", stdout); */
-  /* stopwatch__dump(&update_players_sw, "Update Players", stdout); */
+  stopwatch__dump(&draw_players_sw, "Draw Players", stdout);
+  stopwatch__dump(&update_players_sw, "Update Players", stdout);
   stopwatch__dump(&draw_stats_sw, "Draw Stats", stdout);
   stopwatch__dump(&flip_page_sw, "Flip Page", stdout);
   stopwatch__dump(&frame_sw, "Frame", stdout);

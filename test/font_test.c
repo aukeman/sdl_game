@@ -7,7 +7,7 @@
 #include <SDL/SDL.h>
 #include <geometry.h>
 
-typedef geo__rect_t ascii_to_rect_t[256];
+typedef struct geo__rect_t ascii_to_rect_t[256];
 struct font__handle_t {
   struct video__texture_handle_t* texture;
   ascii_to_rect_t ascii_to_rect;

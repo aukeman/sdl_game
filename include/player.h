@@ -19,8 +19,8 @@ struct player_prototype_t{
 
 struct player_t{
 
-  geo__point_t position;
-  geo__vector_t velocity;
+  struct geo__point_t position;
+  struct geo__vector_t velocity;
 
   const struct player_prototype_t* prototype;
   const struct control__state_t* control;

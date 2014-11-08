@@ -1,8 +1,13 @@
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 
+#include <types.h>
+
 #include <stdint.h>
 #include <stddef.h>
+
+struct geo__rect_t;
+struct geo__vector_t;
 
 enum{
   BACKGROUND__ERROR_CODE_BASE = 0x0,
@@ -16,12 +21,12 @@ enum{
 
 
 enum background__tile_collision_type_e{
-  BACKGROUND__COLLISION_NONE,
-  BACKGROUND__COLLISION_TOP,
-  BACKGROUND__COLLISION_LEFT,
-  BACKGROUND__COLLISION_RIGHT,
-  BACKGROUND__COLLISION_BOTTOM,
-  BACKGROUND__COLLISION_ALL
+  BACKGROUND__COLLISION_NONE = 0x0,
+  BACKGROUND__COLLISION_TOP = 0x1,
+  BACKGROUND__COLLISION_LEFT = 0x2,
+  BACKGROUND__COLLISION_RIGHT = 0x4,
+  BACKGROUND__COLLISION_BOTTOM = 0x8,
+  BACKGROUND__COLLISION_ALL = 0x0F
 };
 
 struct background_t;
@@ -79,6 +84,10 @@ struct background__tile_t{
 
 void background__tile_basic_draw( size_t idx_x, 
 				  size_t idx_y, 
-				  const struct background__tile_t* background );
+				  const struct background__tile_t* tile );
+
+bool_t background__collision_test( const struct background_t* background,
+				   const struct geo__rect_t* position,
+				   struct geo__vector_t* velocity );
 
 #endif
