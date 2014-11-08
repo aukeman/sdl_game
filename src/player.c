@@ -34,16 +34,31 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
   bbox.x = player->position.x;
   bbox.y = player->position.y;
 
+  bool_t top_collision, bottom_collision, left_collision, right_collision;
+  
   struct geo__vector_t movement_this_frame = 
     { (player->velocity.x * frame_length)/1000, 
       (player->velocity.y * frame_length)/1000 };
 
   background__collision_test( player->background,
 			      &bbox,
-			      &movement_this_frame );
+			      &movement_this_frame,
+			      &top_collision,
+			      &bottom_collision,
+			      &left_collision,
+			      &right_collision );
 
   player->position.x += movement_this_frame.x;
   player->position.y += movement_this_frame.y;
 
+  if ( (top_collision && player->velocity.y < 0) ||
+       (bottom_collision && 0 < player->velocity.y) ){
+    player->velocity.y = 0;
+  }
+
+  if ( (left_collision && player->velocity.x < 0) ||
+       (right_collision && 0 < player->velocity.x) ){
+    player->velocity.x = 0;
+  }
 }
 

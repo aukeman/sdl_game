@@ -261,9 +261,14 @@ void background__tile_basic_draw( size_t idx_x,
 
 bool_t background__collision_test( const struct background_t* background,
 				   const struct geo__rect_t* position,
-				   struct geo__vector_t* velocity ){
+				   struct geo__vector_t* velocity,
+				   bool_t* top_collision,
+				   bool_t* bottom_collision,
+				   bool_t* left_collision,
+				   bool_t* right_collision ){
 
-  bool_t result = FALSE;
+  *top_collision = *bottom_collision = 
+    *left_collision = *right_collision = FALSE;
 
   /* get the range of background tiles to check */
   int32_t ul_idx_x = utils__pos2screen(position->x) / background->tile_width;
@@ -307,10 +312,6 @@ bool_t background__collision_test( const struct background_t* background,
       utils__screen2pos(background->tile_width), 
       utils__screen2pos(background->tile_height) };
 
-
-  struct geo__point_t stopping_point;
-  struct geo__line_t translation = { position->x, position->y, 0, 0 };
-
   int32_t idx_x, idx_y;
   for ( idx_x = ul_idx_x; idx_x <= lr_idx_x; ++idx_x ){
     for ( idx_y = ul_idx_y; idx_y <= lr_idx_y; ++idx_y ){
@@ -319,27 +320,58 @@ bool_t background__collision_test( const struct background_t* background,
 
       int32_t distance_until_collision = 0;
 
+      struct geo__vector_t x_velocity = { velocity->x, 0           };
+      struct geo__vector_t y_velocity = { 0,           velocity->y };
 
-      if ( background->tiles[idx_x][idx_y].prototype->collision_type != BACKGROUND__COLLISION_NONE &&
-	   collision__moving_rectangle_intersects_rectangle( position,
-							     velocity,
-							     &tile_position,
-							     &distance_until_collision ) ){
-	result = TRUE;
+      enum background__tile_collision_type_e collision_type = 
+	background->tiles[idx_x][idx_y].prototype->collision_type;
 
-	translation.x2 = position->x + velocity->x;
-	translation.y2 = position->y + velocity->y;
+      /* test for collisions with walls */
+      if (((0 < velocity->x) && 
+	   (collision_type == BACKGROUND__COLLISION_LEFT)) ||
+	  ((velocity->x < 0) && 
+	   (collision_type == BACKGROUND__COLLISION_RIGHT)) ||
+	  ((velocity->x != 0) && 
+	   (collision_type == BACKGROUND__COLLISION_ALL))){
 
-	geo__point_on_line_at_distance( &translation, 
-					distance_until_collision, 
-					&stopping_point );
+	if ( collision__moving_rectangle_intersects_rectangle( position,
+							       &x_velocity,
+							       &tile_position,
+							       &distance_until_collision ) ){
+	  *left_collision = (velocity->x < 0);
+	  *right_collision = (0 < velocity->x);
 
-	velocity->x = (stopping_point.x - position->x);
-	velocity->y = (stopping_point.y - position->y);
+	  x_velocity.x = (x_velocity.x / abs(x_velocity.x)) * distance_until_collision;
+	}
       }
+
+      /* test for collisions with floors and ceilings) */
+      if (((0 < velocity->y) && 
+	   (collision_type == BACKGROUND__COLLISION_TOP)) ||
+	  ((velocity->y < 0) && 
+	   (collision_type == BACKGROUND__COLLISION_BOTTOM)) ||
+	  ((velocity->y != 0) && 
+	   (collision_type == BACKGROUND__COLLISION_ALL))){
+
+	if ( collision__moving_rectangle_intersects_rectangle( position,
+							       &y_velocity,
+							       &tile_position,
+							       &distance_until_collision ) ){
+	  *top_collision = (velocity->y < 0);
+	  *bottom_collision = (0 < velocity->y);
+
+	  y_velocity.y = (y_velocity.y / abs(y_velocity.y)) * distance_until_collision;
+	}
+      }
+
+      velocity->x = x_velocity.x;
+      velocity->y = y_velocity.y;
     }
   }
 
-  return result;
+return (*top_collision || 
+	*bottom_collision || 
+	*left_collision || 
+	*right_collision );
 }
 

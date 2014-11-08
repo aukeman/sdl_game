@@ -88,6 +88,10 @@ void background__tile_basic_draw( size_t idx_x,
 
 bool_t background__collision_test( const struct background_t* background,
 				   const struct geo__rect_t* position,
-				   struct geo__vector_t* velocity );
+				   struct geo__vector_t* velocity,
+				   bool_t* top_collision,
+				   bool_t* bottom_collision,
+				   bool_t* left_collision,
+				   bool_t* right_collision );
 
 #endif
