@@ -19,7 +19,7 @@ void* linked_list__remove(void* item, item_equality_fxn item_equality, struct li
 
 bool_t linked_list__empty(const struct linked_list_t* ll);
 
-void* linked_list__begin(struct linked_list_t* ll);
-void* linked_list__next();
+void* linked_list__begin(struct linked_list_t* ll, struct linked_list__node_t** iter);
+void* linked_list__next(struct linked_list__node_t** iter);
 
 #endif

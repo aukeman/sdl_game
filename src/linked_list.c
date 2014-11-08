@@ -12,8 +12,6 @@ struct linked_list__node_t{
   struct linked_list__node_t* next;
 };
 
-struct linked_list__node_t* _iterator;
-
 int linked_list__setup(struct linked_list_t* ll){
   ll->head = NULL;
 
@@ -88,20 +86,26 @@ bool_t linked_list__empty(const struct linked_list_t* ll){
   return !ll || (ll->head == NULL);
 }
 
-void* linked_list__begin(struct linked_list_t* ll){
-
-  _iterator = ll->head;
-
-  return linked_list__next();
-}
-
-void* linked_list__next(){
+void* linked_list__begin(struct linked_list_t* ll, struct linked_list__node_t** iter){
 
   void* result = NULL;
 
-  if ( _iterator ){
-    result = _iterator->data;
-    _iterator = _iterator->next;
+  if ( iter ){
+    *iter = ll->head;
+    result = linked_list__next(iter);
+  }
+
+  return result;
+}
+
+void* linked_list__next(struct linked_list__node_t** iter){
+
+  void* result = NULL;
+
+  if ( iter && *iter ){
+
+    result = (*iter)->data;
+    *iter = (*iter)->next;
   }
 
   return result;

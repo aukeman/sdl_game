@@ -146,9 +146,11 @@ void _handle_keydown(events__type_e event,
 		     const events__event_parameter_t* param, 
 		     void* context){
   
+
+  struct linked_list__node_t* iter;
   const struct control_mapping_t* mapping =
-    (const struct control_mapping_t*) 
-    linked_list__begin(&keyboard_mappings[param->key.value]);
+    (const struct control_mapping_t*)
+    linked_list__begin(&keyboard_mappings[param->key.value], &iter);
 
   while ( mapping ){
 
@@ -166,7 +168,7 @@ void _handle_keydown(events__type_e event,
     }
     
     mapping = 
-      (const struct control_mapping_t*)linked_list__next();
+      (const struct control_mapping_t*)linked_list__next(&iter);
   }
 }
 
@@ -174,9 +176,10 @@ void _handle_keyup(events__type_e event,
 		   const events__event_parameter_t* param, 
 		   void* context){
 
+  struct linked_list__node_t* iter;
   const struct control_mapping_t* mapping =
     (const struct control_mapping_t*) 
-    linked_list__begin(&keyboard_mappings[param->key.value]);
+    linked_list__begin(&keyboard_mappings[param->key.value], &iter);
 
   while ( mapping ){
 
@@ -194,7 +197,7 @@ void _handle_keyup(events__type_e event,
     }
 
     mapping = 
-      (const struct control_mapping_t*)linked_list__next();
+      (const struct control_mapping_t*)linked_list__next(&iter);
   }
 }
 
@@ -202,9 +205,10 @@ void _handle_axis(events__type_e event,
 		  const events__event_parameter_t* param, 
 		  void* context){
 
+  struct linked_list__node_t* iter;
   const struct control_mapping_t* mapping =
     (const struct control_mapping_t*) 
-    linked_list__begin(&js_axis_mappings[param->js_axis.joystick_id][param->js_axis.axis_id]);
+    linked_list__begin(&js_axis_mappings[param->js_axis.joystick_id][param->js_axis.axis_id], &iter);
 
   while ( mapping ){
 
@@ -229,7 +233,7 @@ void _handle_axis(events__type_e event,
     }
 
     mapping = 
-      (const struct control_mapping_t*)linked_list__next();
+      (const struct control_mapping_t*)linked_list__next(&iter);
   }
 }
 
@@ -237,9 +241,10 @@ void _handle_button(events__type_e event,
 		    const events__event_parameter_t* param, 
 		    void* context){
 
+  struct linked_list__node_t* iter;
   const struct control_mapping_t* mapping =
     (const struct control_mapping_t*) 
-    linked_list__begin(&js_button_mappings[param->js_button.joystick_id][param->js_button.button_id]);
+    linked_list__begin(&js_button_mappings[param->js_button.joystick_id][param->js_button.button_id], &iter);
 
   while ( mapping ){
 
@@ -257,7 +262,7 @@ void _handle_button(events__type_e event,
     }
 
     mapping = 
-      (const struct control_mapping_t*)linked_list__next();
+      (const struct control_mapping_t*)linked_list__next(&iter);
   }
 }
 

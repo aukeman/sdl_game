@@ -300,9 +300,10 @@ int _invoke_callback( events__type_e event_type,
   if ( EVENTS__TYPE_NONE < event_type &&
        event_type < EVENTS__TYPE_LAST ){
 
+    struct linked_list__node_t* iter;
     struct events__callback_record_t* record =
       (struct events__callback_record_t*)
-      linked_list__begin(&events__callbacks[event_type]);
+      linked_list__begin(&events__callbacks[event_type], &iter);
 
     while ( record ){
 
@@ -315,7 +316,7 @@ int _invoke_callback( events__type_e event_type,
 	result = SUCCESS;
       }
       
-      record = (struct events__callback_record_t*)linked_list__next();
+      record = (struct events__callback_record_t*)linked_list__next(&iter);
     }
   }
   else{

@@ -10,6 +10,7 @@ bool_t integer_equality( const void* a, const void* b ){
   return *(int*)a == *(int*)b;
 }
 
+struct linked_list__node_t* iter = NULL;
 struct linked_list_t ll;
 
 int setup(){
@@ -24,8 +25,8 @@ void empty_list(){
 
   int one = 1;
 
-  TEST_ASSERT_NULL( linked_list__begin(&ll) );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_NULL( linked_list__begin(&ll, &iter) );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 
   TEST_ASSERT_NULL( linked_list__remove(&one, integer_equality, &ll) );
 
@@ -37,8 +38,8 @@ void single_element(){
 
   TEST_ASSERT_SUCCESS( linked_list__add(&one, &ll) );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_NULL( linked_list__next() );  
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );  
 }
 
 void two_elements(){
@@ -49,9 +50,9 @@ void two_elements(){
   TEST_ASSERT_SUCCESS( linked_list__add(&one, &ll) );
   TEST_ASSERT_SUCCESS( linked_list__add(&two, &ll) );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &two );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &two );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 }
 
 void three_elements(){
@@ -64,10 +65,10 @@ void three_elements(){
   TEST_ASSERT_SUCCESS( linked_list__add(&two, &ll) );
   TEST_ASSERT_SUCCESS( linked_list__add(&three, &ll) );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &two );
-  TEST_ASSERT_PTR( linked_list__next(), &three );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &two );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &three );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 
 }
 
@@ -83,18 +84,18 @@ void remove_from_head(){
 
   TEST_ASSERT_PTR( linked_list__remove(&one, NULL, &ll), &one );
   
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &two );
-  TEST_ASSERT_PTR( linked_list__next(), &three );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &two );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &three );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 
   TEST_ASSERT_PTR( linked_list__remove(&two, NULL, &ll), &two );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &three );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &three );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 
   TEST_ASSERT_PTR( linked_list__remove(&three, NULL, &ll), &three );
 
-  TEST_ASSERT_NULL( linked_list__begin(&ll) );
+  TEST_ASSERT_NULL( linked_list__begin(&ll, &iter) );
 }
 
 void remove_from_tail(){
@@ -109,18 +110,18 @@ void remove_from_tail(){
 
   TEST_ASSERT_PTR( linked_list__remove(&three, NULL, &ll), &three );
   
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &two );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &two );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 
   TEST_ASSERT_PTR( linked_list__remove(&two, NULL, &ll), &two );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 
   TEST_ASSERT_PTR( linked_list__remove(&one, NULL, &ll), &one );
 
-  TEST_ASSERT_NULL( linked_list__begin(&ll) );
+  TEST_ASSERT_NULL( linked_list__begin(&ll, &iter) );
 }
 
 void remove_from_middle(){
@@ -133,16 +134,16 @@ void remove_from_middle(){
   TEST_ASSERT_SUCCESS( linked_list__add(&two, &ll) );
   TEST_ASSERT_SUCCESS( linked_list__add(&three, &ll) );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &two );
-  TEST_ASSERT_PTR( linked_list__next(), &three );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &two );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &three );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 
   TEST_ASSERT_PTR( linked_list__remove(&two, NULL, &ll), &two );
   
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &three );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &three );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 }
 
 void remove_from_head_and_add(){
@@ -161,9 +162,9 @@ void remove_from_head_and_add(){
   
   TEST_ASSERT_SUCCESS( linked_list__add(&four, &ll) );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &three );
-  TEST_ASSERT_PTR( linked_list__next(), &four );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &three );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &four );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 }
 
 void remove_from_tail_and_add(){
@@ -182,9 +183,9 @@ void remove_from_tail_and_add(){
   
   TEST_ASSERT_SUCCESS( linked_list__add(&four, &ll) );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &four );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &four );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 }
 
 void remove_from_middle_and_add(){
@@ -202,10 +203,10 @@ void remove_from_middle_and_add(){
   
   TEST_ASSERT_SUCCESS( linked_list__add(&four, &ll) );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &three );
-  TEST_ASSERT_PTR( linked_list__next(), &four );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &three );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &four );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 }
 
 void failed_remove(){
@@ -221,10 +222,10 @@ void failed_remove(){
 
   TEST_ASSERT_NULL( linked_list__remove(&four, NULL, &ll) );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &two );
-  TEST_ASSERT_PTR( linked_list__next(), &three );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &two );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &three );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 }
 
 void free_on_teardown(){
@@ -257,9 +258,9 @@ void custom_equality_check(){
   TEST_ASSERT_NULL( linked_list__remove(&other_two, NULL, &ll) );
   TEST_ASSERT_PTR( linked_list__remove(&other_two, integer_equality, &ll), &two );
 
-  TEST_ASSERT_PTR( linked_list__begin(&ll), &one );
-  TEST_ASSERT_PTR( linked_list__next(), &three );
-  TEST_ASSERT_NULL( linked_list__next() );
+  TEST_ASSERT_PTR( linked_list__begin(&ll, &iter), &one );
+  TEST_ASSERT_PTR( linked_list__next(&iter), &three );
+  TEST_ASSERT_NULL( linked_list__next(&iter) );
 }
 
 void test_empty(){
