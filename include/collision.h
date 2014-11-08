@@ -22,9 +22,9 @@ bool_t collision__line_intersects_rectangle( const struct geo__line_t* line,
 					     struct geo__point_t* intersection);
 
 
-bool_t collision__moving_box_intersects_box( const struct geo__rect_t* a,
-					     const struct geo__vector_t* a_motion,
-					     const struct geo__rect_t* b,
-					     int* distance_until_collision );
+bool_t collision__moving_rectangle_intersects_rectangle(const struct geo__rect_t* a,
+							const struct geo__vector_t* a_motion,
+							const struct geo__rect_t* b,
+							int* distance_until_collision );
 
 #endif

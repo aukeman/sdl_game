@@ -263,25 +263,27 @@ bool_t background__collision_test( const struct background_t* background,
 				   const struct geo__rect_t* position,
 				   struct geo__vector_t* velocity ){
 
+  bool_t result = FALSE;
+
   /* get the range of background tiles to check */
   int32_t ul_idx_x = utils__pos2screen(position->x) / background->tile_width;
   int32_t ul_idx_y = utils__pos2screen(position->y) / background->tile_height;
   
   int32_t lr_idx_x = utils__pos2screen(position->x + position->width) / background->tile_width;
   int32_t lr_idx_y = utils__pos2screen(position->y + position->height) / background->tile_height;
-    
+
   if ( velocity->x < 0 ){
     ul_idx_x = utils__pos2screen(position->x + velocity->x) / background->tile_width;
   }
   else{
-    lr_idx_x = utils__pos2screen(position->x + velocity->x) / background->tile_width;
+    lr_idx_x = utils__pos2screen(position->x + position->width + velocity->x) / background->tile_width;
   }
   
   if ( velocity->y < 0 ){
     ul_idx_y = utils__pos2screen(position->y + velocity->y) / background->tile_height;
   }
   else{
-    lr_idx_y = utils__pos2screen(position->x + velocity->x) / background->tile_height;
+    lr_idx_y = utils__pos2screen(position->y +  position->height + velocity->y) / background->tile_height;
   }
 
   if ( ul_idx_x < 0 ){
@@ -300,13 +302,44 @@ bool_t background__collision_test( const struct background_t* background,
     lr_idx_y = 0;
   }
 
+  struct geo__rect_t tile_position = 
+    { 0, 0, 
+      utils__screen2pos(background->tile_width), 
+      utils__screen2pos(background->tile_height) };
+
+
+  struct geo__point_t stopping_point;
+  struct geo__line_t translation = { position->x, position->y, 0, 0 };
+
   int32_t idx_x, idx_y;
-  for ( idx_x = ul_idx_x; idx_x < lr_idx_x; ++idx_x ){
-    for ( idx_y = ul_idx_y; idx_y < lr_idx_y; ++idx_y ){
-      
+  for ( idx_x = ul_idx_x; idx_x <= lr_idx_x; ++idx_x ){
+    for ( idx_y = ul_idx_y; idx_y <= lr_idx_y; ++idx_y ){
+      tile_position.x = utils__screen2pos(idx_x * background->tile_width);
+      tile_position.y = utils__screen2pos(idx_y * background->tile_height);
+
+      int32_t distance_until_collision = 0;
+
+
+      if ( background->tiles[idx_x][idx_y].prototype->collision_type != BACKGROUND__COLLISION_NONE &&
+	   collision__moving_rectangle_intersects_rectangle( position,
+							     velocity,
+							     &tile_position,
+							     &distance_until_collision ) ){
+	result = TRUE;
+
+	translation.x2 = position->x + velocity->x;
+	translation.y2 = position->y + velocity->y;
+
+	geo__point_on_line_at_distance( &translation, 
+					distance_until_collision, 
+					&stopping_point );
+
+	velocity->x = (stopping_point.x - position->x);
+	velocity->y = (stopping_point.y - position->y);
+      }
     }
   }
 
-  return FALSE;
+  return result;
 }
 

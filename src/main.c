@@ -7,6 +7,7 @@
 #include <player.h>
 #include <background.h>
 #include <stopwatch.h>
+#include <utils.h>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -45,13 +46,16 @@ int main( int argc, char** argv ) {
   struct background_t* background = NULL;
   background__create("resources/background/background.dat", &background);
 
-  struct player_prototype_t default_player = { &player__basic_draw,
+  struct player_prototype_t default_player = { { 0, 0, 
+						 utils__screen2pos(16), 
+						 utils__screen2pos(16) },
+					       &player__basic_draw,
 					       &player__basic_update,
 					       NULL };
 
   struct player_t players[2] = {
-    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), { 255, 0,   0 } },
-    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), {   0, 0, 255 } }
+    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), background, { 255, 0,   0 } },
+    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), background, {   0, 0, 255 } }
   };
 
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
@@ -100,8 +104,8 @@ int main( int argc, char** argv ) {
     background__draw(pos_x, pos_y, background);
     stopwatch__stop(&draw_bg_sw);
 
-    int player_idx = 0;
-    for ( player_idx = 0; player_idx < 2; ++player_idx ){
+    int player_idx;
+    for ( player_idx = 1; player_idx < 2; ++player_idx ){
       stopwatch__start(&draw_players_sw);
       players[player_idx].prototype->draw_fxn( &players[player_idx] );
       stopwatch__stop(&draw_players_sw);
