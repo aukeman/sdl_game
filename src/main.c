@@ -27,7 +27,7 @@ void on_quit( events__type_e type,
 
 int main( int argc, char** argv ) {
 
-  video__setup(800, 600, 400, 300, FALSE);
+  video__setup(800, 600, 400, 300, TRUE);
   js__setup();
   timing__setup();
   control__setup("data/controls.dat");
@@ -54,8 +54,8 @@ int main( int argc, char** argv ) {
 					       NULL };
 
   struct player_t players[2] = {
-    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), background, { 255, 0,   0 } },
-    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), background, {   0, 0, 255 } }
+    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), background, FALSE, FALSE, FALSE, FALSE, { 255, 0,   0 } },
+    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), background, FALSE, FALSE, FALSE, FALSE, {   0, 0, 255 } }
   };
 
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
@@ -82,22 +82,6 @@ int main( int argc, char** argv ) {
 
     stopwatch__start(&process_events_sw);
     events__process_events();
-
-    if ( control__get_state(1)->up.value ){
-      pos_y -= 10;
-    }
-
-    if ( control__get_state(1)->down.value ){
-      pos_y += 10;
-    }
-
-    if ( control__get_state(1)->left.value ){
-      pos_x -= 10;
-    }
-
-    if ( control__get_state(1)->right.value ){
-      pos_x += 10;
-    }
     stopwatch__stop(&process_events_sw);
 
     stopwatch__start(&draw_bg_sw);
@@ -119,10 +103,15 @@ int main( int argc, char** argv ) {
     font__draw_string(font, 0, 0,
     		      "FPS:         %5.1f\n"
     		      "Frame Count: %5d\n"
-    		      "Fame Length: %5d",
+    		      "Fame Length: %5d\n"
+		      "Pos: %4d %4d Vel: %3d %3d\n",
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
-    		      timing__get_frame_length());
+    		      timing__get_frame_length(),
+		      players[1].position.x, 
+		      players[1].position.y, 
+		      players[1].velocity.x, 
+		      players[1].velocity.y );
     stopwatch__stop(&draw_stats_sw);
 
     stopwatch__start(&flip_page_sw);

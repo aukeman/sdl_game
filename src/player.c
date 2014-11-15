@@ -20,6 +20,19 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
 {
   const int speed = utils__screen2pos(100);
 
+  if ( -utils__screen2pos(100) < player->velocity.x && player->control->left.value ){
+    player->velocity.x -= 10;
+  }
+  
+  if ( player->velocity.x < utils__screen2pos(100) && player->control->right.value ){
+    player->velocity.x += 10;
+  }
+
+  if ( player->control->left.value == 0 && player->control->right.value == 0 ){
+    player->velocity.x = 0;
+  }
+
+
   /* player->velocity.x = */
   /*   (player->control->right.value*speed) - (player->control->left.value*speed); */
 
@@ -27,15 +40,15 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
   /*   (player->control->down.value*speed) - (player->control->up.value*speed); */
   
   /* gravity */
-  player->velocity.y += ( utils__screen2pos(200) * frame_length)/1000;
+  if ( ! player->bottom_collision ){
+    player->velocity.y += ( utils__screen2pos(200) * frame_length)/1000;
+  }
 
   struct geo__rect_t bbox = player->prototype->bounding_box;
 
   bbox.x = player->position.x;
   bbox.y = player->position.y;
 
-  bool_t top_collision, bottom_collision, left_collision, right_collision;
-  
   struct geo__vector_t movement_this_frame = 
     { (player->velocity.x * frame_length)/1000, 
       (player->velocity.y * frame_length)/1000 };
@@ -43,21 +56,21 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
   background__collision_test( player->background,
 			      &bbox,
 			      &movement_this_frame,
-			      &top_collision,
-			      &bottom_collision,
-			      &left_collision,
-			      &right_collision );
+			      &(player->top_collision),
+			      &(player->bottom_collision),
+			      &(player->left_collision),
+			      &(player->right_collision) );
 
   player->position.x += movement_this_frame.x;
   player->position.y += movement_this_frame.y;
 
-  if ( (top_collision && player->velocity.y < 0) ||
-       (bottom_collision && 0 < player->velocity.y) ){
+  if ( (player->top_collision && player->velocity.y < 0) ||
+       (player->bottom_collision && 0 < player->velocity.y) ){
     player->velocity.y = 0;
   }
 
-  if ( (left_collision && player->velocity.x < 0) ||
-       (right_collision && 0 < player->velocity.x) ){
+  if ( (player->left_collision && player->velocity.x < 0) ||
+       (player->right_collision && 0 < player->velocity.x) ){
     player->velocity.x = 0;
   }
 }

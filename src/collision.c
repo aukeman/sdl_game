@@ -171,7 +171,7 @@ bool_t collision__line_intersects_rectangle( const struct geo__line_t* line,
   bool_t result = FALSE;
 
   struct geo__rect_t line_bbox = { line->x1, line->y1, 
-			    line->x2 - line->x1, line->y2 - line->y1 };
+				   line->x2 - line->x1, line->y2 - line->y1 };
 
   if (intersection){
     intersection->x = 0;
@@ -181,16 +181,16 @@ bool_t collision__line_intersects_rectangle( const struct geo__line_t* line,
   if ( collision__rectangles_overlap( rect, &line_bbox ) ){
 
     struct geo__line_t side_1 = { rect->x+rect->width, rect->y,
-			   rect->x, rect->y };
+				  rect->x, rect->y };
     
     struct geo__line_t side_2 = { rect->x+rect->width, rect->y, 
-			   rect->x+rect->width, rect->y+rect->height };
+				  rect->x+rect->width, rect->y+rect->height };
     
     struct geo__line_t side_3 = { rect->x, rect->y+rect->height,
-			   rect->x+rect->width, rect->y+rect->height };
+				  rect->x+rect->width, rect->y+rect->height };
     
     struct geo__line_t side_4 = { rect->x, rect->y+rect->height, 
-			   rect->x, rect->y };
+				  rect->x, rect->y };
 
     struct geo__line_t* sides[] = { &side_1, &side_2, &side_3, &side_4 };
 

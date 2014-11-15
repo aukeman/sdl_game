@@ -31,6 +31,11 @@ struct player_t{
   
   struct background_t* background;
 
+  bool_t top_collision;
+  bool_t bottom_collision;
+  bool_t left_collision;
+  bool_t right_collision;
+
   uint8_t color[3];
 };
 
