@@ -65,8 +65,6 @@ void rectangle_overlap_top(){
 
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &d ));
   TEST_ASSERT_TRUE(collision__rectangles_overlap( &d, &a ));
-
-  
 }
 
 void rectangle_overlap_bottom(){
@@ -206,29 +204,29 @@ void rectangle_doesnt_overlap_touching(){
   struct geo__rect_t h = {  10, -10, 10, 10 };
   struct geo__rect_t i = {   0, -10, 10, 10 };
 
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &b ));
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &b, &a ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &b ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &b, &a ));
 
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &c ));
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &c, &a ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &c ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &c, &a ));
 
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &d ));
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &d, &a ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &d ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &d, &a ));
 
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &e ));
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &e, &a ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &e ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &e, &a ));
 
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &f ));
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &f, &a ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &f ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &f, &a ));
 
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &g ));
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &g, &a ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &g ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &g, &a ));
 
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &h ));
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &h, &a ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &h ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &h, &a ));
 
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &a, &i ));
-  TEST_ASSERT_FALSE(collision__rectangles_overlap( &i, &a ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &a, &i ));
+  TEST_ASSERT_TRUE(collision__rectangles_overlap( &i, &a ));
 
   
 }
@@ -1345,7 +1343,7 @@ void moving_rect_intersects_no_distance(){
   bool_t result = 
     collision__moving_rectangle_intersects_rectangle( &a, &v, &b, NULL );
 
-  TEST_ASSERT_FALSE( result );
+  TEST_ASSERT_TRUE( result );
 }
 
 void moving_rect_intersects(){
