@@ -104,14 +104,19 @@ int main( int argc, char** argv ) {
     		      "FPS:         %5.1f\n"
     		      "Frame Count: %5d\n"
     		      "Fame Length: %5d\n"
-		      "Pos: %4d %4d Vel: %3d %3d\n",
+		      "Pos: %4d %4d Vel: %3d %3d\n"
+		      "top: %d bottom: %d left: %d right: %d",
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
 		      players[1].position.x, 
 		      players[1].position.y, 
 		      players[1].velocity.x, 
-		      players[1].velocity.y );
+		      players[1].velocity.y,
+		      players[1].top_collision,
+		      players[1].bottom_collision,
+		      players[1].left_collision,
+		      players[1].right_collision );
     stopwatch__stop(&draw_stats_sw);
 
     stopwatch__start(&flip_page_sw);

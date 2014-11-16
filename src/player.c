@@ -5,6 +5,8 @@
 #include <geometry.h>
 #include <background.h>
 
+#include <stdio.h>
+
 void player__basic_draw( const struct player_t* player )
 {
   struct geo__rect_t dest = 
@@ -40,9 +42,7 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
   /*   (player->control->down.value*speed) - (player->control->up.value*speed); */
   
   /* gravity */
-  if ( ! player->bottom_collision ){
-    player->velocity.y += ( utils__screen2pos(200) * frame_length)/1000;
-  }
+  player->velocity.y += ( utils__screen2pos(200) * frame_length)/1000;
 
   struct geo__rect_t bbox = player->prototype->bounding_box;
 
@@ -53,6 +53,8 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
     { (player->velocity.x * frame_length)/1000, 
       (player->velocity.y * frame_length)/1000 };
 
+  printf( "%d; %d\n", player->velocity.x * frame_length, movement_this_frame.x );
+
   background__collision_test( player->background,
 			      &bbox,
 			      &movement_this_frame,
@@ -61,6 +63,7 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
 			      &(player->left_collision),
 			      &(player->right_collision) );
 
+  printf( " %d\n", movement_this_frame.x );
   player->position.x += movement_this_frame.x;
   player->position.y += movement_this_frame.y;
 
@@ -71,7 +74,7 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
 
   if ( (player->left_collision && player->velocity.x < 0) ||
        (player->right_collision && 0 < player->velocity.x) ){
-    player->velocity.x = 0;
+    /*    player->velocity.x = 0; */
   }
 }
 

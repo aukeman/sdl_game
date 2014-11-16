@@ -7,6 +7,18 @@
 bool_t collision__rectangles_overlap( const struct geo__rect_t* a,
 				      const struct geo__rect_t* b );
 
+bool_t collision__touches_top( const struct geo__rect_t* toucher, 
+			       const struct geo__rect_t* touchee );
+
+bool_t collision__touches_bottom( const struct geo__rect_t* toucher, 
+				  const struct geo__rect_t* touchee );
+
+bool_t collision__touches_left( const struct geo__rect_t* toucher, 
+				const struct geo__rect_t* touchee );
+
+bool_t collision__touches_right( const struct geo__rect_t* toucher, 
+				 const struct geo__rect_t* touchee );
+
 bool_t collision__point_in_rectangle( const struct geo__point_t* point,
 				      const struct geo__rect_t* rect );
 

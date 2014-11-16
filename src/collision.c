@@ -51,6 +51,26 @@ bool_t collision__rectangles_overlap( const struct geo__rect_t* a,
 	   local_b.y <= (local_a.y + local_a.height) );
 }
 
+bool_t collision__touches_top( const struct geo__rect_t* toucher, 
+			       const struct geo__rect_t* touchee ){
+  return ( toucher->y + toucher->height == touchee->y);
+}
+
+bool_t collision__touches_bottom( const struct geo__rect_t* toucher, 
+				  const struct geo__rect_t* touchee ){
+  return collision__touches_top( touchee, toucher );
+}
+
+bool_t collision__touches_left( const struct geo__rect_t* toucher, 
+				const struct geo__rect_t* touchee ){
+  return ( toucher->x + toucher->width == touchee->x);
+}
+
+bool_t collision__touches_right( const struct geo__rect_t* toucher, 
+				 const struct geo__rect_t* touchee ){
+  return collision__touches_left( touchee, toucher );
+}
+
 bool_t collision__point_in_rectangle( const struct geo__point_t* point,
 				      const struct geo__rect_t* rect ){
 
