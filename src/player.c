@@ -34,15 +34,13 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
     player->velocity.x = 0;
   }
 
-
-  /* player->velocity.x = */
-  /*   (player->control->right.value*speed) - (player->control->left.value*speed); */
-
-  /* player->velocity.y = */
-  /*   (player->control->down.value*speed) - (player->control->up.value*speed); */
-  
-  /* gravity */
-  player->velocity.y += ( utils__screen2pos(200) * frame_length)/1000;
+  if ( !player->bottom_collision ){
+    /* gravity */
+    player->velocity.y += ( utils__screen2pos(200) * frame_length)/1000;
+  }
+  else if ( player->control->jump.value ){
+    player->velocity.y -= 400;
+  }
 
   struct geo__rect_t bbox = player->prototype->bounding_box;
 
@@ -74,7 +72,7 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
 
   if ( (player->left_collision && player->velocity.x < 0) ||
        (player->right_collision && 0 < player->velocity.x) ){
-    /*    player->velocity.x = 0; */
+       player->velocity.x = 0;
   }
 }
 

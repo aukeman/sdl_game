@@ -309,15 +309,31 @@ bool_t background__collision_test( const struct background_t* background,
 
   struct geo__rect_t position_for_x_check =
     { position->x,
-      position->y,
+      position->y+1,
       position->width,
-      position->height-1 };
+      position->height-2 };
+
+  if ( velocity->x < 0 ){
+    position_for_x_check.width -= 1;
+  }
+  else if ( 0 < velocity->x ){
+    position_for_x_check.x += 1;
+    position_for_x_check.width -= 1;
+  }
 
   struct geo__rect_t position_for_y_check =
-    { position->x,
+    { position->x+1,
       position->y,
-      position->width-1,
+      position->width-2,
       position->height };
+
+  if ( velocity->y < 0 ){
+    position_for_y_check.height -= 1;
+  }
+  else if ( 0 < velocity->y ){
+    position_for_y_check.y += 1;
+    position_for_y_check.height -= 1;
+  }
 
   struct geo__rect_t tile_position = 
     { 0, 0, 
@@ -354,7 +370,8 @@ bool_t background__collision_test( const struct background_t* background,
       else if (((0 < velocity->y) && 
 		(collision_type & BACKGROUND__COLLISION_TOP)) ||
 	       ((velocity->y < 0) && 
-		(collision_type & BACKGROUND__COLLISION_BOTTOM))){
+		(collision_type & BACKGROUND__COLLISION_BOTTOM)) &&
+		!collision__touches_top(&position_for_y_check, &tile_position)){
 
 	if ( collision__moving_rectangle_intersects_rectangle( &position_for_y_check,
 							       &y_velocity,
