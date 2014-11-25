@@ -51,7 +51,7 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
     { (player->velocity.x * frame_length)/1000, 
       (player->velocity.y * frame_length)/1000 };
 
-  printf( "%d; %d\n", player->velocity.x * frame_length, movement_this_frame.x );
+  printf( "before movement this frame.y: %d\n", movement_this_frame.y );
 
   background__collision_test( player->background,
 			      &bbox,
@@ -61,7 +61,8 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
 			      &(player->left_collision),
 			      &(player->right_collision) );
 
-  printf( " %d\n", movement_this_frame.x );
+  printf( "after movement this frame.y: %d\n", movement_this_frame.y );
+
   player->position.x += movement_this_frame.x;
   player->position.y += movement_this_frame.y;
 
