@@ -69,8 +69,8 @@ int main( int argc, char** argv ) {
 
   video__clearscreen();
 
-  uint32_t pos_x = 0;
-  uint32_t pos_y = 0;
+  int32_t pos_x = 0;
+  int32_t pos_y = 0;
 
   while ( keep_looping ) {
 
@@ -91,7 +91,7 @@ int main( int argc, char** argv ) {
     int player_idx;
     for ( player_idx = 1; player_idx < 2; ++player_idx ){
       stopwatch__start(&draw_players_sw);
-      players[player_idx].prototype->draw_fxn( &players[player_idx] );
+      players[player_idx].prototype->draw_fxn( pos_x, pos_y, &players[player_idx] );
       stopwatch__stop(&draw_players_sw);
       
       stopwatch__start(&update_players_sw);
@@ -99,16 +99,34 @@ int main( int argc, char** argv ) {
       stopwatch__stop(&update_players_sw);
     }
 
+    if ( players[1].position.x - 600 < pos_x ){
+      pos_x = players[1].position.x - 600;
+
+      if ( pos_x < 0 ){
+    	pos_x = 0;
+      }
+    }
+    else  if ( pos_x < players[1].position.x - 1000 ){ 
+      pos_x = players[1].position.x - 1000;
+
+      if ( utils__screen2pos((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_width) < pos_x ){
+	pos_x = utils__screen2pos((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_width);
+      }
+    }
+    
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
     		      "FPS:         %5.1f\n"
     		      "Frame Count: %5d\n"
     		      "Fame Length: %5d\n"
+		      "Screen Pos: %5d %5d\n"
 		      "Pos: %4d %4d Vel: %3d %3d\n"
 		      "top: %d bottom: %d left: %d right: %d",
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
+		      pos_x,
+		      pos_y,
 		      players[1].position.x, 
 		      players[1].position.y, 
 		      players[1].velocity.x, 

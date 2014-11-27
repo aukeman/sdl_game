@@ -9,7 +9,7 @@
 struct player_t;
 struct background_t;
 
-typedef void player__draw_fxn( const struct player_t* player );
+typedef void player__draw_fxn( int32_t screen_pos_x, int32_t screen_pos_y, const struct player_t* player );
 typedef void player__update_fxn( struct player_t* player, milliseconds_t frame_length );
 
 struct player_prototype_t{
@@ -39,7 +39,7 @@ struct player_t{
   uint8_t color[3];
 };
 
-void player__basic_draw( const struct player_t* player );
+void player__basic_draw( int32_t screen_pos_x, int32_t screen_pos_y, const struct player_t* player );
 void player__basic_update( struct player_t* player, milliseconds_t frame_length );
 
 #endif

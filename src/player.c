@@ -7,8 +7,16 @@
 
 #include <stdio.h>
 
-void player__basic_draw( const struct player_t* player )
+void player__basic_draw( int32_t pos_x, 
+			 int32_t pos_y, 
+			 const struct player_t* player )
 {
+
+  int32_t screen_pos_x = utils__pos2screen(pos_x);
+  int32_t screen_pos_y = utils__pos2screen(pos_y);
+
+  video__translate( -screen_pos_x, -screen_pos_y );
+
   struct geo__rect_t dest = 
     { utils__pos2screen(player->position.x), 
       utils__pos2screen(player->position.y), 
@@ -16,6 +24,9 @@ void player__basic_draw( const struct player_t* player )
       utils__pos2screen(player->prototype->bounding_box.height) };
 
   video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
+
+  video__translate( screen_pos_x, screen_pos_y );
+
 }
 
 void player__basic_update( struct player_t* player, milliseconds_t frame_length )
