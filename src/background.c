@@ -356,8 +356,10 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 	       ((moving_left) && 
 		(collision_type & BACKGROUND__COLLISION_RIGHT))){
 
+	struct geo__vector_t v = { *x_velocity, 0 };
+
 	if ( collision__moving_rectangle_intersects_rectangle( &pos_for_test,
-							       x_velocity,
+							       &v,
 							       &tile_position,
 							       &distance_until_collision ) ){
 	  *left_collision = (moving_left);
@@ -406,8 +408,6 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
   int32_t lr_idx_x = utils__pos2screen(pos_for_test.x + pos_for_test.width) / background->tile_width;
   int32_t lr_idx_y = utils__pos2screen(pos_for_test.y + pos_for_test.height + moving_down*(*y_velocity)) / background->tile_height;
 
-  printf ("ul_idx_y: %d  lr_idx_y: %d\n", ul_idx_y, lr_idx_y );
-
   struct geo__rect_t tile_position = 
     { 0, 0, 
       utils__screen2pos(background->tile_width), 
@@ -440,15 +440,12 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 	       ((moving_up) && 
 		(collision_type & BACKGROUND__COLLISION_BOTTOM))){
 
-	printf ("should be in here!\n");
+	struct geo__vector_t v = { 0, *y_velocity };
 
 	if ( collision__moving_rectangle_intersects_rectangle( &pos_for_test,
-							       y_velocity,
+							       &v,
 							       &tile_position,
 							       &distance_until_collision ) ){
-
-	  printf ("should also be in here!\n");
-
 
 	  *top_collision = (moving_up);
 	  *bottom_collision = (moving_down);
