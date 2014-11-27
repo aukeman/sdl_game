@@ -366,6 +366,8 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 	  *right_collision = (moving_right);
 
 	  *x_velocity = (*x_velocity / abs(*x_velocity)) * distance_until_collision;
+
+	  standing_still = (0 == *x_velocity);
 	}
 
       }
@@ -451,6 +453,8 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 	  *bottom_collision = (moving_down);
 
 	  *y_velocity = (*y_velocity / abs(*y_velocity)) * distance_until_collision;
+
+	  standing_still = (0 == *y_velocity);
 	}
       }
     }

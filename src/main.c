@@ -27,7 +27,7 @@ void on_quit( events__type_e type,
 
 int main( int argc, char** argv ) {
 
-  video__setup(800, 600, 400, 300, TRUE);
+  video__setup(800, 600, 400, 300, FALSE);
   js__setup();
   timing__setup();
   control__setup("data/controls.dat");
