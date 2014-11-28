@@ -16,11 +16,14 @@ enum {
 };
 
 typedef struct {
-  uint32_t width;
-  uint32_t height;
+  uint32_t pixels_width;
+  uint32_t pixels_height;
   
-  uint32_t viewport_width;
-  uint32_t viewport_height;
+  uint32_t viewport_screen_width;
+  uint32_t viewport_screen_height;
+
+  uint32_t viewport_position_width;
+  uint32_t viewport_position_height;
 
   int fullscreen;
 } video__screen_extents_t;

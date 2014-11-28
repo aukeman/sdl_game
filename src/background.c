@@ -49,7 +49,7 @@ int background__create( const char* background_config_file,
   }
 
   rc = fscanf(fin, "%d %d%*c", 
-	      &(*handle_ptr)->tile_width, &(*handle_ptr)->tile_height);
+	      &(*handle_ptr)->tile_screen_width, &(*handle_ptr)->tile_screen_height);
 	
   if ( rc != 2 ) {
     background__free(*handle_ptr);
@@ -58,6 +58,9 @@ int background__create( const char* background_config_file,
     fclose(fin);
     return BACKGROUND__BAD_CONFIG_FILE;
   }
+
+  (*handle_ptr)->tile_width = utils__screen2pos((*handle_ptr)->tile_screen_width);
+  (*handle_ptr)->tile_height = utils__screen2pos((*handle_ptr)->tile_screen_height);
 
   int number_of_prototypes;
 
@@ -108,19 +111,19 @@ int background__create( const char* background_config_file,
     uint32_t texture_height = video__get_texture_height((*handle_ptr)->texture);
 
     prototype->texture_src.x1 = 
-      (float)(prototype->tile_idx_x * (*handle_ptr)->tile_width) / 
+      (float)(prototype->tile_idx_x * (*handle_ptr)->tile_screen_width) / 
       (float)texture_width;
 
     prototype->texture_src.y1 = 
-      (float)(prototype->tile_idx_y * (*handle_ptr)->tile_height) / 
+      (float)(prototype->tile_idx_y * (*handle_ptr)->tile_screen_height) / 
       (float)texture_height;
 
     prototype->texture_src.x2 = 
-      (float)((prototype->tile_idx_x+1) * (*handle_ptr)->tile_width) / 
+      (float)((prototype->tile_idx_x+1) * (*handle_ptr)->tile_screen_width) / 
       (float)texture_width;
 
     prototype->texture_src.y2 = 
-      (float)((prototype->tile_idx_y+1) * (*handle_ptr)->tile_height) / 
+      (float)((prototype->tile_idx_y+1) * (*handle_ptr)->tile_screen_height) / 
       (float)texture_height;
 
     prototype_dictionary[prototype_label] = prototype;
@@ -208,11 +211,11 @@ void background__draw( int32_t pos_x,
   int32_t screen_pos_x = utils__pos2screen(pos_x);
   int32_t screen_pos_y = utils__pos2screen(pos_y);
 
-  int32_t min_col_idx = screen_pos_x / background->tile_width;
-  int32_t min_row_idx = screen_pos_y / background->tile_height;
+  int32_t min_col_idx = screen_pos_x / background->tile_screen_width;
+  int32_t min_row_idx = screen_pos_y / background->tile_screen_height;
 
-  int32_t max_col_idx = min_col_idx + (video__get_screen_extents()->viewport_width / background->tile_width) + 1;
-  int32_t max_row_idx = min_row_idx + (video__get_screen_extents()->viewport_height / background->tile_height) + 1;
+  int32_t max_col_idx = min_col_idx + (video__get_screen_extents()->viewport_screen_width / background->tile_screen_width) + 1;
+  int32_t max_row_idx = min_row_idx + (video__get_screen_extents()->viewport_screen_height / background->tile_screen_height) + 1;
 
   if ( background->tiles_wide < max_col_idx ){
     max_col_idx = background->tiles_wide;
@@ -252,10 +255,10 @@ void background__tile_basic_draw( size_t idx_x,
 		     tile->prototype->texture_src.y1, 
 		     tile->prototype->texture_src.x2, 
 		     tile->prototype->texture_src.y2,
-		     idx_x * tile->prototype->background->tile_width,
-		     idx_y * tile->prototype->background->tile_height,
-		     (idx_x+1) * tile->prototype->background->tile_width,
-		     (idx_y+1) * tile->prototype->background->tile_height );
+		     idx_x * tile->prototype->background->tile_screen_width,
+		     idx_y * tile->prototype->background->tile_screen_height,
+		     (idx_x+1) * tile->prototype->background->tile_screen_width,
+		     (idx_y+1) * tile->prototype->background->tile_screen_height );
 		     
 }
 
@@ -318,22 +321,22 @@ bool_t _collision_test_for_walls( const struct background_t* background,
   }
 
   /* get the range of background tiles to check */
-  int32_t ul_idx_x = utils__pos2screen(pos_for_test.x + (moving_left)*(*x_velocity) - 1) / background->tile_width;
-  int32_t ul_idx_y = utils__pos2screen(pos_for_test.y) / background->tile_height;
+  int32_t ul_idx_x = (pos_for_test.x + (moving_left)*(*x_velocity) - 1) / background->tile_width;
+  int32_t ul_idx_y = (pos_for_test.y) / background->tile_height;
   
-  int32_t lr_idx_x = utils__pos2screen(pos_for_test.x + pos_for_test.width + (moving_right)*(*x_velocity)) / background->tile_width;
-  int32_t lr_idx_y = utils__pos2screen(pos_for_test.y + pos_for_test.height) / background->tile_height;
+  int32_t lr_idx_x = (pos_for_test.x + pos_for_test.width + (moving_right)*(*x_velocity)) / background->tile_width;
+  int32_t lr_idx_y = (pos_for_test.y + pos_for_test.height) / background->tile_height;
 
   struct geo__rect_t tile_position = 
     { 0, 0, 
-      utils__screen2pos(background->tile_width), 
-      utils__screen2pos(background->tile_height) };
+      background->tile_width, 
+      background->tile_height };
 
   int32_t idx_x, idx_y;
   for ( idx_x = ul_idx_x; idx_x <= lr_idx_x; ++idx_x ){
     for ( idx_y = ul_idx_y; idx_y <= lr_idx_y; ++idx_y ){
-      tile_position.x = utils__screen2pos(idx_x * background->tile_width);
-      tile_position.y = utils__screen2pos(idx_y * background->tile_height);
+      tile_position.x = (idx_x * background->tile_width);
+      tile_position.y = (idx_y * background->tile_height);
 
       int32_t distance_until_collision = 0;
 
@@ -404,22 +407,22 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
   }
 
   /* get the range of background tiles to check */
-  int32_t ul_idx_x = utils__pos2screen(pos_for_test.x) / background->tile_width;
-  int32_t ul_idx_y = utils__pos2screen(pos_for_test.y + moving_up*(*y_velocity) - 1) / background->tile_height;
+  int32_t ul_idx_x = (pos_for_test.x) / background->tile_width;
+  int32_t ul_idx_y = (pos_for_test.y + moving_up*(*y_velocity) - 1) / background->tile_height;
   
-  int32_t lr_idx_x = utils__pos2screen(pos_for_test.x + pos_for_test.width) / background->tile_width;
-  int32_t lr_idx_y = utils__pos2screen(pos_for_test.y + pos_for_test.height + moving_down*(*y_velocity)) / background->tile_height;
+  int32_t lr_idx_x = (pos_for_test.x + pos_for_test.width) / background->tile_width;
+  int32_t lr_idx_y = (pos_for_test.y + pos_for_test.height + moving_down*(*y_velocity)) / background->tile_height;
 
   struct geo__rect_t tile_position = 
     { 0, 0, 
-      utils__screen2pos(background->tile_width), 
-      utils__screen2pos(background->tile_height) };
+      (background->tile_width), 
+      (background->tile_height) };
 
   int32_t idx_x, idx_y;
   for ( idx_x = ul_idx_x; idx_x <= lr_idx_x; ++idx_x ){
     for ( idx_y = ul_idx_y; idx_y <= lr_idx_y; ++idx_y ){
-      tile_position.x = utils__screen2pos(idx_x * background->tile_width);
-      tile_position.y = utils__screen2pos(idx_y * background->tile_height);
+      tile_position.x = (idx_x * background->tile_width);
+      tile_position.y = (idx_y * background->tile_height);
 
       int32_t distance_until_collision = 0;
 

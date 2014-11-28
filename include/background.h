@@ -54,6 +54,12 @@ struct background_t {
 
   uint32_t tile_width; 
   uint32_t tile_height;
+
+  uint32_t tile_screen_width; 
+  uint32_t tile_screen_height;
+
+  int32_t scroll_pos_x;
+  int32_t scroll_pos_y;
 };
 
 typedef void background__tile_draw_fxn( size_t idx_x, size_t idx_y, const struct background__tile_t* background );

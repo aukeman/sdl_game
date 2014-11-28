@@ -109,8 +109,8 @@ int main( int argc, char** argv ) {
     else  if ( pos_x < players[1].position.x - 800 ){ 
       pos_x = players[1].position.x - 800;
 
-      if ( utils__screen2pos((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_width) < pos_x ){
-	pos_x = utils__screen2pos((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_width);
+      if ( ((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_position_width) < pos_x ){
+	pos_x = ((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_position_width);
       }
     }
 
@@ -124,8 +124,8 @@ int main( int argc, char** argv ) {
     else  if ( pos_y < players[1].position.y - 600 ){ 
       pos_y = players[1].position.y - 600;
 
-      if ( utils__screen2pos((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_height) < pos_y ){
-	pos_y = utils__screen2pos((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_height);
+      if ( ((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_position_height) < pos_y ){
+	pos_y = ((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_position_height);
       }
     }
 

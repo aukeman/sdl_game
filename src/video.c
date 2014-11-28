@@ -1,6 +1,7 @@
 #include <video.h>
 #include <constants.h>
 #include <geometry.h>
+#include <utils.h>
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
@@ -19,7 +20,7 @@ struct {
 
 } blit_operation;
 
-video__screen_extents_t video__screen_extents = {0, 0, FALSE};
+video__screen_extents_t video__screen_extents = {0, 0, 0, 0, 0, 0, FALSE};
 
 struct video__texture_handle_t {
   uint32_t texture_id;
@@ -41,10 +42,12 @@ int video__setup( uint32_t screen_width,
 
   int result = SUCCESS;
 
-  video__screen_extents.width = screen_width;
-  video__screen_extents.height = screen_height;
-  video__screen_extents.viewport_width = viewport_width;
-  video__screen_extents.viewport_height = viewport_height;
+  video__screen_extents.pixels_width = screen_width;
+  video__screen_extents.pixels_height = screen_height;
+  video__screen_extents.viewport_screen_width = viewport_width;
+  video__screen_extents.viewport_screen_height = viewport_height;
+  video__screen_extents.viewport_position_width = utils__screen2pos(viewport_width);
+  video__screen_extents.viewport_position_height = utils__screen2pos(viewport_height);
   video__screen_extents.fullscreen = fullscreen;
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -64,8 +67,8 @@ int video__setup( uint32_t screen_width,
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     video__surface = 
-      SDL_SetVideoMode(video__screen_extents.width, 
-		       video__screen_extents.height, 
+      SDL_SetVideoMode(video__screen_extents.pixels_width, 
+		       video__screen_extents.pixels_height, 
 		       0, 
 		       SDL_HWSURFACE | 
 		       SDL_OPENGL | 
@@ -78,7 +81,7 @@ int video__setup( uint32_t screen_width,
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    glViewport(0, 0, video__screen_extents.width, video__screen_extents.height);
+    glViewport(0, 0, video__screen_extents.pixels_width, video__screen_extents.pixels_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, viewport_width, viewport_height, 0, -1.0, 1.0);
