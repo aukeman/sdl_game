@@ -249,37 +249,27 @@ void background__scroll_to( struct background_t* background,
 			    int32_t position_x, 
 			    int32_t position_y ){
   
-    if ( position_x - 800 < background->scroll_position_x ){
-      background->scroll_position_x = position_x - 800;
+  int minimum_scroll_position_x = 0;
+  int minimum_scroll_position_y = 0;
+  int maximum_scroll_position_x = background->tiles_wide*background->tile_width - video__get_screen_extents()->viewport_position_width;
+  int maximum_scroll_position_y = background->tiles_high*background->tile_height - video__get_screen_extents()->viewport_position_height;
+    
+  background->scroll_position_x = position_x;
+  background->scroll_position_y = position_y;
 
-      if ( background->scroll_position_x < 0 ){
-    	background->scroll_position_x = 0;
-      }
-    }
-    else  if ( background->scroll_position_x < position_x - 800 ){ 
-      background->scroll_position_x = position_x - 800;
-
-      if ( ((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_position_width) < background->scroll_position_x ){
-	background->scroll_position_x = ((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_position_width);
-      }
-    }
-
-    if ( position_y - 600 < background->scroll_position_y ){
-      background->scroll_position_y = position_y - 600;
-
-      if ( background->scroll_position_y < 0 ){
-    	background->scroll_position_y = 0;
-      }
-    }
-    else  if ( background->scroll_position_y < position_y - 600 ){ 
-      background->scroll_position_y = position_y - 600;
-
-      if ( ((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_position_height) < background->scroll_position_y ){
-	background->scroll_position_y = ((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_position_height);
-      }
-    }
-
-
+  if ( background->scroll_position_x < minimum_scroll_position_x ){
+    background->scroll_position_x = minimum_scroll_position_x;
+  }
+  else if ( maximum_scroll_position_x < background->scroll_position_x ){
+    background->scroll_position_x = maximum_scroll_position_x;
+  }
+  
+  if ( background->scroll_position_y < minimum_scroll_position_y ){
+    background->scroll_position_y = minimum_scroll_position_y;
+  }
+  else if ( maximum_scroll_position_y < background->scroll_position_y ){
+    background->scroll_position_y = maximum_scroll_position_y;
+  }
 }
 
 void background__tile_basic_draw( size_t idx_x, 

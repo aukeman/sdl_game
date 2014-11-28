@@ -99,8 +99,8 @@ int main( int argc, char** argv ) {
     }
 
     background__scroll_to( background, 
-			   players[1].position.x, 
-			   players[1].position.y ); 
+			   players[1].position.x - video__get_screen_extents()->viewport_position_width/2, 
+			   players[1].position.y - video__get_screen_extents()->viewport_position_height/2 ); 
 
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
