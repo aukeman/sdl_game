@@ -45,7 +45,10 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
     player->velocity.x = 0;
   }
 
-  if ( !player->bottom_collision ){
+  if ( player->control->up.value ){
+    player->velocity.y = -200;
+  }
+  else if ( !player->bottom_collision ){
     /* gravity */
     player->velocity.y += ( utils__screen2pos(200) * frame_length)/1000;
   }

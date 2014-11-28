@@ -27,7 +27,7 @@ void on_quit( events__type_e type,
 
 int main( int argc, char** argv ) {
 
-  video__setup(800, 600, 400, 300, FALSE);
+  video__setup(800, 600, 400, 300, TRUE);
   js__setup();
   timing__setup();
   control__setup("data/controls.dat");
@@ -99,20 +99,37 @@ int main( int argc, char** argv ) {
       stopwatch__stop(&update_players_sw);
     }
 
-    if ( players[1].position.x - 600 < pos_x ){
-      pos_x = players[1].position.x - 600;
+    if ( players[1].position.x - 800 < pos_x ){
+      pos_x = players[1].position.x - 800;
 
       if ( pos_x < 0 ){
     	pos_x = 0;
       }
     }
-    else  if ( pos_x < players[1].position.x - 1000 ){ 
-      pos_x = players[1].position.x - 1000;
+    else  if ( pos_x < players[1].position.x - 800 ){ 
+      pos_x = players[1].position.x - 800;
 
       if ( utils__screen2pos((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_width) < pos_x ){
 	pos_x = utils__screen2pos((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_width);
       }
     }
+
+    if ( players[1].position.y - 600 < pos_y ){
+      pos_y = players[1].position.y - 600;
+
+      if ( pos_y < 0 ){
+    	pos_y = 0;
+      }
+    }
+    else  if ( pos_y < players[1].position.y - 600 ){ 
+      pos_y = players[1].position.y - 600;
+
+      if ( utils__screen2pos((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_height) < pos_y ){
+	pos_y = utils__screen2pos((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_height);
+      }
+    }
+
+
     
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
