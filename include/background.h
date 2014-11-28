@@ -47,6 +47,8 @@ struct background_t {
 
   struct video__texture_handle_t* texture;
 
+  bool_t transparency_allowed;
+
   uint32_t tiles_wide;
   uint32_t tiles_high;
 

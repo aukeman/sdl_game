@@ -27,7 +27,7 @@ void on_quit( events__type_e type,
 
 int main( int argc, char** argv ) {
 
-  video__setup(800, 600, 400, 300, TRUE);
+  video__setup(800, 600, 400, 300, (1 < argc) && !strcmp("-f", argv[1]) );
   js__setup();
   timing__setup();
   control__setup("data/controls.dat");
@@ -43,8 +43,15 @@ int main( int argc, char** argv ) {
   struct font__handle_t* font = NULL;
   font__create("resources/font/test_font.dat", &font);
 
+  struct background_t* terrain = NULL;
+  if ( background__create("resources/background/background3.dat", &terrain) != SUCCESS ){
+    fprintf(stderr, "could not create terrain\n");
+  }
+
   struct background_t* background = NULL;
-  background__create("resources/background/background.dat", &background);
+  if ( background__create("resources/background/background2.dat", &background) != SUCCESS ){
+    fprintf(stderr, "could not create background\n");
+  }
 
   struct player_prototype_t default_player = { { 0, 0, 
 						 utils__screen2pos(16), 
@@ -54,8 +61,8 @@ int main( int argc, char** argv ) {
 					       NULL };
 
   struct player_t players[2] = {
-    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), background, FALSE, FALSE, FALSE, FALSE, { 255, 0,   0 } },
-    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), background, FALSE, FALSE, FALSE, FALSE, {   0, 0, 255 } }
+    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), terrain, FALSE, FALSE, FALSE, FALSE, { 255, 0,   0 } },
+    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), terrain, FALSE, FALSE, FALSE, FALSE, {   0, 0, 255 } }
   };
 
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
@@ -83,13 +90,14 @@ int main( int argc, char** argv ) {
 
     stopwatch__start(&draw_bg_sw);
     background__draw(background);
+    background__draw(terrain);
     stopwatch__stop(&draw_bg_sw);
 
     int player_idx;
     for ( player_idx = 1; player_idx < 2; ++player_idx ){
       stopwatch__start(&draw_players_sw);
-      players[player_idx].prototype->draw_fxn( background->scroll_position_x, 
-					       background->scroll_position_y, 
+      players[player_idx].prototype->draw_fxn( terrain->scroll_position_x, 
+					       terrain->scroll_position_y, 
 					       &players[player_idx] );
       stopwatch__stop(&draw_players_sw);
       
@@ -98,7 +106,7 @@ int main( int argc, char** argv ) {
       stopwatch__stop(&update_players_sw);
     }
 
-    background__scroll_to( background, 
+    background__scroll_to( terrain, 
 			   players[1].position.x - video__get_screen_extents()->viewport_position_width/2, 
 			   players[1].position.y - video__get_screen_extents()->viewport_position_height/2 ); 
 
@@ -113,8 +121,8 @@ int main( int argc, char** argv ) {
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
-		      background->scroll_position_x,
-		      background->scroll_position_y,
+		      terrain->scroll_position_x,
+		      terrain->scroll_position_y,
 		      players[1].position.x, 
 		      players[1].position.y, 
 		      players[1].velocity.x, 
@@ -148,6 +156,7 @@ int main( int argc, char** argv ) {
   stopwatch__dump(&frame_sw, "Frame", stdout);
 
   background__free(background);
+  background__free(terrain);
 	   
   font__free(font);
   
