@@ -204,12 +204,10 @@ int background__free( struct background_t* handle ){
   return SUCCESS;
 }
 
-void background__draw( int32_t pos_x, 
-		       int32_t pos_y, 
-		       const struct background_t* background ){
+void background__draw( const struct background_t* background ){
 
-  int32_t screen_pos_x = utils__pos2screen(pos_x);
-  int32_t screen_pos_y = utils__pos2screen(pos_y);
+  int32_t screen_pos_x = utils__pos2screen(background->scroll_position_x);
+  int32_t screen_pos_y = utils__pos2screen(background->scroll_position_y);
 
   int32_t min_col_idx = screen_pos_x / background->tile_screen_width;
   int32_t min_row_idx = screen_pos_y / background->tile_screen_height;
@@ -245,6 +243,43 @@ void background__draw( int32_t pos_x,
   }
   video__end_blits();
   video__translate( screen_pos_x, screen_pos_y );
+}
+
+void background__scroll_to( struct background_t* background,
+			    int32_t position_x, 
+			    int32_t position_y ){
+  
+    if ( position_x - 800 < background->scroll_position_x ){
+      background->scroll_position_x = position_x - 800;
+
+      if ( background->scroll_position_x < 0 ){
+    	background->scroll_position_x = 0;
+      }
+    }
+    else  if ( background->scroll_position_x < position_x - 800 ){ 
+      background->scroll_position_x = position_x - 800;
+
+      if ( ((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_position_width) < background->scroll_position_x ){
+	background->scroll_position_x = ((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_position_width);
+      }
+    }
+
+    if ( position_y - 600 < background->scroll_position_y ){
+      background->scroll_position_y = position_y - 600;
+
+      if ( background->scroll_position_y < 0 ){
+    	background->scroll_position_y = 0;
+      }
+    }
+    else  if ( background->scroll_position_y < position_y - 600 ){ 
+      background->scroll_position_y = position_y - 600;
+
+      if ( ((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_position_height) < background->scroll_position_y ){
+	background->scroll_position_y = ((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_position_height);
+      }
+    }
+
+
 }
 
 void background__tile_basic_draw( size_t idx_x, 

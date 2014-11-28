@@ -69,9 +69,6 @@ int main( int argc, char** argv ) {
 
   video__clearscreen();
 
-  int32_t pos_x = 0;
-  int32_t pos_y = 0;
-
   while ( keep_looping ) {
 
     stopwatch__start(&frame_sw);
@@ -85,13 +82,15 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&process_events_sw);
 
     stopwatch__start(&draw_bg_sw);
-    background__draw(pos_x, pos_y, background);
+    background__draw(background);
     stopwatch__stop(&draw_bg_sw);
 
     int player_idx;
     for ( player_idx = 1; player_idx < 2; ++player_idx ){
       stopwatch__start(&draw_players_sw);
-      players[player_idx].prototype->draw_fxn( pos_x, pos_y, &players[player_idx] );
+      players[player_idx].prototype->draw_fxn( background->scroll_position_x, 
+					       background->scroll_position_y, 
+					       &players[player_idx] );
       stopwatch__stop(&draw_players_sw);
       
       stopwatch__start(&update_players_sw);
@@ -99,38 +98,10 @@ int main( int argc, char** argv ) {
       stopwatch__stop(&update_players_sw);
     }
 
-    if ( players[1].position.x - 800 < pos_x ){
-      pos_x = players[1].position.x - 800;
+    background__scroll_to( background, 
+			   players[1].position.x, 
+			   players[1].position.y ); 
 
-      if ( pos_x < 0 ){
-    	pos_x = 0;
-      }
-    }
-    else  if ( pos_x < players[1].position.x - 800 ){ 
-      pos_x = players[1].position.x - 800;
-
-      if ( ((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_position_width) < pos_x ){
-	pos_x = ((background->tiles_wide*background->tile_width) - video__get_screen_extents()->viewport_position_width);
-      }
-    }
-
-    if ( players[1].position.y - 600 < pos_y ){
-      pos_y = players[1].position.y - 600;
-
-      if ( pos_y < 0 ){
-    	pos_y = 0;
-      }
-    }
-    else  if ( pos_y < players[1].position.y - 600 ){ 
-      pos_y = players[1].position.y - 600;
-
-      if ( ((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_position_height) < pos_y ){
-	pos_y = ((background->tiles_high*background->tile_height) - video__get_screen_extents()->viewport_position_height);
-      }
-    }
-
-
-    
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
     		      "FPS:         %5.1f\n"
@@ -142,8 +113,8 @@ int main( int argc, char** argv ) {
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
-		      pos_x,
-		      pos_y,
+		      background->scroll_position_x,
+		      background->scroll_position_y,
 		      players[1].position.x, 
 		      players[1].position.y, 
 		      players[1].velocity.x, 
