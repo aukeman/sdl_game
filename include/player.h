@@ -10,7 +10,9 @@ struct player_t;
 struct background_t;
 
 typedef void player__draw_fxn( int32_t screen_pos_x, int32_t screen_pos_y, const struct player_t* player );
-typedef void player__update_fxn( struct player_t* player, milliseconds_t frame_length );
+typedef void player__update_fxn( struct player_t* player, 
+				 const struct background_t* terrain,
+				 milliseconds_t frame_length );
 
 struct player_prototype_t{
 
@@ -29,8 +31,6 @@ struct player_t{
   const struct player_prototype_t* prototype;
   const struct control__state_t* control;
   
-  struct background_t* background;
-
   bool_t top_collision;
   bool_t bottom_collision;
   bool_t left_collision;
@@ -40,6 +40,8 @@ struct player_t{
 };
 
 void player__basic_draw( int32_t screen_pos_x, int32_t screen_pos_y, const struct player_t* player );
-void player__basic_update( struct player_t* player, milliseconds_t frame_length );
+void player__basic_update( struct player_t* player, 
+			   const struct  background_t* background,
+			   milliseconds_t frame_length );
 
 #endif

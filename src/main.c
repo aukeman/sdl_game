@@ -5,6 +5,7 @@
 #include <font.h>
 #include <control.h>
 #include <player.h>
+#include <level.h>
 #include <background.h>
 #include <stopwatch.h>
 #include <utils.h>
@@ -37,20 +38,12 @@ int main( int argc, char** argv ) {
   events__add_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
   events__add_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
 
-  struct video__texture_handle_t* texture;
-  video__setup_texture("resources/img/background.png", &texture);
-  
   struct font__handle_t* font = NULL;
   font__create("resources/font/test_font.dat", &font);
 
-  struct background_t* terrain = NULL;
-  if ( background__create("resources/background/background3.dat", &terrain) != SUCCESS ){
-    fprintf(stderr, "could not create terrain\n");
-  }
-
-  struct background_t* background = NULL;
-  if ( background__create("resources/background/background2.dat", &background) != SUCCESS ){
-    fprintf(stderr, "could not create background\n");
+  struct level_t* level = NULL;
+  if ( level__create("resources/level/level.dat", &level) != SUCCESS ){
+    fprintf(stderr, "could not create level\n");
   }
 
   struct player_prototype_t default_player = { { 0, 0, 
@@ -61,8 +54,8 @@ int main( int argc, char** argv ) {
 					       NULL };
 
   struct player_t players[2] = {
-    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), terrain, FALSE, FALSE, FALSE, FALSE, { 255, 0,   0 } },
-    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), terrain, FALSE, FALSE, FALSE, FALSE, {   0, 0, 255 } }
+    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), FALSE, FALSE, FALSE, FALSE, { 255, 0,   0 } },
+    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), FALSE, FALSE, FALSE, FALSE, {   0, 0, 255 } }
   };
 
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
@@ -89,26 +82,27 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&process_events_sw);
 
     stopwatch__start(&draw_bg_sw);
-    background__draw(background);
-    background__draw(terrain);
+    level__draw(level);
     stopwatch__stop(&draw_bg_sw);
 
     int player_idx;
     for ( player_idx = 1; player_idx < 2; ++player_idx ){
       stopwatch__start(&draw_players_sw);
-      players[player_idx].prototype->draw_fxn( terrain->scroll_position_x, 
-					       terrain->scroll_position_y, 
+      players[player_idx].prototype->draw_fxn( level->terrain_layer.background->scroll_position_x, 
+					       level->terrain_layer.background->scroll_position_y, 
 					       &players[player_idx] );
       stopwatch__stop(&draw_players_sw);
       
       stopwatch__start(&update_players_sw);
-      players[player_idx].prototype->update_fxn( &players[player_idx], frame_length );
+      players[player_idx].prototype->update_fxn( &players[player_idx], 
+						 level->terrain_layer.background,
+						 frame_length );
       stopwatch__stop(&update_players_sw);
     }
 
-    background__scroll_to( terrain, 
-			   players[1].position.x - video__get_screen_extents()->viewport_position_width/2, 
-			   players[1].position.y - video__get_screen_extents()->viewport_position_height/2 ); 
+    level__update( level, 
+		   players[1].position.x - video__get_screen_extents()->viewport_position_width/2,
+		   players[1].position.y - video__get_screen_extents()->viewport_position_height/2 );
 
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
@@ -121,8 +115,8 @@ int main( int argc, char** argv ) {
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
-		      terrain->scroll_position_x,
-		      terrain->scroll_position_y,
+		      level->terrain_layer.background->scroll_position_x,
+		      level->terrain_layer.background->scroll_position_y,
 		      players[1].position.x, 
 		      players[1].position.y, 
 		      players[1].velocity.x, 
@@ -155,8 +149,7 @@ int main( int argc, char** argv ) {
   stopwatch__dump(&flip_page_sw, "Flip Page", stdout);
   stopwatch__dump(&frame_sw, "Frame", stdout);
 
-  background__free(background);
-  background__free(terrain);
+  level__free(level);
 	   
   font__free(font);
   

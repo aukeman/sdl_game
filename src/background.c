@@ -199,18 +199,21 @@ int background__create( const char* background_config_file,
 
 int background__free( struct background_t* handle ){
 
-  if ( handle->texture != NULL ){
-    video__teardown_texture(handle->texture);
-  }
+  if ( handle ){
 
-  size_t col_idx;
-  for ( col_idx = 0; col_idx < handle->tiles_wide; ++col_idx){
-    free(handle->tiles[col_idx]);
-  }
+    if ( handle->texture != NULL ){
+      video__teardown_texture(handle->texture);
+    }
 
-  free(handle->tiles);
-  free(handle->tile_prototypes);
-  free(handle);
+    size_t col_idx;
+    for ( col_idx = 0; col_idx < handle->tiles_wide; ++col_idx){
+      free(handle->tiles[col_idx]);
+    }
+
+    free(handle->tiles);
+    free(handle->tile_prototypes);
+    free(handle);
+  }
 
   return SUCCESS;
 }

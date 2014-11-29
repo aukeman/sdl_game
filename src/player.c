@@ -29,7 +29,9 @@ void player__basic_draw( int32_t pos_x,
 
 }
 
-void player__basic_update( struct player_t* player, milliseconds_t frame_length )
+void player__basic_update( struct player_t* player, 
+			   const struct  background_t* terrain,
+			   milliseconds_t frame_length )
 {
   const int speed = utils__screen2pos(100);
 
@@ -65,7 +67,7 @@ void player__basic_update( struct player_t* player, milliseconds_t frame_length 
     { (player->velocity.x * frame_length)/1000, 
       (player->velocity.y * frame_length)/1000 };
 
-  background__collision_test( player->background,
+  background__collision_test( terrain,
 			      &bbox,
 			      &movement_this_frame,
 			      &(player->top_collision),
