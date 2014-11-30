@@ -39,6 +39,9 @@ int level__create( const char* level_config_file, struct level_t** handle_ptr ){
     return LEVEL__BAD_CONFIG_FILE;
   }
 
+  (*handle_ptr)->terrain_layer.scroll_factor_x = 100;
+  (*handle_ptr)->terrain_layer.scroll_factor_y = 100;
+
   if ( SUCCESS != 
        background__create( buffer, 
 			   &(*handle_ptr)->terrain_layer.background ) ){
@@ -72,9 +75,12 @@ int level__create( const char* level_config_file, struct level_t** handle_ptr ){
   size_t idx;
   for ( idx = 0; idx < (*handle_ptr)->number_of_background_layers; ++idx ){
     
-    rc = fscanf(fin, "%1023s%*c", buffer);
+    rc = fscanf(fin, "%1023s %d %d*c", 
+		buffer,
+		&(*handle_ptr)->background_layers[idx].scroll_factor_x,
+		&(*handle_ptr)->background_layers[idx].scroll_factor_y);
 
-    if ( rc < 1 ){
+    if ( rc < 2 ){
       level__free(*handle_ptr);
       *handle_ptr = NULL;
 
@@ -126,9 +132,25 @@ int level__update( struct level_t* level,
 		   int32_t scroll_position_x,
 		   int32_t scroll_position_y ){
 
+
   background__scroll_to( level->terrain_layer.background,
 			 scroll_position_x, 
 			 scroll_position_y );
+
+  int32_t terrain_scroll_position_x = level->terrain_layer.background->scroll_position_x;
+  int32_t terrain_scroll_position_y = level->terrain_layer.background->scroll_position_y;
+
+  int idx;
+  for ( idx = 0; idx < level->number_of_background_layers; ++idx ){
+
+    struct layer_t* background_layer = &level->background_layers[idx];
+
+    background__scroll_to( background_layer->background, 
+			   (terrain_scroll_position_x*background_layer->scroll_factor_x)/100,
+			   (terrain_scroll_position_y*background_layer->scroll_factor_y)/100 );
+
+  }
+
 
   return SUCCESS;
 }

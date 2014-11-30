@@ -18,6 +18,9 @@ enum {
 
 struct layer_t{
   struct background_t* background;
+  
+  int32_t scroll_factor_x;
+  int32_t scroll_factor_y;
 };
 
 struct level_t {
