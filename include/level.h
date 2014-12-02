@@ -26,7 +26,9 @@ struct layer_t{
 struct level_t {
   struct layer_t terrain_layer;
   struct layer_t* background_layers;
+  struct layer_t* foreground_layers;
   size_t number_of_background_layers;
+  size_t number_of_foreground_layers;
 };
 
 int level__create( const char* level_config_file, struct level_t** handle_ptr );
