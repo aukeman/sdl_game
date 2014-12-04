@@ -468,3 +468,12 @@ struct control_mapping_t* _load_keyboard(FILE* fin){
   return mapping;
 }
 
+bool_t control__button_pressed( const struct control__binary_t* control ){
+  return (control->value &&
+	  timing__get_top_of_frame() <= control->timestamp);
+}
+
+bool_t control__button_released( const struct control__binary_t* control ){
+  return (!control->value &&
+	  timing__get_top_of_frame() <= control->timestamp);
+}

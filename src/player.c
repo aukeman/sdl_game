@@ -47,15 +47,29 @@ void player__basic_update( struct player_t* player,
     player->velocity.x = 0;
   }
 
-  if ( player->control->up.value ){
-    player->velocity.y = -200;
+  if ( player->bottom_collision ){
+
+    player->jump_state = PLAYER__JUMP_STATE_NONE;
+
+    if ( control__button_pressed( &player->control->jump ) ){
+    
+      player->velocity.y -= (350 + 50*abs(player->velocity.x)/400);
+
+      player->jump_state = PLAYER__JUMP_STATE_JUMPING;
+    }
   }
-  else if ( !player->bottom_collision ){
-    /* gravity */
-    player->velocity.y += ( utils__screen2pos(200) * frame_length)/1000;
-  }
-  else if ( player->control->jump.value ){
-    player->velocity.y -= 400;
+  else{
+    int gravity = 400;
+
+    if ( player->jump_state == PLAYER__JUMP_STATE_JUMPING ){
+      gravity = gravity / 4;
+    }
+
+    player->velocity.y += ( utils__screen2pos(gravity) * frame_length)/1000;
+
+    if ( 0 < player->velocity.y || !player->control->jump.value ){
+      player->jump_state = PLAYER__JUMP_STATE_FALLING;
+    }
   }
 
   struct geo__rect_t bbox = player->prototype->bounding_box;

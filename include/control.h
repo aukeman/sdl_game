@@ -47,6 +47,7 @@ int control__teardown();
 
 const struct control__state_t* control__get_state( uint32_t player );
 
-
+bool_t control__button_pressed( const struct control__binary_t* control );
+bool_t control__button_released( const struct control__binary_t* control );
 
 #endif

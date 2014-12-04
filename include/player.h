@@ -14,6 +14,12 @@ typedef void player__update_fxn( struct player_t* player,
 				 const struct background_t* terrain,
 				 milliseconds_t frame_length );
 
+enum player__jump_state_e{
+  PLAYER__JUMP_STATE_NONE,
+  PLAYER__JUMP_STATE_JUMPING,
+  PLAYER__JUMP_STATE_FALLING
+};
+
 struct player_prototype_t{
 
   struct geo__rect_t bounding_box;
@@ -35,6 +41,8 @@ struct player_t{
   bool_t bottom_collision;
   bool_t left_collision;
   bool_t right_collision;
+
+  enum player__jump_state_e jump_state;
 
   uint8_t color[3];
 };
