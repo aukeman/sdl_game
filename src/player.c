@@ -53,7 +53,7 @@ void player__basic_update( struct player_t* player,
 
     if ( control__button_pressed( &player->control->jump ) ){
     
-      player->velocity.y -= (350 + 50*abs(player->velocity.x)/400);
+      player->velocity.y -= (800 + 200*abs(player->velocity.x)/400);
 
       player->jump_state = PLAYER__JUMP_STATE_JUMPING;
     }
@@ -61,14 +61,15 @@ void player__basic_update( struct player_t* player,
   else{
     int gravity = 400;
 
-    if ( player->jump_state == PLAYER__JUMP_STATE_JUMPING ){
-      gravity = gravity / 4;
-    }
-
     player->velocity.y += ( utils__screen2pos(gravity) * frame_length)/1000;
 
     if ( 0 < player->velocity.y || !player->control->jump.value ){
       player->jump_state = PLAYER__JUMP_STATE_FALLING;
+    }
+
+    if ( control__button_released( &player->control->jump ) &&
+	 player->velocity.y < -100 ){
+      player->velocity.y = -100;
     }
   }
 
