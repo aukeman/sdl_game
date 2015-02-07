@@ -44,7 +44,17 @@ void player__basic_update( struct player_t* player,
   }
 
   if ( player->control->left.value == 0 && player->control->right.value == 0 ){
-    player->velocity.x = 0;
+
+    if ( player->velocity.x < -20 ){
+      player->velocity.x += 20;
+    }
+    else if ( 20 < player->velocity.x ){
+      player->velocity.x -= 20;
+    }
+    else
+    {
+      player->velocity.x = 0;
+    }
   }
 
   if ( player->bottom_collision ){
@@ -56,6 +66,44 @@ void player__basic_update( struct player_t* player,
       player->velocity.y -= (800 + 200*abs(player->velocity.x)/400);
 
       player->jump_state = PLAYER__JUMP_STATE_JUMPING;
+    }
+  }
+  else if ( player->left_collision && 
+	    player->jump_state == PLAYER__JUMP_STATE_FALLING &&
+	    0 < player->control->left.value )
+  {
+    if ( control__button_pressed( &player->control->jump ) )
+    {
+      player->velocity.y = -800;
+      player->velocity.x += 400;
+    }
+    else if ( 300 < player->velocity.y )
+    {
+      player->velocity.y = 300;
+    }
+    else
+    {
+      int gravity = 400;
+      player->velocity.y += ( utils__screen2pos(gravity) * frame_length)/1000;
+    }
+  }
+  else if ( player->right_collision && 
+	    player->jump_state == PLAYER__JUMP_STATE_FALLING &&
+	    0 < player->control->right.value )
+  {
+    if ( control__button_pressed( &player->control->jump ) )
+    {
+      player->velocity.y = -800;
+      player->velocity.x -= 400;
+    }
+    else if ( 300 < player->velocity.y )
+    {
+      player->velocity.y = 300;
+    }
+    else
+    {
+      int gravity = 400;
+      player->velocity.y += ( utils__screen2pos(gravity) * frame_length)/1000;
     }
   }
   else{
