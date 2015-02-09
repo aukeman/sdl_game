@@ -14,7 +14,7 @@ CFLAGS=-g -DSTOPWATCH_ENABLED
 all: sdl_game 
 
 sdl_game: $(SOURCES) $(HEADERS) $(MAIN) 
-	gcc $(CFLAGS) -I./include -o sdl_game  $(SOURCES) $(MAIN) -lSDL -lSDL_image -lGL
+	gcc $(CFLAGS) -I./include -o sdl_game  $(SOURCES) $(MAIN) -lm -lSDL -lSDL_image -lGL
 
 test/bin: 
 	mkdir -p test/bin
