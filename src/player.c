@@ -38,12 +38,15 @@ void player__basic_update( struct player_t* player,
   const bool_t jump_pressed = control__button_pressed( &player->control->jump );
   const bool_t jump_released = control__button_released( &player->control->jump );
 
+  const enum player__jump_state_e previous_state = player->jump_state;
+
   /* figure out current jump state */
   if ( player->bottom_collision ){
     player->jump_state = 
       jump_pressed ? PLAYER__JUMP_STATE_JUMPING : PLAYER__JUMP_STATE_NONE;
   }
-  else if ( player->jump_state == PLAYER__JUMP_STATE_JUMPING &&
+  else if ( (player->jump_state == PLAYER__JUMP_STATE_JUMPING ||
+	     player->jump_state == PLAYER__JUMP_STATE_JUMPING_OFF_WALL) &&
             player->velocity.y < 0 &&
 	    0 < player->control->jump.value )
   {
@@ -53,11 +56,11 @@ void player__basic_update( struct player_t* player,
 	    player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT ||
 	    player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT )
   {
-    if ( jump_pressed &&
+    if ( jump_pressed && 
 	 (player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT ||
 	  player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT) )
     {
-      player->jump_state = PLAYER__JUMP_STATE_JUMPING;
+      player->jump_state = PLAYER__JUMP_STATE_JUMPING_OFF_WALL;
     }
     else if ( player->left_collision && 0 < player->control->left.value )
     {
@@ -80,7 +83,7 @@ void player__basic_update( struct player_t* player,
   static const int per_frame_x_acceleration = 20;
   static const int per_frame_x_decceleration = 10;
 
-  static const int per_second_gravity_acceleration = 600;
+  static const int per_second_gravity_acceleration = 1000;
 
   static const int initial_jump_velocity = 600;
   static const int final_jump_velocity = 100;
@@ -88,26 +91,36 @@ void player__basic_update( struct player_t* player,
   static const int max_wall_sliding_velocity = 300;
 
   /* x acceleration */
-  if ( -utils__screen2pos(100) < player->velocity.x && player->control->left.value ){
-    player->velocity.x -= per_frame_x_acceleration;
-  }
-  
-  if ( player->velocity.x < utils__screen2pos(100) && player->control->right.value ){
-    player->velocity.x += per_frame_x_acceleration;
-  }
-
-  /* x decelleration */
-  if ( player->control->left.value == 0 && player->control->right.value == 0 ){
-
-    if ( player->velocity.x < -20 ){
-      player->velocity.x += per_frame_x_decceleration;
-    }
-    else if ( 20 < player->velocity.x ){
-      player->velocity.x -= per_frame_x_decceleration;
-    }
-    else
+  if ( player->jump_state != PLAYER__JUMP_STATE_JUMPING_OFF_WALL )
+  {
+    if ( -utils__screen2pos(100) < player->velocity.x && 
+	   player->control->left.value )
     {
-      player->velocity.x = 0;
+      player->velocity.x -= per_frame_x_acceleration;
+    }
+  
+    if ( player->velocity.x < utils__screen2pos(100) && 
+	 player->control->right.value )
+    {
+      player->velocity.x += per_frame_x_acceleration;
+    }
+
+    /* x decelleration */
+    if ( player->control->left.value == 0 && 
+	 player->control->right.value == 0 )
+    {
+      if ( player->velocity.x < -20 )
+      {
+	player->velocity.x += per_frame_x_decceleration;
+      }
+      else if ( 20 < player->velocity.x )
+      {
+	player->velocity.x -= per_frame_x_decceleration;
+      }
+      else
+      {
+	player->velocity.x = 0;
+      }
     }
   }
 
@@ -133,9 +146,19 @@ void player__basic_update( struct player_t* player,
     break;
 
   case PLAYER__JUMP_STATE_JUMPING:
+  case PLAYER__JUMP_STATE_JUMPING_OFF_WALL:
     if ( jump_pressed )
     {
       player->velocity.y = -(initial_jump_velocity + abs(player->velocity.x)/4);
+
+      if ( previous_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT )
+      {
+	player->velocity.x = 400;
+      }
+      else if ( previous_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT )
+      {
+	player->velocity.x = -400;
+      }
     }
     break;
 
@@ -149,13 +172,8 @@ void player__basic_update( struct player_t* player,
 
   case PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT:
   case PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT:
-    if ( jump_pressed )
-    {
-      player->velocity.x += 
-	400*(player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT ? -1 : 1);
-      player->velocity.y -= (initial_jump_velocity + abs(player->velocity.x)/4);
-    }
-    else if ( max_wall_sliding_velocity < player->velocity.y )
+
+    if ( max_wall_sliding_velocity < player->velocity.y )
     {
       player->velocity.y = max_wall_sliding_velocity;
     }
