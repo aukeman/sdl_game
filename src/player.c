@@ -94,6 +94,7 @@ void player__basic_update( struct player_t* player,
   static const int per_second_gravity_acceleration = 1000;
 
   static const int initial_jump_velocity = 600;
+  static const int initial_jump_from_ledge_velocity = 400;
   static const int final_jump_velocity = 100;
 
   static const int max_wall_sliding_velocity = 300;
@@ -169,7 +170,14 @@ void player__basic_update( struct player_t* player,
 	player->velocity.x = -400;
       }
 
-      player->velocity.y = -(initial_jump_velocity + abs(player->velocity.x)/4);
+      if ( previous_state == PLAYER__JUMP_STATE_HANGING_ON_LEDGE )
+      {
+	player->velocity.y = -initial_jump_from_ledge_velocity;
+      }
+      else
+      {
+	player->velocity.y = -(initial_jump_velocity + abs(player->velocity.x)/4);
+      }
     }
     break;
 
@@ -227,21 +235,14 @@ void player__basic_update( struct player_t* player,
 
   /* check for a ledge to grab */
   if ( player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT || 
-       player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT )
+       player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT ||
+       player->jump_state == PLAYER__JUMP_STATE_HANGING_ON_LEDGE )
   {
     struct geo__vector_t zero_vector = {0, 0};
-    struct geo__rect_t grabbing_box = { 0, 0, 2, 4 };
+    struct geo__rect_t grabbing_box = { 0, 0, bbox.width, 4 };
 
-    if ( player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT )
-    {
-      grabbing_box.x = player->position.x;
-      grabbing_box.y = player->position.y-grabbing_box.height;
-    }
-    else
-    {
-      grabbing_box.x = player->position.x + bbox.width - grabbing_box.width;
-      grabbing_box.y = player->position.y-grabbing_box.height;
-    }
+    grabbing_box.x = player->position.x;
+    grabbing_box.y = player->position.y-grabbing_box.height;
 
     bool_t top, bottom, left, right;
 

@@ -47,7 +47,7 @@ int main( int argc, char** argv ) {
   }
 
   struct player_prototype_t default_player = { { 0, 0, 
-						 utils__screen2pos(16), 
+						 utils__screen2pos(12), 
 						 utils__screen2pos(16) },
 					       &player__basic_draw,
 					       &player__basic_update,
