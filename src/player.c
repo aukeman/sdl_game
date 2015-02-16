@@ -55,7 +55,8 @@ void player__basic_update( struct player_t* player,
   }
   else if ( player->jump_state == PLAYER__JUMP_STATE_FALLING ||
 	    player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT ||
-	    player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT )
+	    player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT ||
+	    player->jump_state == PLAYER__JUMP_STATE_HANGING_ON_LEDGE )
   {
     if ( jump_pressed && 
 	 (player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT ||
@@ -65,11 +66,17 @@ void player__basic_update( struct player_t* player,
     }
     else if ( player->left_collision && 0 < player->control->left.value )
     {
-      player->jump_state = PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT;
+      player->jump_state = 
+	(player->against_ledge ? 
+	 PLAYER__JUMP_STATE_HANGING_ON_LEDGE :
+	 PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT);
     }
     else if ( player->right_collision && 0 < player->control->right.value )
     {
-      player->jump_state = PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT;
+      player->jump_state = 
+	(player->against_ledge ? 
+	 PLAYER__JUMP_STATE_HANGING_ON_LEDGE :
+	 PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT);
     }
     else
     {
@@ -131,7 +138,9 @@ void player__basic_update( struct player_t* player,
   switch ( player->jump_state )
   {
   case PLAYER__JUMP_STATE_NONE:
-    /* no gravity calculations needed when on ground */
+  case PLAYER__JUMP_STATE_HANGING_ON_LEDGE:
+    /* no gravity calculations needed when on ground or hanging on ledge*/
+    player->velocity.y = 0;
     break;
   default:
     player->velocity.y += 
@@ -148,10 +157,9 @@ void player__basic_update( struct player_t* player,
 
   case PLAYER__JUMP_STATE_JUMPING:
   case PLAYER__JUMP_STATE_JUMPING_OFF_WALL:
+  case PLAYER__JUMP_STATE_HANGING_ON_LEDGE:
     if ( jump_pressed )
     {
-      player->velocity.y = -(initial_jump_velocity + abs(player->velocity.x)/4);
-
       if ( previous_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT )
       {
 	player->velocity.x = 400;
@@ -160,6 +168,8 @@ void player__basic_update( struct player_t* player,
       {
 	player->velocity.x = -400;
       }
+
+      player->velocity.y = -(initial_jump_velocity + abs(player->velocity.x)/4);
     }
     break;
 
@@ -220,17 +230,17 @@ void player__basic_update( struct player_t* player,
        player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT )
   {
     struct geo__vector_t zero_vector = {0, 0};
-    struct geo__rect_t grabbing_box = { 0, 0, 2, 2 };
+    struct geo__rect_t grabbing_box = { 0, 0, 2, 4 };
 
     if ( player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT )
     {
       grabbing_box.x = player->position.x;
-      grabbing_box.y = player->position.y-2;
+      grabbing_box.y = player->position.y-grabbing_box.height;
     }
     else
     {
-      grabbing_box.x = player->position.x + bbox.width - 2;
-      grabbing_box.y = player->position.y-2;
+      grabbing_box.x = player->position.x + bbox.width - grabbing_box.width;
+      grabbing_box.y = player->position.y-grabbing_box.height;
     }
 
     bool_t top, bottom, left, right;
@@ -243,7 +253,24 @@ void player__basic_update( struct player_t* player,
 				&left,
 				&right );
 
-    player->against_ledge = (!top && !bottom && !left && !right);
+    if (!top && !bottom && !left && !right)
+    {
+      grabbing_box.y = player->position.y + grabbing_box.height;
+
+      background__collision_test( terrain,
+				  &grabbing_box,
+				  &zero_vector,
+				  &top,
+				  &bottom,
+				  &left,
+				  &right );
+
+      player->against_ledge = (left || right);
+    }
+    else
+    {
+      player->against_ledge = FALSE;
+    }
   }
   else
   {
