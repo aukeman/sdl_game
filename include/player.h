@@ -17,7 +17,9 @@ typedef void player__update_fxn( struct player_t* player,
 enum player__jump_state_e{
   PLAYER__JUMP_STATE_NONE,
   PLAYER__JUMP_STATE_JUMPING,
-  PLAYER__JUMP_STATE_FALLING
+  PLAYER__JUMP_STATE_FALLING,
+  PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT,
+  PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT
 };
 
 struct player_prototype_t{

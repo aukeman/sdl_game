@@ -111,7 +111,8 @@ int main( int argc, char** argv ) {
     		      "Fame Length: %5d\n"
 		      "Screen Pos: %5d %5d\n"
 		      "Pos: %4d %4d Vel: %3d %3d\n"
-		      "top: %d bottom: %d left: %d right: %d",
+		      "top: %d bottom: %d left: %d right: %d\n"
+		      "jump state: %d",
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
@@ -124,7 +125,8 @@ int main( int argc, char** argv ) {
 		      players[1].top_collision,
 		      players[1].bottom_collision,
 		      players[1].left_collision,
-		      players[1].right_collision );
+		      players[1].right_collision,
+		      players[1].jump_state);
     stopwatch__stop(&draw_stats_sw);
 
     stopwatch__start(&flip_page_sw);
