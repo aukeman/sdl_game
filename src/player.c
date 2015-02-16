@@ -1,6 +1,7 @@
 #include <player.h>
 #include <utils.h>
 #include <control.h>
+#include <constants.h>
 
 #include <geometry.h>
 #include <background.h>
@@ -212,6 +213,41 @@ void player__basic_update( struct player_t* player,
   if ( (player->left_collision && player->velocity.x < 0) ||
        (player->right_collision && 0 < player->velocity.x) ){
        player->velocity.x = 0;
+  }
+
+  /* check for a ledge to grab */
+  if ( player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT || 
+       player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT )
+  {
+    struct geo__vector_t zero_vector = {0, 0};
+    struct geo__rect_t grabbing_box = { 0, 0, 2, 2 };
+
+    if ( player->jump_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT )
+    {
+      grabbing_box.x = player->position.x;
+      grabbing_box.y = player->position.y-2;
+    }
+    else
+    {
+      grabbing_box.x = player->position.x + bbox.width - 2;
+      grabbing_box.y = player->position.y-2;
+    }
+
+    bool_t top, bottom, left, right;
+
+    background__collision_test( terrain,
+				&grabbing_box,
+				&zero_vector,
+				&top,
+				&bottom,
+				&left,
+				&right );
+
+    player->against_ledge = (!top && !bottom && !left && !right);
+  }
+  else
+  {
+    player->against_ledge = FALSE;
   }
 }
 

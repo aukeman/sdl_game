@@ -20,7 +20,8 @@ enum player__jump_state_e{
   PLAYER__JUMP_STATE_FALLING,
   PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT,
   PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT,
-  PLAYER__JUMP_STATE_JUMPING_OFF_WALL
+  PLAYER__JUMP_STATE_JUMPING_OFF_WALL,
+  PLAYER__JUMP_STATE_HANGING_ON_WALL
 };
 
 struct player_prototype_t{
@@ -44,6 +45,8 @@ struct player_t{
   bool_t bottom_collision;
   bool_t left_collision;
   bool_t right_collision;
+
+  bool_t against_ledge;
 
   enum player__jump_state_e jump_state;
 
