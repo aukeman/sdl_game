@@ -88,6 +88,9 @@ void player__basic_update( struct player_t* player,
     player->jump_state = PLAYER__JUMP_STATE_FALLING;
   }
 
+  static const int running_velocity_limit = 400;
+  static const int walking_velocity_limit = 150;
+
   static const int per_frame_x_acceleration = 20;
   static const int per_frame_x_decceleration = 10;
 
@@ -99,25 +102,50 @@ void player__basic_update( struct player_t* player,
 
   static const int max_wall_sliding_velocity = 300;
 
+  int maximum_x_velocity = 0;
+
   /* x acceleration */
   if ( player->jump_state != PLAYER__JUMP_STATE_JUMPING_OFF_WALL )
   {
-    if ( -utils__screen2pos(100) < player->velocity.x && 
-	   player->control->left.value )
+    if ( player->control->left.value )
     {
-      player->velocity.x -= per_frame_x_acceleration;
-    }
-  
-    if ( player->velocity.x < utils__screen2pos(100) && 
-	 player->control->right.value )
-    {
-      player->velocity.x += per_frame_x_acceleration;
-    }
+      maximum_x_velocity = 
+	(0.75 < player->control->left.value ? running_velocity_limit : walking_velocity_limit);
 
-    /* x decelleration */
-    if ( player->control->left.value == 0 && 
-	 player->control->right.value == 0 )
+      if (-maximum_x_velocity < (player->velocity.x-per_frame_x_acceleration))
+      {
+	player->velocity.x -= per_frame_x_acceleration;
+      }
+      else if ( player->velocity.x+per_frame_x_acceleration < -maximum_x_velocity )
+      {
+	player->velocity.x += per_frame_x_acceleration;
+      }
+      else
+      {
+	player->velocity.x = -maximum_x_velocity;
+      }
+    }
+    else if ( player->control->right.value )
     {
+      maximum_x_velocity = 
+	(0.75 < player->control->right.value ? running_velocity_limit : walking_velocity_limit);
+
+      if ((player->velocity.x+per_frame_x_acceleration) < maximum_x_velocity)
+      {
+	player->velocity.x += per_frame_x_acceleration;
+      }
+      else if ( maximum_x_velocity < player->velocity.x-per_frame_x_acceleration )
+      {
+	player->velocity.x -= per_frame_x_acceleration;
+      }
+      else
+      {
+	player->velocity.x = maximum_x_velocity;
+      }
+    }
+    else /* x decceleration */
+    {
+
       if ( player->velocity.x < -20 )
       {
 	player->velocity.x += per_frame_x_decceleration;
