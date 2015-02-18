@@ -18,11 +18,13 @@ void player__basic_draw( int32_t pos_x,
 
   video__translate( -screen_pos_x, -screen_pos_y );
 
+  const struct geo__rect_t* bbox = player__get_bounding_box(player);
+
   struct geo__rect_t dest = 
-    { utils__pos2screen(player->position.x), 
-      utils__pos2screen(player->position.y), 
-      utils__pos2screen(player->prototype->bounding_box.width), 
-      utils__pos2screen(player->prototype->bounding_box.height) };
+    { utils__pos2screen(player->position.x + bbox->x), 
+      utils__pos2screen(player->position.y + bbox->y), 
+      utils__pos2screen(bbox->width), 
+      utils__pos2screen(bbox->height) };
 
   video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
 
@@ -43,8 +45,19 @@ void player__basic_update( struct player_t* player,
 
   /* figure out current jump state */
   if ( player->bottom_collision ){
-    player->jump_state = 
-      jump_pressed ? PLAYER__JUMP_STATE_JUMPING : PLAYER__JUMP_STATE_NONE;
+
+    if ( jump_pressed )
+    {
+      player->jump_state = PLAYER__JUMP_STATE_JUMPING;
+    }
+    else if ( 0.75 < player->control->down.value )
+    {
+      player->jump_state = PLAYER__JUMP_STATE_DUCKING;
+    }
+    else
+    {
+      player->jump_state = PLAYER__JUMP_STATE_NONE;
+    }
   }
   else if ( (player->jump_state == PLAYER__JUMP_STATE_JUMPING ||
 	     player->jump_state == PLAYER__JUMP_STATE_JUMPING_OFF_WALL) &&
@@ -105,7 +118,22 @@ void player__basic_update( struct player_t* player,
   int maximum_x_velocity = 0;
 
   /* x acceleration */
-  if ( player->jump_state != PLAYER__JUMP_STATE_JUMPING_OFF_WALL )
+  if ( player->jump_state == PLAYER__JUMP_STATE_DUCKING )
+  {
+      if ( player->velocity.x < -20 )
+      {
+	player->velocity.x += per_frame_x_decceleration;
+      }
+      else if ( 20 < player->velocity.x )
+      {
+	player->velocity.x -= per_frame_x_decceleration;
+      }
+      else
+      {
+	player->velocity.x = 0;
+      }
+  }
+  else if ( player->jump_state != PLAYER__JUMP_STATE_JUMPING_OFF_WALL )
   {
     if ( player->control->left.value )
     {
@@ -231,10 +259,10 @@ void player__basic_update( struct player_t* player,
     break;
   }
 
-  struct geo__rect_t bbox = player->prototype->bounding_box;
+  struct geo__rect_t bbox = *player__get_bounding_box(player);
 
-  bbox.x = player->position.x;
-  bbox.y = player->position.y;
+  bbox.x += player->position.x;
+  bbox.y += player->position.y;
 
   struct geo__vector_t movement_this_frame = 
     { (player->velocity.x * frame_length)/1000, 
@@ -269,8 +297,8 @@ void player__basic_update( struct player_t* player,
     struct geo__vector_t zero_vector = {0, 0};
     struct geo__rect_t grabbing_box = { 0, 0, bbox.width, 4 };
 
-    grabbing_box.x = player->position.x;
-    grabbing_box.y = player->position.y-grabbing_box.height;
+    grabbing_box.x = bbox.x;
+    grabbing_box.y = bbox.y-grabbing_box.height;
 
     bool_t top, bottom, left, right;
 
@@ -284,7 +312,7 @@ void player__basic_update( struct player_t* player,
 
     if (!top && !bottom && !left && !right)
     {
-      grabbing_box.y = player->position.y + grabbing_box.height;
+      grabbing_box.y = bbox.y + grabbing_box.height;
 
       background__collision_test( terrain,
 				  &grabbing_box,
@@ -307,3 +335,22 @@ void player__basic_update( struct player_t* player,
   }
 }
 
+const struct geo__rect_t* player__get_bounding_box( const struct player_t* player )
+{
+  const struct geo__rect_t* result = NULL;
+
+  if ( player )
+  {
+    switch ( player->jump_state )
+    {
+    case PLAYER__JUMP_STATE_DUCKING:
+      result = &(player->prototype->bounding_box_ducking);
+      break;
+    default:
+      result = &(player->prototype->bounding_box_standing);
+      break;
+    }
+  }
+
+  return result;
+}
