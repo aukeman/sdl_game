@@ -36,9 +36,9 @@ typedef struct
   int velocity_limit_wall_sliding;
   int velocity_limit_falling;
 
-  int initial_jump_velocity;
-  int initial_jump_from_ledge_velocity;
-  int final_jump_velocity;
+  int jump_initial_y_velocity;
+  int jump_from_ledge_initial_y_velocity;
+  int jump_final_y_velocity;
 
 } player__config_t;
 

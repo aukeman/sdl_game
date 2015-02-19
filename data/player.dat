@@ -5,9 +5,10 @@ velocity_limit_falling 1500
 per_second_x_acceleration 20
 per_second_x_decceleration 10
 per_second_gravity_acceleration 1000
-initial_jump_velocity 600
-initial_jump_from_ledge_velocity 400
-final_jump_velocity 100
+jump_initial_y_velocity 600
+jump_from_ledge_initial_y_velocity 400
+wall_jump_initial_x_velocity 400
+jump_final_velocity 100
 
 bounding_box_x 0
 bounding_box_y 0

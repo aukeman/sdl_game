@@ -94,20 +94,6 @@ void player__basic_update( struct player_t* player,
     player->jump_state = PLAYER__JUMP_STATE_FALLING;
   }
 
-  /* static const int running_velocity_limit = 400; */
-  /* static const int walking_velocity_limit = 150; */
-
-  /* static const int per_frame_x_acceleration = 20; */
-  /* static const int per_frame_x_decceleration = 10; */
-
-  /* static const int per_second_gravity_acceleration = 1000; */
-
-  /* static const int initial_jump_velocity = 600; */
-  /* static const int initial_jump_from_ledge_velocity = 400; */
-  /* static const int final_jump_velocity = 100; */
-
-  /* static const int max_wall_sliding_velocity = 300; */
-
   int maximum_x_velocity = 0;
 
   /* x acceleration */
@@ -201,28 +187,28 @@ void player__basic_update( struct player_t* player,
     {
       if ( previous_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT )
       {
-	player->velocity.x = 400;
+	player->velocity.x = config->velocity_limit_running;
       }
       else if ( previous_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT )
       {
-	player->velocity.x = -400;
+	player->velocity.x = -config->velocity_limit_running;
       }
 
       if ( previous_state == PLAYER__JUMP_STATE_HANGING_ON_LEDGE )
       {
-	player->velocity.y = -config->initial_jump_from_ledge_velocity;
+	player->velocity.y = -config->jump_from_ledge_initial_y_velocity;
       }
       else
       {
-	player->velocity.y = -(config->initial_jump_velocity + abs(player->velocity.x)/4);
+	player->velocity.y = -(config->jump_initial_y_velocity + abs(player->velocity.x)/4);
       }
     }
     break;
 
   case PLAYER__JUMP_STATE_FALLING:
-    if ( jump_released && player->velocity.y < -config->final_jump_velocity)
+    if ( jump_released && player->velocity.y < -config->jump_final_y_velocity)
     {
-      player->velocity.y = -config->final_jump_velocity;
+      player->velocity.y = -config->jump_final_y_velocity;
     }
     else if ( config->velocity_limit_falling < player->velocity.y )
     {
@@ -382,10 +368,10 @@ bool_t _apply_config_value( const char* name,
 	{"per_second_x_decceleration",&config->per_second_x_decceleration},
 	{"per_second_gravity_acceleration", 
 	                              &config->per_second_gravity_acceleration},
-	{"initial_jump_velocity",     &config->initial_jump_velocity},
-	{"initial_jump_from_ledge_velocity", 
-	                              &config->initial_jump_from_ledge_velocity},
-	{"final_jump_velocity",       &config->final_jump_velocity},
+	{"jump_initial_y_velocity",   &config->jump_initial_y_velocity},
+	{"jump_from_ledge_initial_y_velocity", 
+	                              &config->jump_from_ledge_initial_y_velocity},
+	{"jump_final_y_velocity",     &config->jump_final_y_velocity},
 	{"bounding_box_x",            &prototype->bounding_box.x},
 	{"bounding_box_y",            &prototype->bounding_box.y},
 	{"bounding_box_width",        &prototype->bounding_box.width},
