@@ -7,6 +7,10 @@
 #include <background.h>
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static bool_t _apply_config_value( const char* name, int value, struct player_prototype_t* prototype );
 
 void player__basic_draw( int32_t pos_x, 
 			 int32_t pos_y, 
@@ -38,6 +42,8 @@ void player__basic_update( struct player_t* player,
 
   const bool_t jump_pressed = control__button_pressed( &player->control->jump );
   const bool_t jump_released = control__button_released( &player->control->jump );
+
+  const player__config_t* config = &(player->prototype->config);
 
   const enum player__jump_state_e previous_state = player->jump_state;
 
@@ -88,19 +94,19 @@ void player__basic_update( struct player_t* player,
     player->jump_state = PLAYER__JUMP_STATE_FALLING;
   }
 
-  static const int running_velocity_limit = 400;
-  static const int walking_velocity_limit = 150;
+  /* static const int running_velocity_limit = 400; */
+  /* static const int walking_velocity_limit = 150; */
 
-  static const int per_frame_x_acceleration = 20;
-  static const int per_frame_x_decceleration = 10;
+  /* static const int per_frame_x_acceleration = 20; */
+  /* static const int per_frame_x_decceleration = 10; */
 
-  static const int per_second_gravity_acceleration = 1000;
+  /* static const int per_second_gravity_acceleration = 1000; */
 
-  static const int initial_jump_velocity = 600;
-  static const int initial_jump_from_ledge_velocity = 400;
-  static const int final_jump_velocity = 100;
+  /* static const int initial_jump_velocity = 600; */
+  /* static const int initial_jump_from_ledge_velocity = 400; */
+  /* static const int final_jump_velocity = 100; */
 
-  static const int max_wall_sliding_velocity = 300;
+  /* static const int max_wall_sliding_velocity = 300; */
 
   int maximum_x_velocity = 0;
 
@@ -110,15 +116,17 @@ void player__basic_update( struct player_t* player,
     if ( player->control->left.value )
     {
       maximum_x_velocity = 
-	(0.75 < player->control->left.value ? running_velocity_limit : walking_velocity_limit);
+	(0.75 < player->control->left.value ? 
+	 config->velocity_limit_running : 
+	 config->velocity_limit_walking);
 
-      if (-maximum_x_velocity < (player->velocity.x-per_frame_x_acceleration))
+      if (-maximum_x_velocity < (player->velocity.x-config->per_second_x_acceleration))
       {
-	player->velocity.x -= per_frame_x_acceleration;
+	player->velocity.x -= config->per_second_x_acceleration;
       }
-      else if ( player->velocity.x+per_frame_x_acceleration < -maximum_x_velocity )
+      else if ( player->velocity.x+config->per_second_x_acceleration < -maximum_x_velocity )
       {
-	player->velocity.x += per_frame_x_acceleration;
+	player->velocity.x += config->per_second_x_acceleration;
       }
       else
       {
@@ -128,15 +136,17 @@ void player__basic_update( struct player_t* player,
     else if ( player->control->right.value )
     {
       maximum_x_velocity = 
-	(0.75 < player->control->right.value ? running_velocity_limit : walking_velocity_limit);
+	(0.75 < player->control->right.value ? 
+	 config->velocity_limit_running : 
+	 config->velocity_limit_walking);
 
-      if ((player->velocity.x+per_frame_x_acceleration) < maximum_x_velocity)
+      if ((player->velocity.x+config->per_second_x_acceleration) < maximum_x_velocity)
       {
-	player->velocity.x += per_frame_x_acceleration;
+	player->velocity.x += config->per_second_x_acceleration;
       }
-      else if ( maximum_x_velocity < player->velocity.x-per_frame_x_acceleration )
+      else if ( maximum_x_velocity < player->velocity.x-config->per_second_x_acceleration )
       {
-	player->velocity.x -= per_frame_x_acceleration;
+	player->velocity.x -= config->per_second_x_acceleration;
       }
       else
       {
@@ -148,11 +158,11 @@ void player__basic_update( struct player_t* player,
 
       if ( player->velocity.x < -20 )
       {
-	player->velocity.x += per_frame_x_decceleration;
+	player->velocity.x += config->per_second_x_decceleration;
       }
       else if ( 20 < player->velocity.x )
       {
-	player->velocity.x -= per_frame_x_decceleration;
+	player->velocity.x -= config->per_second_x_decceleration;
       }
       else
       {
@@ -173,7 +183,7 @@ void player__basic_update( struct player_t* player,
     break;
   default:
     player->velocity.y += 
-      ( per_second_gravity_acceleration * frame_length)/1000;
+      ( config->per_second_gravity_acceleration * frame_length)/1000;
     break;
   }
 
@@ -200,19 +210,19 @@ void player__basic_update( struct player_t* player,
 
       if ( previous_state == PLAYER__JUMP_STATE_HANGING_ON_LEDGE )
       {
-	player->velocity.y = -initial_jump_from_ledge_velocity;
+	player->velocity.y = -config->initial_jump_from_ledge_velocity;
       }
       else
       {
-	player->velocity.y = -(initial_jump_velocity + abs(player->velocity.x)/4);
+	player->velocity.y = -(config->initial_jump_velocity + abs(player->velocity.x)/4);
       }
     }
     break;
 
   case PLAYER__JUMP_STATE_FALLING:
-    if ( jump_released && player->velocity.y < -final_jump_velocity)
+    if ( jump_released && player->velocity.y < -config->final_jump_velocity)
     {
-      player->velocity.y = -final_jump_velocity;
+      player->velocity.y = -config->final_jump_velocity;
     }
 
     break;
@@ -220,9 +230,9 @@ void player__basic_update( struct player_t* player,
   case PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT:
   case PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT:
 
-    if ( max_wall_sliding_velocity < player->velocity.y )
+    if ( config->velocity_limit_wall_sliding < player->velocity.y )
     {
-      player->velocity.y = max_wall_sliding_velocity;
+      player->velocity.y = config->velocity_limit_wall_sliding;
     }
     break;
 
@@ -307,3 +317,86 @@ void player__basic_update( struct player_t* player,
   }
 }
 
+int player__load_config( const char* config_file,
+			 struct player_prototype_t* prototype )
+{
+    int result = UNKNOWN_FAILURE;
+    FILE* fin = NULL;
+
+    char name[64];
+    int value;
+
+    memset(name, '\0', sizeof(name));
+    
+    memset(&(prototype->config), '\0', sizeof(prototype->config));
+
+    if ( config_file && prototype )
+    {
+      fin = fopen(config_file, "r");
+
+      while ( fin )
+      {
+	if ( 2 == fscanf(fin, "%63s %d*c", name, &value) &&
+	     _apply_config_value( name, value, prototype ) )
+	{	  
+	  result = SUCCESS;
+	}
+
+	if ( feof(fin) )
+	{
+	  fclose(fin);
+	  fin = NULL;
+	}
+      }
+    }
+
+    return result;
+}
+
+bool_t _apply_config_value( const char* name, 
+			    int value, 
+			    struct player_prototype_t* prototype )
+{
+  bool_t result = FALSE;
+
+  player__config_t* config = &(prototype->config);
+
+  int idx = 0;
+
+  struct 
+  { 
+    const char* value_name; 
+    int* value_ptr;
+  } name_to_value_map[] = 
+      { {"velocity_limit_running",    &config->velocity_limit_running},
+	{"velocity_limit_walking",    &config->velocity_limit_walking},
+	{"per_frame_x_acceleration",  &config->per_second_x_acceleration},
+	{"per_frame_x_decceleration", &config->per_second_x_decceleration},
+	{"per_second_gravity_acceleration", 
+	                              &config->per_second_gravity_acceleration},
+	{"initial_jump_velocity",     &config->initial_jump_velocity},
+	{"initial_jump_from_ledge_velocity", 
+	                              &config->initial_jump_from_ledge_velocity},
+	{"final_jump_velocity",       &config->final_jump_velocity},
+	{"max_wall_sliding_velocity", &config->velocity_limit_wall_sliding},
+	{NULL, NULL}
+      };
+
+  for ( idx = 0; name_to_value_map[idx].value_name != NULL; ++idx )
+  {
+    if ( !strcmp( name_to_value_map[idx].value_name, name ) )
+    {
+      result = TRUE;
+      *(name_to_value_map[idx].value_ptr) = value;
+      
+      break;
+    }
+  }
+
+  if ( !result )
+  {
+    fprintf( stderr, "unknown value %s in player configuration file\n", name );
+  }
+
+  return result;
+}

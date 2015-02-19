@@ -49,9 +49,12 @@ int main( int argc, char** argv ) {
   struct player_prototype_t default_player = { { 0, 0, 
 						 utils__screen2pos(12), 
 						 utils__screen2pos(16) },
+					       { },
 					       &player__basic_draw,
 					       &player__basic_update,
 					       NULL };
+
+  player__load_config("data/player.dat", &default_player);
 
   struct player_t players[2] = {
     { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), FALSE, FALSE, FALSE, FALSE, FALSE, PLAYER__JUMP_STATE_NONE, { 255, 0,   0 } },

@@ -24,9 +24,29 @@ enum player__jump_state_e{
   PLAYER__JUMP_STATE_HANGING_ON_LEDGE
 };
 
+typedef struct
+{
+  int per_second_x_acceleration;
+  int per_second_x_decceleration;
+
+  int per_second_gravity_acceleration;
+
+  int velocity_limit_walking;
+  int velocity_limit_running;
+  int velocity_limit_wall_sliding;
+  int velocity_limit_falling;
+
+  int initial_jump_velocity;
+  int initial_jump_from_ledge_velocity;
+  int final_jump_velocity;
+
+} player__config_t;
+
 struct player_prototype_t{
 
   struct geo__rect_t bounding_box;
+
+  player__config_t config;
 
   player__draw_fxn* draw_fxn;
   player__update_fxn* update_fxn;
@@ -57,5 +77,8 @@ void player__basic_draw( int32_t screen_pos_x, int32_t screen_pos_y, const struc
 void player__basic_update( struct player_t* player, 
 			   const struct  background_t* background,
 			   milliseconds_t frame_length );
+
+int player__load_config( const char* config_file,
+			 struct player_prototype_t* prototype );
 
 #endif

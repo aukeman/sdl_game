@@ -1,0 +1,9 @@
+velocity_limit_running 400
+velocity_limit_walking 150
+max_wall_sliding_velocity 300
+per_frame_x_acceleration 20
+per_frame_x_decceleration 10
+per_second_gravity_acceleration 1000
+initial_jump_velocity 600
+initial_jump_from_ledge_velocity 400
+final_jump_velocity 100
