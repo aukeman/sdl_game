@@ -224,6 +224,10 @@ void player__basic_update( struct player_t* player,
     {
       player->velocity.y = -config->final_jump_velocity;
     }
+    else if ( config->velocity_limit_falling < player->velocity.y )
+    {
+      player->velocity.y = config->velocity_limit_falling;
+    }
 
     break;
 
@@ -328,6 +332,7 @@ int player__load_config( const char* config_file,
 
     memset(name, '\0', sizeof(name));
     
+    memset(&(prototype->bounding_box), '\0', sizeof(prototype->bounding_box));
     memset(&(prototype->config), '\0', sizeof(prototype->config));
 
     if ( config_file && prototype )
@@ -370,15 +375,21 @@ bool_t _apply_config_value( const char* name,
   } name_to_value_map[] = 
       { {"velocity_limit_running",    &config->velocity_limit_running},
 	{"velocity_limit_walking",    &config->velocity_limit_walking},
-	{"per_frame_x_acceleration",  &config->per_second_x_acceleration},
-	{"per_frame_x_decceleration", &config->per_second_x_decceleration},
+	{"velocity_limit_wall_sliding", 
+	                              &config->velocity_limit_wall_sliding},
+	{"velocity_limit_falling",    &config->velocity_limit_falling},
+	{"per_second_x_acceleration", &config->per_second_x_acceleration},
+	{"per_second_x_decceleration",&config->per_second_x_decceleration},
 	{"per_second_gravity_acceleration", 
 	                              &config->per_second_gravity_acceleration},
 	{"initial_jump_velocity",     &config->initial_jump_velocity},
 	{"initial_jump_from_ledge_velocity", 
 	                              &config->initial_jump_from_ledge_velocity},
 	{"final_jump_velocity",       &config->final_jump_velocity},
-	{"max_wall_sliding_velocity", &config->velocity_limit_wall_sliding},
+	{"bounding_box_x",            &prototype->bounding_box.x},
+	{"bounding_box_y",            &prototype->bounding_box.y},
+	{"bounding_box_width",        &prototype->bounding_box.width},
+	{"bounding_box_height",       &prototype->bounding_box.height},
 	{NULL, NULL}
       };
 
