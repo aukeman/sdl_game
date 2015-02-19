@@ -45,6 +45,9 @@ void player__basic_update( struct player_t* player,
 
   const player__config_t* config = &(player->prototype->config);
 
+  const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / 1000;
+  const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / 1000;
+
   const enum player__jump_state_e previous_state = player->jump_state;
 
   /* figure out current jump state */
@@ -106,13 +109,13 @@ void player__basic_update( struct player_t* player,
 	 config->velocity_limit_running : 
 	 config->velocity_limit_walking);
 
-      if (-maximum_x_velocity < (player->velocity.x-config->per_second_x_acceleration))
+      if (-maximum_x_velocity < (player->velocity.x-this_frame_x_acceleration))
       {
-	player->velocity.x -= config->per_second_x_acceleration;
+	player->velocity.x -= this_frame_x_acceleration;
       }
-      else if ( player->velocity.x+config->per_second_x_acceleration < -maximum_x_velocity )
+      else if ( player->velocity.x+this_frame_x_acceleration < -maximum_x_velocity )
       {
-	player->velocity.x += config->per_second_x_acceleration;
+	player->velocity.x += this_frame_x_acceleration;
       }
       else
       {
@@ -126,13 +129,13 @@ void player__basic_update( struct player_t* player,
 	 config->velocity_limit_running : 
 	 config->velocity_limit_walking);
 
-      if ((player->velocity.x+config->per_second_x_acceleration) < maximum_x_velocity)
+      if ((player->velocity.x+this_frame_x_acceleration) < maximum_x_velocity)
       {
-	player->velocity.x += config->per_second_x_acceleration;
+	player->velocity.x += this_frame_x_acceleration;
       }
-      else if ( maximum_x_velocity < player->velocity.x-config->per_second_x_acceleration )
+      else if ( maximum_x_velocity < player->velocity.x-this_frame_x_acceleration )
       {
-	player->velocity.x -= config->per_second_x_acceleration;
+	player->velocity.x -= this_frame_x_acceleration;
       }
       else
       {
@@ -142,13 +145,13 @@ void player__basic_update( struct player_t* player,
     else /* x decceleration */
     {
 
-      if ( player->velocity.x < -20 )
+      if ( player->velocity.x < -this_frame_x_decceleration )
       {
-	player->velocity.x += config->per_second_x_decceleration;
+	player->velocity.x += this_frame_x_decceleration;
       }
-      else if ( 20 < player->velocity.x )
+      else if ( this_frame_x_decceleration < player->velocity.x )
       {
-	player->velocity.x -= config->per_second_x_decceleration;
+	player->velocity.x -= this_frame_x_decceleration;
       }
       else
       {
