@@ -6,6 +6,7 @@ per_second_x_acceleration 20
 per_second_x_decceleration 10
 per_second_gravity_acceleration 1000
 jump_initial_y_velocity 600
+jump_x_velocity_percent 25
 jump_from_ledge_initial_y_velocity 400
 wall_jump_initial_y_velocity 700
 wall_jump_initial_x_velocity 400

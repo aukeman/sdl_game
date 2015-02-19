@@ -37,6 +37,7 @@ typedef struct
   int velocity_limit_falling;
 
   int jump_initial_y_velocity;
+  int jump_x_velocity_percent;
   int jump_from_ledge_initial_y_velocity;
   int wall_jump_initial_y_velocity;
   int wall_jump_initial_x_velocity;

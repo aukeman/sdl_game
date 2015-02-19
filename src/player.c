@@ -201,7 +201,8 @@ void player__basic_update( struct player_t* player,
       }
       else
       {
-	player->velocity.y = -(config->jump_initial_y_velocity + abs(player->velocity.x)/4);
+	player->velocity.y = -(config->jump_initial_y_velocity + 
+			       config->jump_x_velocity_percent*abs(player->velocity.x)/100);
       }
     }
     break;
@@ -370,6 +371,7 @@ bool_t _apply_config_value( const char* name,
 	{"per_second_gravity_acceleration", 
 	                              &config->per_second_gravity_acceleration},
 	{"jump_initial_y_velocity",   &config->jump_initial_y_velocity},
+	{"jump_x_velocity_percent",   &config->jump_x_velocity_percent},
 	{"jump_from_ledge_initial_y_velocity", 
 	                              &config->jump_from_ledge_initial_y_velocity},
 	{"wall_jump_initial_x_velocity",     
