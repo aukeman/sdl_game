@@ -187,14 +187,15 @@ void player__basic_update( struct player_t* player,
     {
       if ( previous_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT )
       {
-	player->velocity.x = config->velocity_limit_running;
+	player->velocity.x = config->wall_jump_initial_x_velocity;
+	player->velocity.y = -config->wall_jump_initial_y_velocity;
       }
       else if ( previous_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT )
       {
-	player->velocity.x = -config->velocity_limit_running;
+	player->velocity.x = -config->wall_jump_initial_x_velocity;
+	player->velocity.y = -config->wall_jump_initial_y_velocity;
       }
-
-      if ( previous_state == PLAYER__JUMP_STATE_HANGING_ON_LEDGE )
+      else if ( previous_state == PLAYER__JUMP_STATE_HANGING_ON_LEDGE )
       {
 	player->velocity.y = -config->jump_from_ledge_initial_y_velocity;
       }
@@ -371,6 +372,10 @@ bool_t _apply_config_value( const char* name,
 	{"jump_initial_y_velocity",   &config->jump_initial_y_velocity},
 	{"jump_from_ledge_initial_y_velocity", 
 	                              &config->jump_from_ledge_initial_y_velocity},
+	{"wall_jump_initial_x_velocity",     
+	                              &config->wall_jump_initial_x_velocity},
+	{"wall_jump_initial_y_velocity",     
+	                              &config->wall_jump_initial_y_velocity},
 	{"jump_final_y_velocity",     &config->jump_final_y_velocity},
 	{"bounding_box_x",            &prototype->bounding_box.x},
 	{"bounding_box_y",            &prototype->bounding_box.y},
