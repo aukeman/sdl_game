@@ -279,6 +279,9 @@ void player__basic_update( struct player_t* player,
   player->position.x += movement_this_frame.x;
   player->position.y += movement_this_frame.y;
 
+  bbox.x += movement_this_frame.x;
+  bbox.y += movement_this_frame.y;
+
   if ( (player->top_collision && player->velocity.y < 0) ||
        (player->bottom_collision && 0 < player->velocity.y) ){
     player->velocity.y = 0;
