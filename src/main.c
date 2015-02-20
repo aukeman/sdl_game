@@ -48,6 +48,7 @@ int main( int argc, char** argv ) {
 
   struct player_prototype_t default_player = { { },
 					       { },
+					       { },
 					       &player__basic_draw,
 					       &player__basic_update,
 					       NULL };

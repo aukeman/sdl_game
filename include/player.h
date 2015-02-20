@@ -21,7 +21,8 @@ enum player__jump_state_e{
   PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT,
   PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT,
   PLAYER__JUMP_STATE_JUMPING_OFF_WALL,
-  PLAYER__JUMP_STATE_HANGING_ON_LEDGE
+  PLAYER__JUMP_STATE_HANGING_ON_LEDGE,
+  PLAYER__JUMP_STATE_DUCKING
 };
 
 typedef struct
@@ -47,7 +48,8 @@ typedef struct
 
 struct player_prototype_t{
 
-  struct geo__rect_t bounding_box;
+  struct geo__rect_t bounding_box_standing;
+  struct geo__rect_t bounding_box_ducking;
 
   player__config_t config;
 
@@ -81,7 +83,10 @@ void player__basic_update( struct player_t* player,
 			   const struct  background_t* background,
 			   milliseconds_t frame_length );
 
+
 int player__load_config( const char* config_file,
 			 struct player_prototype_t* prototype );
+
+const struct geo__rect_t* player__get_bounding_box( const struct player_t* player );
 
 #endif

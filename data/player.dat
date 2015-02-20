@@ -12,7 +12,12 @@ wall_jump_initial_y_velocity 700
 wall_jump_initial_x_velocity 400
 jump_final_y_velocity 100
 
-bounding_box_x 0
-bounding_box_y 0
-bounding_box_width 48
-bounding_box_height 64
+bounding_box_standing_x 0
+bounding_box_standing_y 0
+bounding_box_standing_width 48
+bounding_box_standing_height 64
+
+bounding_box_ducking_x 0
+bounding_box_ducking_y 16
+bounding_box_ducking_width 48
+bounding_box_ducking_height 48
