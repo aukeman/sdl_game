@@ -57,7 +57,17 @@ void player__basic_update( struct player_t* player,
 
     if ( jump_pressed )
     {
-      player->jump_state = PLAYER__JUMP_STATE_JUMPING;
+      if ((player->control->left.value && 
+	   config->minimum_backflip_starting_velocity < player->velocity.x) ||
+	  (player->control->right.value && 
+	   player->velocity.x < -config->minimum_backflip_starting_velocity))
+      {
+	player->jump_state = PLAYER__JUMP_STATE_BACK_FLIP;
+      }
+      else
+      {
+	player->jump_state = PLAYER__JUMP_STATE_JUMPING;
+      }
     }
     else if ( 0.75 < player->control->down.value )
     {
@@ -69,7 +79,8 @@ void player__basic_update( struct player_t* player,
     }
   }
   else if ( (player->jump_state == PLAYER__JUMP_STATE_JUMPING ||
-	     player->jump_state == PLAYER__JUMP_STATE_JUMPING_OFF_WALL) &&
+	     player->jump_state == PLAYER__JUMP_STATE_JUMPING_OFF_WALL ||
+	     player->jump_state == PLAYER__JUMP_STATE_BACK_FLIP ) &&
             player->velocity.y < 0 &&
 	    0 < player->control->jump.value )
   {
@@ -128,7 +139,8 @@ void player__basic_update( struct player_t* player,
 	player->velocity.x = 0;
       }
   }
-  else if ( player->jump_state != PLAYER__JUMP_STATE_JUMPING_OFF_WALL )
+  else if ( player->jump_state != PLAYER__JUMP_STATE_JUMPING_OFF_WALL &&
+	    player->jump_state != PLAYER__JUMP_STATE_BACK_FLIP )
   {
     if ( player->control->left.value )
     {
@@ -214,8 +226,21 @@ void player__basic_update( struct player_t* player,
   case PLAYER__JUMP_STATE_JUMPING:
   case PLAYER__JUMP_STATE_JUMPING_OFF_WALL:
   case PLAYER__JUMP_STATE_HANGING_ON_LEDGE:
+  case PLAYER__JUMP_STATE_BACK_FLIP:
     if ( jump_pressed )
     {
+      if ( player->jump_state == PLAYER__JUMP_STATE_BACK_FLIP )
+      {
+	if ( player->velocity.x < 0 )
+	{
+	  player->velocity.x = config->velocity_limit_running;
+	}
+	else if ( 0 < player->velocity.x )
+ 	{
+	  player->velocity.x = -config->velocity_limit_running;
+	}
+      }
+
       if ( previous_state == PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT )
       {
 	player->velocity.x = config->wall_jump_initial_x_velocity;
@@ -414,6 +439,8 @@ bool_t _apply_config_value( const char* name,
 	{"wall_jump_initial_y_velocity",     
 	                              &config->wall_jump_initial_y_velocity},
 	{"jump_final_y_velocity",     &config->jump_final_y_velocity},
+	{"minimum_backflip_starting_velocity", 
+	                              &config->minimum_backflip_starting_velocity },
 	{"bounding_box_standing_x",   &prototype->bounding_box_standing.x},
 	{"bounding_box_standing_y",   &prototype->bounding_box_standing.y},
 	{"bounding_box_standing_width", &prototype->bounding_box_standing.width},

@@ -11,6 +11,7 @@ jump_from_ledge_initial_y_velocity 400
 wall_jump_initial_y_velocity 700
 wall_jump_initial_x_velocity 400
 jump_final_y_velocity 100
+minimum_backflip_starting_velocity 200
 
 bounding_box_standing_x 0
 bounding_box_standing_y 0

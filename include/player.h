@@ -20,8 +20,9 @@ enum player__jump_state_e{
   PLAYER__JUMP_STATE_FALLING,
   PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT,
   PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT,
-  PLAYER__JUMP_STATE_JUMPING_OFF_WALL,
   PLAYER__JUMP_STATE_HANGING_ON_LEDGE,
+  PLAYER__JUMP_STATE_JUMPING_OFF_WALL,
+  PLAYER__JUMP_STATE_BACK_FLIP,
   PLAYER__JUMP_STATE_DUCKING
 };
 
@@ -43,6 +44,8 @@ typedef struct
   int wall_jump_initial_y_velocity;
   int wall_jump_initial_x_velocity;
   int jump_final_y_velocity;
+
+  int minimum_backflip_starting_velocity;
 
 } player__config_t;
 
