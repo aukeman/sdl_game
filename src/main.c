@@ -59,8 +59,8 @@ int main( int argc, char** argv ) {
   }
 
   struct player_t players[2] = {
-    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), FALSE, FALSE, FALSE, FALSE, FALSE, PLAYER__JUMP_STATE_NONE, { 255, 0,   0 } },
-    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), FALSE, FALSE, FALSE, FALSE, FALSE, PLAYER__JUMP_STATE_NONE, {   0, 0, 255 } }
+    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), FALSE, FALSE, FALSE, FALSE, FALSE, PLAYER__STATE_NONE, { 255, 0,   0 } },
+    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), FALSE, FALSE, FALSE, FALSE, FALSE, PLAYER__STATE_NONE, {   0, 0, 255 } }
   };
 
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
@@ -117,7 +117,7 @@ int main( int argc, char** argv ) {
 		      "Screen Pos: %5d %5d\n"
 		      "Pos: %4d %4d Vel: %3d %3d\n"
 		      "top: %d bottom: %d left: %d right: %d\n"
-		      "jump state: %d against ledge: %d",
+		      "state: %d against ledge: %d",
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
@@ -131,7 +131,7 @@ int main( int argc, char** argv ) {
 		      players[1].bottom_collision,
 		      players[1].left_collision,
 		      players[1].right_collision,
-		      players[1].jump_state,
+		      players[1].state,
 		      players[1].against_ledge);
     stopwatch__stop(&draw_stats_sw);
 

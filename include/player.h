@@ -14,16 +14,16 @@ typedef void player__update_fxn( struct player_t* player,
 				 const struct background_t* terrain,
 				 milliseconds_t frame_length );
 
-enum player__jump_state_e{
-  PLAYER__JUMP_STATE_NONE,
-  PLAYER__JUMP_STATE_JUMPING,
-  PLAYER__JUMP_STATE_FALLING,
-  PLAYER__JUMP_STATE_SLIDING_WALL_ON_LEFT,
-  PLAYER__JUMP_STATE_SLIDING_WALL_ON_RIGHT,
-  PLAYER__JUMP_STATE_HANGING_ON_LEDGE,
-  PLAYER__JUMP_STATE_JUMPING_OFF_WALL,
-  PLAYER__JUMP_STATE_BACK_FLIP,
-  PLAYER__JUMP_STATE_DUCKING
+enum player__state_e{
+  PLAYER__STATE_NONE,
+  PLAYER__STATE_JUMPING,
+  PLAYER__STATE_FALLING,
+  PLAYER__STATE_SLIDING_WALL_ON_LEFT,
+  PLAYER__STATE_SLIDING_WALL_ON_RIGHT,
+  PLAYER__STATE_HANGING_ON_LEDGE,
+  PLAYER__STATE_JUMPING_OFF_WALL,
+  PLAYER__STATE_BACK_FLIP,
+  PLAYER__STATE_DUCKING
 };
 
 typedef struct
@@ -76,7 +76,7 @@ struct player_t{
 
   bool_t against_ledge;
 
-  enum player__jump_state_e jump_state;
+  enum player__state_e state;
 
   uint8_t color[3];
 };
