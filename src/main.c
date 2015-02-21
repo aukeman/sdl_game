@@ -58,10 +58,16 @@ int main( int argc, char** argv ) {
     fprintf( stderr, "could not load player config\n" );
   }
 
-  struct player_t players[2] = {
-    { { 175, 225 }, { 0, 0 }, &default_player, control__get_state(0), FALSE, FALSE, FALSE, FALSE, FALSE, PLAYER__STATE_NONE, { 255, 0,   0 } },
-    { { 225, 225 }, { 0, 0 }, &default_player, control__get_state(1), FALSE, FALSE, FALSE, FALSE, FALSE, PLAYER__STATE_NONE, {   0, 0, 255 } }
-  };
+  struct player_t player =
+    { 
+      { 225, 225 }, 
+      { 0, 0 }, 
+      &default_player, 
+      control__get_state(1), 
+      FALSE, FALSE, FALSE, FALSE, FALSE, 
+      {PLAYER__STATE_NONE, 0}, 
+      {   0, 0, 255 } 
+    };
 
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
   stopwatch__init(&process_events_sw);
@@ -90,24 +96,21 @@ int main( int argc, char** argv ) {
     level__draw(level);
     stopwatch__stop(&draw_bg_sw);
 
-    int player_idx;
-    for ( player_idx = 1; player_idx < 2; ++player_idx ){
-      stopwatch__start(&draw_players_sw);
-      players[player_idx].prototype->draw_fxn( level->terrain_layer.background->scroll_position_x, 
-					       level->terrain_layer.background->scroll_position_y, 
-					       &players[player_idx] );
-      stopwatch__stop(&draw_players_sw);
-      
-      stopwatch__start(&update_players_sw);
-      players[player_idx].prototype->update_fxn( &players[player_idx], 
-						 level->terrain_layer.background,
-						 frame_length );
-      stopwatch__stop(&update_players_sw);
-    }
-
+    stopwatch__start(&draw_players_sw);
+    player.prototype->draw_fxn( level->terrain_layer.background->scroll_position_x, 
+				level->terrain_layer.background->scroll_position_y, 
+				&player );
+    stopwatch__stop(&draw_players_sw);
+    
+    stopwatch__start(&update_players_sw);
+    player.prototype->update_fxn( &player, 
+				  level->terrain_layer.background,
+				  frame_length );
+    stopwatch__stop(&update_players_sw);
+    
     level__update( level, 
-		   players[1].position.x - video__get_screen_extents()->viewport_position_width/2,
-		   players[1].position.y - video__get_screen_extents()->viewport_position_height/2 );
+		   player.position.x - video__get_screen_extents()->viewport_position_width/2,
+		   player.position.y - video__get_screen_extents()->viewport_position_height/2 );
 
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
@@ -123,16 +126,16 @@ int main( int argc, char** argv ) {
     		      timing__get_frame_length(),
 		      level->terrain_layer.background->scroll_position_x,
 		      level->terrain_layer.background->scroll_position_y,
-		      players[1].position.x, 
-		      players[1].position.y, 
-		      players[1].velocity.x, 
-		      players[1].velocity.y,
-		      players[1].top_collision,
-		      players[1].bottom_collision,
-		      players[1].left_collision,
-		      players[1].right_collision,
-		      players[1].state,
-		      players[1].against_ledge);
+		      player.position.x, 
+		      player.position.y, 
+		      player.velocity.x, 
+		      player.velocity.y,
+		      player.top_collision,
+		      player.bottom_collision,
+		      player.left_collision,
+		      player.right_collision,
+		      player.state,
+		      player.against_ledge);
     stopwatch__stop(&draw_stats_sw);
 
     stopwatch__start(&flip_page_sw);

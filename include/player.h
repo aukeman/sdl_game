@@ -16,6 +16,9 @@ typedef void player__update_fxn( struct player_t* player,
 
 enum player__state_e{
   PLAYER__STATE_NONE,
+  PLAYER__STATE_WALKING,
+  PLAYER__STATE_RUNNING,
+  PLAYER__STATE_STANDING,
   PLAYER__STATE_JUMPING,
   PLAYER__STATE_FALLING,
   PLAYER__STATE_SLIDING_WALL_ON_LEFT,
@@ -61,6 +64,12 @@ struct player_prototype_t{
   const struct video__texture_handle_t* texture;
 };
 
+struct player_state_info_t
+{
+  enum player__state_e value;
+  timestamp_t timestamp;
+};
+
 struct player_t{
 
   struct geo__point_t position;
@@ -76,7 +85,7 @@ struct player_t{
 
   bool_t against_ledge;
 
-  enum player__state_e state;
+  struct player_state_info_t state;
 
   uint8_t color[3];
 };
@@ -87,8 +96,12 @@ void player__basic_update( struct player_t* player,
 			   milliseconds_t frame_length );
 
 
+
+
 int player__load_config( const char* config_file,
 			 struct player_prototype_t* prototype );
+
+int player__update_state( struct player_t* player );
 
 const struct geo__rect_t* player__get_bounding_box( const struct player_t* player );
 
