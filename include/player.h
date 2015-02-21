@@ -15,18 +15,24 @@ typedef void player__update_fxn( struct player_t* player,
 				 milliseconds_t frame_length );
 
 enum player__state_e{
-  PLAYER__STATE_NONE,
-  PLAYER__STATE_WALKING,
-  PLAYER__STATE_RUNNING,
-  PLAYER__STATE_STANDING,
-  PLAYER__STATE_JUMPING,
-  PLAYER__STATE_FALLING,
-  PLAYER__STATE_SLIDING_WALL_ON_LEFT,
-  PLAYER__STATE_SLIDING_WALL_ON_RIGHT,
-  PLAYER__STATE_HANGING_ON_LEDGE,
-  PLAYER__STATE_JUMPING_OFF_WALL,
-  PLAYER__STATE_BACK_FLIP,
-  PLAYER__STATE_DUCKING
+  PLAYER__STATE_NONE, /**/
+  PLAYER__STATE_STANDING, /**/
+  PLAYER__STATE_DUCKING, /**/
+  PLAYER__STATE_WALKING, /**/
+  PLAYER__STATE_RUNNING, /**/
+  PLAYER__STATE_START_JUMPING, /**/
+  PLAYER__STATE_JUMPING, /**/
+  PLAYER__STATE_CEASE_JUMPING, /**/
+  PLAYER__STATE_FALLING, /**/
+  PLAYER__STATE_SLIDING_WALL_ON_LEFT, /**/
+  PLAYER__STATE_SLIDING_WALL_ON_RIGHT, /**/
+  PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT, /**/
+  PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT, /**/
+  PLAYER__STATE_JUMPING_OFF_WALL, /**/
+  PLAYER__STATE_HANGING_ON_LEDGE, /**/
+  PLAYER__STATE_START_CLIMBING_LEDGE, /**/
+  PLAYER__STATE_START_BACK_FLIP, /**/
+  PLAYER__STATE_BACK_FLIP /**/
 };
 
 typedef struct
@@ -101,7 +107,12 @@ void player__basic_update( struct player_t* player,
 int player__load_config( const char* config_file,
 			 struct player_prototype_t* prototype );
 
-int player__update_state( struct player_t* player );
+enum player__state_e player__calculate_new_state( 
+				      const struct player_t* player );
+
+void player__calculate_new_velocity( const struct player_t* player, 
+				     milliseconds_t frame_length,
+				     struct geo__vector_t* new_velocity );
 
 const struct geo__rect_t* player__get_bounding_box( const struct player_t* player );
 

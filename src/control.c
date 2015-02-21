@@ -34,6 +34,11 @@ struct linked_list_t keyboard_mappings[512];
 struct linked_list_t js_axis_mappings[JS__MAX_JOYSTICKS][JS__MAX_AXES];
 struct linked_list_t js_button_mappings[JS__MAX_JOYSTICKS][JS__MAX_BUTTONS];
 
+static const float ANALOG_AXIS_FULL = 1.0f;
+static const float ANALOG_AXIS_HIGH = 0.75f;
+static const float ANALOG_AXIS_MEDIUM = 0.25f;
+static const float ANALOG_AXIS_NONE = 0.0;
+
 void _handle_keydown(events__type_e event, 
 		     const events__event_parameter_t* param, 
 		     void* context);
@@ -468,6 +473,62 @@ struct control_mapping_t* _load_keyboard(FILE* fin){
   return mapping;
 }
 
+bool_t control__is_full( const struct control__analog_t* control )
+{
+  return (control->value == ANALOG_AXIS_FULL);
+}
+
+bool_t control__is_high( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_HIGH <= control->value && 
+	  control->value < ANALOG_AXIS_FULL);
+}
+
+bool_t control__is_medium( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_MEDIUM <= control->value && 
+	  control->value < ANALOG_AXIS_HIGH);
+}
+
+bool_t control__is_low( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_NONE < control->value &&
+	  control->value < ANALOG_AXIS_MEDIUM);
+}
+
+bool_t control__at_least_high( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_HIGH <= control->value);
+}
+
+bool_t control__at_least_medium( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_MEDIUM <= control->value);
+}
+
+bool_t control__at_least_low( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_NONE < control->value);
+}
+
+bool_t control__at_most_high( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_NONE < control->value &&
+	  control->value < ANALOG_AXIS_FULL);
+}
+
+bool_t control__at_most_medium( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_NONE < control->value &&
+	  control->value < ANALOG_AXIS_HIGH);
+}
+
+bool_t control__at_most_low( const struct control__analog_t* control )
+{
+  return (ANALOG_AXIS_NONE < control->value &&
+	  control->value < ANALOG_AXIS_MEDIUM);
+}
+
 bool_t control__button_pressed( const struct control__binary_t* control ){
   return (control->value &&
 	  timing__get_top_of_frame() <= control->timestamp);
@@ -477,3 +538,5 @@ bool_t control__button_released( const struct control__binary_t* control ){
   return (!control->value &&
 	  timing__get_top_of_frame() <= control->timestamp);
 }
+
+

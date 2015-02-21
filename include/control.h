@@ -47,6 +47,19 @@ int control__teardown();
 
 const struct control__state_t* control__get_state( uint32_t player );
 
+bool_t control__is_full( const struct control__analog_t* control );
+bool_t control__is_high( const struct control__analog_t* control );
+bool_t control__is_medium( const struct control__analog_t* control );
+bool_t control__is_low( const struct control__analog_t* control );
+
+bool_t control__at_least_high( const struct control__analog_t* control );
+bool_t control__at_least_medium( const struct control__analog_t* control );
+bool_t control__at_least_low( const struct control__analog_t* control );
+
+bool_t control__at_most_high( const struct control__analog_t* control );
+bool_t control__at_most_medium( const struct control__analog_t* control );
+bool_t control__at_most_low( const struct control__analog_t* control );
+
 bool_t control__button_pressed( const struct control__binary_t* control );
 bool_t control__button_released( const struct control__binary_t* control );
 

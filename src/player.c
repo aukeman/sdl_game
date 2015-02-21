@@ -2,6 +2,7 @@
 #include <utils.h>
 #include <control.h>
 #include <constants.h>
+#include <timing.h>
 
 #include <geometry.h>
 #include <background.h>
@@ -50,9 +51,15 @@ void player__basic_update( struct player_t* player,
   const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / 1000;
   const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / 1000;
 
-  const enum player__state_e previous_state = player->state.value;
+  enum player__state_e previous_state = PLAYER__STATE_NONE;
+  enum player__state_e new_state = player__calculate_new_state( player );
+  if ( new_state != player->state.value )
+  {
+    player->state.value = new_state;
+    player->state.timestamp = timing__get_top_of_frame();
+  }
 
-  player__update_state( player );
+  player__calculate_new_velocity( player, frame_length, &player->velocity );
 
   int maximum_x_velocity = 0;
 
@@ -301,86 +308,195 @@ void player__basic_update( struct player_t* player,
   }
 }
 
-int player__update_state( struct player_t* player )
+enum player__state_e player__calculate_new_state( const struct player_t* player )
 {
-  int result = SUCCESS;
+  enum player__state_e result = player->state.value;
 
   const bool_t jump_pressed = control__button_pressed( &player->control->jump );
   const bool_t jump_released = control__button_released( &player->control->jump );
 
+  const bool_t pushing_against_left_wall = 
+    (player->left_collision && 
+     control__at_least_low(&player->control->left));
+  const bool_t pushing_against_right_wall = 
+    (player->right_collision && 
+     control__at_least_low(&player->control->right));
+
   const player__config_t* config = &(player->prototype->config);
 
-  if ( player->bottom_collision )
+  switch ( player->state.value )
   {
-    if ( jump_pressed )
+  case PLAYER__STATE_NONE:
+  case PLAYER__STATE_STANDING:
+  case PLAYER__STATE_DUCKING:
+  case PLAYER__STATE_WALKING:
+  case PLAYER__STATE_RUNNING:
+    if ( !player->bottom_collision )
     {
-      if ((player->control->left.value && 
-	   config->minimum_backflip_starting_velocity < player->velocity.x) ||
-	  (player->control->right.value && 
-	   player->velocity.x < -config->minimum_backflip_starting_velocity))
+      result = PLAYER__STATE_FALLING;
+    }
+    else if ( jump_pressed )
+    {
+      if (( control__at_least_low(&player->control->left) && 
+	    config->minimum_backflip_starting_velocity < player->velocity.x) ||
+	  ( control__at_least_low(&player->control->right) && 
+	    player->velocity.x < -config->minimum_backflip_starting_velocity))
       {
-	player->state.value = PLAYER__STATE_BACK_FLIP;
+	result = PLAYER__STATE_START_BACK_FLIP;
       }
       else
       {
-	player->state.value = PLAYER__STATE_JUMPING;
+	result = PLAYER__STATE_START_JUMPING;
       }
     }
-    else if ( 0.75 < player->control->down.value )
+    else if ( control__at_least_high(&player->control->down) )
+    {  
+      result = PLAYER__STATE_DUCKING;
+    }
+    else if ( config->velocity_limit_walking < abs(player->velocity.x) )
     {
-      player->state.value = PLAYER__STATE_DUCKING;
+      result = PLAYER__STATE_RUNNING;
+    }
+    else if ( 0 < abs(player->velocity.x) )
+    {
+      result = PLAYER__STATE_WALKING;
     }
     else
     {
-      player->state.value = PLAYER__STATE_NONE;
+      result = PLAYER__STATE_STANDING;
     }
-  }
-  else if ( (player->state.value == PLAYER__STATE_JUMPING ||
-	     player->state.value == PLAYER__STATE_JUMPING_OFF_WALL ||
-	     player->state.value == PLAYER__STATE_BACK_FLIP ) &&
-            player->velocity.y < 0 &&
-	    0 < player->control->jump.value )
-  {
-    /* still jumping; don't change state */
-  }
-  else if ( player->state.value == PLAYER__STATE_FALLING ||
-	    player->state.value == PLAYER__STATE_SLIDING_WALL_ON_LEFT ||
-	    player->state.value == PLAYER__STATE_SLIDING_WALL_ON_RIGHT ||
-	    player->state.value == PLAYER__STATE_HANGING_ON_LEDGE )
-  {
-    if ( jump_pressed && 
-	 (player->state.value == PLAYER__STATE_SLIDING_WALL_ON_LEFT ||
-	  player->state.value == PLAYER__STATE_SLIDING_WALL_ON_RIGHT) )
+    break;
+
+  case PLAYER__STATE_JUMPING:
+  case PLAYER__STATE_JUMPING_OFF_WALL:
+  case PLAYER__STATE_BACK_FLIP:
+    if ( 0 < player->velocity.y )
     {
-      player->state.value = PLAYER__STATE_JUMPING_OFF_WALL;
+      result = PLAYER__STATE_FALLING;
     }
-    else if ( player->left_collision && 0 < player->control->left.value )
+    else if ( jump_released )
     {
-      player->state.value = 
-	(player->against_ledge ? 
-	 PLAYER__STATE_HANGING_ON_LEDGE :
-	 PLAYER__STATE_SLIDING_WALL_ON_LEFT);
-    }
-    else if ( player->right_collision && 0 < player->control->right.value )
-    {
-      player->state.value = 
-	(player->against_ledge ? 
-	 PLAYER__STATE_HANGING_ON_LEDGE :
-	 PLAYER__STATE_SLIDING_WALL_ON_RIGHT);
+      result = PLAYER__STATE_CEASE_JUMPING;
     }
     else
     {
-      player->state.value = PLAYER__STATE_FALLING;
+      /* no-op, maintain state */
     }
-  }
-  else
-  {
-    player->state.value = PLAYER__STATE_FALLING;
+    break;
+
+  case PLAYER__STATE_FALLING:
+    if ( player->bottom_collision )
+    {
+      result = PLAYER__STATE_STANDING;
+    }
+    else if ( pushing_against_left_wall )
+    {
+      result = PLAYER__STATE_SLIDING_WALL_ON_LEFT;
+    }
+    else if ( pushing_against_right_wall )
+    {
+      result = PLAYER__STATE_SLIDING_WALL_ON_RIGHT;
+    }
+    else
+    { 
+      /* still falling, no-op */
+    }
+    break;
+
+  case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
+    if ( jump_pressed )
+    {
+      result = PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT;
+    }
+    else if ( pushing_against_left_wall )
+    {
+      if ( player->against_ledge )
+      {
+	result = PLAYER__STATE_HANGING_ON_LEDGE;
+      }
+      else
+      {
+	/* no-op, maintain state */
+      }
+    }
+    else
+    { 
+      result = PLAYER__STATE_FALLING;
+    }
+    break;
+
+  case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
+    if ( jump_pressed )
+    {
+      result = PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT;
+    }
+    else if ( pushing_against_right_wall )
+    {
+      if ( player->against_ledge )
+      {
+	result = PLAYER__STATE_HANGING_ON_LEDGE;
+      }
+      else
+      {
+	/* no-op, maintain state */
+      }
+    }
+    else
+    { 
+      result = PLAYER__STATE_FALLING;
+    }
+    break;
+
+  case PLAYER__STATE_HANGING_ON_LEDGE:
+    if ( jump_pressed )
+    {
+      result = PLAYER__STATE_START_CLIMBING_LEDGE;
+    }
+    else if ( player->against_ledge &&
+	      (pushing_against_left_wall || pushing_against_right_wall) )
+    {
+      /* no-op, maintain state */
+    }
+    else
+    {
+      result = PLAYER__STATE_FALLING;
+    }
+    break;
+
+  case PLAYER__STATE_START_JUMPING:
+  case PLAYER__STATE_START_CLIMBING_LEDGE:
+    result = PLAYER__STATE_JUMPING;
+    break;
+
+  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT:
+  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT:
+    result = PLAYER__STATE_JUMPING_OFF_WALL;
+    break;
+    
+  case PLAYER__STATE_START_BACK_FLIP:
+    result = PLAYER__STATE_BACK_FLIP;
+    break;
+    
+  case PLAYER__STATE_CEASE_JUMPING:
+    result = PLAYER__STATE_FALLING;
+    break;
+      
+  default:
+    fprintf( stderr, 
+	     "WARNING: unhandled player state: %d\n", 
+	     player->state.value );
+    break;
   }
 
   return result;
 }
 
+void player__calculate_new_velocity( const struct player_t* player, 
+				     milliseconds_t frame_length,
+				     struct geo__vector_t* new_velocity )
+{
+
+}
 
 int player__load_config( const char* config_file,
 			 struct player_prototype_t* prototype )
@@ -484,7 +600,7 @@ bool_t _apply_config_value( const char* name,
 
   return result;
 }
-      
+
 const struct geo__rect_t* player__get_bounding_box( const struct player_t* player )
 {
   const struct geo__rect_t* result = NULL;
