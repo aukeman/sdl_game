@@ -110,9 +110,10 @@ int player__load_config( const char* config_file,
 enum player__state_e player__calculate_new_state( 
 				      const struct player_t* player );
 
-void player__calculate_new_velocity( const struct player_t* player, 
-				     milliseconds_t frame_length,
-				     struct geo__vector_t* new_velocity );
+int player__calculate_new_velocity( enum player__state_e previous_state,
+				    const struct player_t* player, 
+				    milliseconds_t frame_length,
+				    struct geo__vector_t* new_velocity );
 
 const struct geo__rect_t* player__get_bounding_box( const struct player_t* player );
 

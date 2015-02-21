@@ -48,186 +48,18 @@ void player__basic_update( struct player_t* player,
 
   const player__config_t* config = &(player->prototype->config);
 
-  const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / 1000;
-  const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / 1000;
-
-  enum player__state_e previous_state = PLAYER__STATE_NONE;
+  enum player__state_e previous_state = player->state.value;
   enum player__state_e new_state = player__calculate_new_state( player );
-  if ( new_state != player->state.value )
+  if ( new_state != previous_state )
   {
     player->state.value = new_state;
     player->state.timestamp = timing__get_top_of_frame();
   }
 
-  player__calculate_new_velocity( player, frame_length, &player->velocity );
-
-  int maximum_x_velocity = 0;
-
-  /* x acceleration */
-  if ( player->state.value == PLAYER__STATE_DUCKING )
-  {
-      if ( player->velocity.x < -config->per_second_x_decceleration )
-      {
-	player->velocity.x += config->per_second_x_decceleration;
-      }
-      else if ( config->per_second_x_decceleration < player->velocity.x )
-      {
-	player->velocity.x -= config->per_second_x_decceleration;
-      }
-      else
-      {
-	player->velocity.x = 0;
-      }
-  }
-  else if ( player->state.value != PLAYER__STATE_JUMPING_OFF_WALL &&
-	    player->state.value != PLAYER__STATE_BACK_FLIP )
-  {
-    if ( player->control->left.value )
-    {
-      maximum_x_velocity = 
-	(0.75 < player->control->left.value ? 
-	 config->velocity_limit_running : 
-	 config->velocity_limit_walking);
-
-      if (-maximum_x_velocity < (player->velocity.x-this_frame_x_acceleration))
-      {
-	player->velocity.x -= this_frame_x_acceleration;
-      }
-      else if ( player->velocity.x+this_frame_x_acceleration < -maximum_x_velocity )
-      {
-	player->velocity.x += this_frame_x_acceleration;
-      }
-      else
-      {
-	player->velocity.x = -maximum_x_velocity;
-      }
-    }
-    else if ( player->control->right.value )
-    {
-      maximum_x_velocity = 
-	(0.75 < player->control->right.value ? 
-	 config->velocity_limit_running : 
-	 config->velocity_limit_walking);
-
-      if ((player->velocity.x+this_frame_x_acceleration) < maximum_x_velocity)
-      {
-	player->velocity.x += this_frame_x_acceleration;
-      }
-      else if ( maximum_x_velocity < player->velocity.x-this_frame_x_acceleration )
-      {
-	player->velocity.x -= this_frame_x_acceleration;
-      }
-      else
-      {
-	player->velocity.x = maximum_x_velocity;
-      }
-    }
-    else /* x decceleration */
-    {
-
-      if ( player->velocity.x < -this_frame_x_decceleration )
-      {
-	player->velocity.x += this_frame_x_decceleration;
-      }
-      else if ( this_frame_x_decceleration < player->velocity.x )
-      {
-	player->velocity.x -= this_frame_x_decceleration;
-      }
-      else
-      {
-	player->velocity.x = 0;
-      }
-    }
-  }
-
-  /* y acceleration and velocity */
-
-  /* apply gravity */
-  switch ( player->state.value )
-  {
-  case PLAYER__STATE_NONE:
-  case PLAYER__STATE_HANGING_ON_LEDGE:
-    /* no gravity calculations needed when on ground or hanging on ledge*/
-    player->velocity.y = 0;
-    break;
-  default:
-    player->velocity.y += 
-      ( config->per_second_gravity_acceleration * frame_length)/1000;
-    break;
-  }
-
-  /* other accelerations */
-  switch ( player->state.value )
-  {
-  case PLAYER__STATE_NONE:
-    player->velocity.y = 0;
-    break;
-
-  case PLAYER__STATE_JUMPING:
-  case PLAYER__STATE_JUMPING_OFF_WALL:
-  case PLAYER__STATE_HANGING_ON_LEDGE:
-  case PLAYER__STATE_BACK_FLIP:
-    if ( jump_pressed )
-    {
-      if ( player->state.value == PLAYER__STATE_BACK_FLIP )
-      {
-	if ( player->velocity.x < 0 )
-	{
-	  player->velocity.x = config->velocity_limit_running;
-	}
-	else if ( 0 < player->velocity.x )
- 	{
-	  player->velocity.x = -config->velocity_limit_running;
-	}
-      }
-
-      if ( previous_state == PLAYER__STATE_SLIDING_WALL_ON_LEFT )
-      {
-	player->velocity.x = config->wall_jump_initial_x_velocity;
-	player->velocity.y = -config->wall_jump_initial_y_velocity;
-      }
-      else if ( previous_state == PLAYER__STATE_SLIDING_WALL_ON_RIGHT )
-      {
-	player->velocity.x = -config->wall_jump_initial_x_velocity;
-	player->velocity.y = -config->wall_jump_initial_y_velocity;
-      }
-      else if ( previous_state == PLAYER__STATE_HANGING_ON_LEDGE )
-      {
-	player->velocity.y = -config->jump_from_ledge_initial_y_velocity;
-      }
-      else
-      {
-	player->velocity.y = -(config->jump_initial_y_velocity + 
-			       config->jump_x_velocity_percent*abs(player->velocity.x)/100);
-      }
-    }
-    break;
-
-  case PLAYER__STATE_FALLING:
-    if ( jump_released && player->velocity.y < -config->jump_final_y_velocity)
-    {
-      player->velocity.y = -config->jump_final_y_velocity;
-    }
-    else if ( config->velocity_limit_falling < player->velocity.y )
-    {
-      player->velocity.y = config->velocity_limit_falling;
-    }
-
-    break;
-
-  case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
-  case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
-
-    if ( config->velocity_limit_wall_sliding < player->velocity.y )
-    {
-      player->velocity.y = config->velocity_limit_wall_sliding;
-    }
-    break;
-
-  default:
-    /* no other vertical accelerations */
-    break;
-  }
+  player__calculate_new_velocity( previous_state,
+				  player, 
+				  frame_length, 
+				  &player->velocity );
 
   struct geo__rect_t bbox = *player__get_bounding_box(player);
 
@@ -491,11 +323,193 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
   return result;
 }
 
-void player__calculate_new_velocity( const struct player_t* player, 
-				     milliseconds_t frame_length,
-				     struct geo__vector_t* new_velocity )
+int player__calculate_new_velocity( enum player__state_e previous_state,
+				    const struct player_t* player, 
+				    milliseconds_t frame_length,
+				    struct geo__vector_t* new_velocity )
 {
+  if ( !new_velocity )
+  {
+    return UNKNOWN_FAILURE;
+  }
 
+  *new_velocity = player->velocity;
+
+  const bool_t jump_pressed = control__button_pressed( &player->control->jump );
+  const bool_t jump_released = control__button_released( &player->control->jump );
+
+  const player__config_t* config = &(player->prototype->config);
+
+  const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / 1000;
+  const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / 1000;
+
+  int maximum_x_velocity = 0;
+
+  /* x acceleration */
+  if ( player->state.value == PLAYER__STATE_DUCKING )
+  {
+      if ( new_velocity->x < -config->per_second_x_decceleration )
+      {
+	new_velocity->x += config->per_second_x_decceleration;
+      }
+      else if ( config->per_second_x_decceleration < new_velocity->x )
+      {
+	new_velocity->x -= config->per_second_x_decceleration;
+      }
+      else
+      {
+	new_velocity->x = 0;
+      }
+  }
+  else if ( player->state.value != PLAYER__STATE_JUMPING_OFF_WALL &&
+	    player->state.value != PLAYER__STATE_BACK_FLIP )
+  {
+    if ( player->control->left.value )
+    {
+      maximum_x_velocity = 
+	(0.75 < player->control->left.value ? 
+	 config->velocity_limit_running : 
+	 config->velocity_limit_walking);
+
+      if (-maximum_x_velocity < (new_velocity->x-this_frame_x_acceleration))
+      {
+	new_velocity->x -= this_frame_x_acceleration;
+      }
+      else if ( new_velocity->x+this_frame_x_acceleration < -maximum_x_velocity )
+      {
+	new_velocity->x += this_frame_x_acceleration;
+      }
+      else
+      {
+	new_velocity->x = -maximum_x_velocity;
+      }
+    }
+    else if ( player->control->right.value )
+    {
+      maximum_x_velocity = 
+	(0.75 < player->control->right.value ? 
+	 config->velocity_limit_running : 
+	 config->velocity_limit_walking);
+
+      if ((new_velocity->x+this_frame_x_acceleration) < maximum_x_velocity)
+      {
+	new_velocity->x += this_frame_x_acceleration;
+      }
+      else if ( maximum_x_velocity < new_velocity->x-this_frame_x_acceleration )
+      {
+	new_velocity->x -= this_frame_x_acceleration;
+      }
+      else
+      {
+	new_velocity->x = maximum_x_velocity;
+      }
+    }
+    else /* x decceleration */
+    {
+
+      if ( new_velocity->x < -this_frame_x_decceleration )
+      {
+	new_velocity->x += this_frame_x_decceleration;
+      }
+      else if ( this_frame_x_decceleration < new_velocity->x )
+      {
+	new_velocity->x -= this_frame_x_decceleration;
+      }
+      else
+      {
+	new_velocity->x = 0;
+      }
+    }
+  }
+
+  /* y acceleration and velocity */
+
+  /* apply gravity */
+  switch ( player->state.value )
+  {
+  case PLAYER__STATE_NONE:
+  case PLAYER__STATE_HANGING_ON_LEDGE:
+    /* no gravity calculations needed when on ground or hanging on ledge*/
+    new_velocity->y = 0;
+    break;
+  default:
+    new_velocity->y += 
+      ( config->per_second_gravity_acceleration * frame_length)/1000;
+    break;
+  }
+
+  /* other accelerations */
+  switch ( player->state.value )
+  {
+  case PLAYER__STATE_NONE:
+    new_velocity->y = 0;
+    break;
+
+  case PLAYER__STATE_JUMPING:
+  case PLAYER__STATE_JUMPING_OFF_WALL:
+  case PLAYER__STATE_HANGING_ON_LEDGE:
+  case PLAYER__STATE_BACK_FLIP:
+    if ( jump_pressed )
+    {
+      if ( player->state.value == PLAYER__STATE_BACK_FLIP )
+      {
+	if ( new_velocity->x < 0 )
+	{
+	  new_velocity->x = config->velocity_limit_running;
+	}
+	else if ( 0 < new_velocity->x )
+ 	{
+	  new_velocity->x = -config->velocity_limit_running;
+	}
+      }
+
+      if ( previous_state == PLAYER__STATE_SLIDING_WALL_ON_LEFT )
+      {
+	new_velocity->x = config->wall_jump_initial_x_velocity;
+	new_velocity->y = -config->wall_jump_initial_y_velocity;
+      }
+      else if ( previous_state == PLAYER__STATE_SLIDING_WALL_ON_RIGHT )
+      {
+	new_velocity->x = -config->wall_jump_initial_x_velocity;
+	new_velocity->y = -config->wall_jump_initial_y_velocity;
+      }
+      else if ( previous_state == PLAYER__STATE_HANGING_ON_LEDGE )
+      {
+	new_velocity->y = -config->jump_from_ledge_initial_y_velocity;
+      }
+      else
+      {
+	new_velocity->y = -(config->jump_initial_y_velocity + 
+			       config->jump_x_velocity_percent*abs(new_velocity->x)/100);
+      }
+    }
+    break;
+
+  case PLAYER__STATE_FALLING:
+    if ( jump_released && new_velocity->y < -config->jump_final_y_velocity)
+    {
+      new_velocity->y = -config->jump_final_y_velocity;
+    }
+    else if ( config->velocity_limit_falling < new_velocity->y )
+    {
+      new_velocity->y = config->velocity_limit_falling;
+    }
+
+    break;
+
+  case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
+  case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
+
+    if ( config->velocity_limit_wall_sliding < new_velocity->y )
+    {
+      new_velocity->y = config->velocity_limit_wall_sliding;
+    }
+    break;
+
+  default:
+    /* no other vertical accelerations */
+    break;
+  }
 }
 
 int player__load_config( const char* config_file,
