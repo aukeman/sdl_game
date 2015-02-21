@@ -20,7 +20,7 @@ test/bin:
 	mkdir -p test/bin
 
 test/bin/% : test/%.c  $(C_DEFS) $(SOURCES) $(HEADERS) $(TEST_MAIN) $(TEST_HEADERS) test/bin
-	gcc -g -I./include -I./test -o $@  $(C_DEFS) $(SOURCES) $(TEST_MAIN) $<  -lSDL -lSDL_image -lGL
+	gcc -g -I./include -I./test -o $@  $(C_DEFS) $(SOURCES) $(TEST_MAIN) $<  -lm -lSDL -lSDL_image -lGL
 
 build_tests: $(TEST_EXES)
 
