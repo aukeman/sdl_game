@@ -55,6 +55,10 @@ void player__basic_update( struct player_t* player,
   enum player__state_e new_state = player__calculate_new_state( player );
   if ( new_state != previous_state )
   {
+    printf( "new state: %d; timestamp: %d\n",
+	    new_state,
+	    timing__get_top_of_frame() );
+	    
     player->state.value = new_state;
     player->state.timestamp = timing__get_top_of_frame();
   }
@@ -416,9 +420,12 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
     break;
 
   case PLAYER__STATE_JUMPING:
-  case PLAYER__STATE_FALLING:
   case PLAYER__STATE_JUMPING_OFF_WALL:
   case PLAYER__STATE_BACK_FLIP:
+    velocity.y += gravity_this_frame;
+    break;
+
+  case PLAYER__STATE_FALLING:
     velocity.y += gravity_this_frame;
     if ( config->velocity_limit_falling < velocity.y )
     {
@@ -460,6 +467,7 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
 
   case PLAYER__STATE_START_BACK_FLIP:
     velocity.y = -(config->backflip_initial_y_velocity);
+
     break;
     
   default:
@@ -545,6 +553,10 @@ bool_t _apply_config_value( const char* name,
 	{"jump_final_y_velocity",     &config->jump_final_y_velocity},
 	{"minimum_backflip_starting_velocity", 
 	                              &config->minimum_backflip_starting_velocity },
+	{"backflip_initial_x_velocity",
+	                              &config->backflip_initial_x_velocity },
+	{"backflip_initial_y_velocity",
+	                              &config->backflip_initial_y_velocity },
 	{"bounding_box_standing_x",   &prototype->bounding_box_standing.x},
 	{"bounding_box_standing_y",   &prototype->bounding_box_standing.y},
 	{"bounding_box_standing_width", &prototype->bounding_box_standing.width},
