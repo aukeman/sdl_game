@@ -636,11 +636,14 @@ void _walk_or_run_or_coast( const struct control__analog_t* left,
 
   if ( acceleration_direction )
   {
-    this_frame_x_acceleration *= acceleration_direction;
 
-    if ( abs((*velocity_x_ptr)+this_frame_x_acceleration) < maximum_x_velocity)
+    if ( abs(*velocity_x_ptr)+this_frame_x_acceleration < maximum_x_velocity)
     {
-      (*velocity_x_ptr) += this_frame_x_acceleration;
+      (*velocity_x_ptr) += this_frame_x_acceleration*acceleration_direction;
+    }
+    else if ( maximum_x_velocity < abs(*velocity_x_ptr)-this_frame_x_decceleration )
+    {
+      (*velocity_x_ptr) += (this_frame_x_decceleration*acceleration_direction);
     }
     else
     {
