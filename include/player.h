@@ -49,12 +49,14 @@ typedef struct
 
   int jump_initial_y_velocity;
   int jump_x_velocity_percent;
-  int jump_from_ledge_initial_y_velocity;
+  int climb_ledge_initial_y_velocity;
   int wall_jump_initial_y_velocity;
   int wall_jump_initial_x_velocity;
   int jump_final_y_velocity;
 
   int minimum_backflip_starting_velocity;
+  int backflip_initial_y_velocity;
+  int backflip_initial_x_velocity;
 
 } player__config_t;
 

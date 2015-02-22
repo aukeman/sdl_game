@@ -13,7 +13,15 @@
 
 static bool_t _apply_config_value( const char* name, int value, struct player_prototype_t* prototype );
 
-static void _coast( int* velocity_x_ptr, int this_frame_x_decceleration );
+static void _walk_or_run_or_coast( const struct control__analog_t* left,
+				   const struct control__analog_t* right,
+				   const player__config_t* config,
+				   int this_frame_x_acceleration,
+				   int this_frame_x_decceleration,
+				   int* velocity_x_ptr );
+
+static void _coast( int this_frame_x_decceleration,
+		    int* velocity_x_ptr );
 
 void player__basic_draw( int32_t pos_x, 
 			 int32_t pos_y, 
@@ -346,172 +354,118 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
   case PLAYER__STATE_STANDING:
   case PLAYER__STATE_WALKING:
   case PLAYER__STATE_RUNNING:
+  case PLAYER__STATE_START_JUMPING:
   case PLAYER__STATE_JUMPING:
   case PLAYER__STATE_CEASE_JUMPING:
   case PLAYER__STATE_FALLING:
-    
-
+    _walk_or_run_or_coast( &(player->control->left),
+			   &(player->control->right),
+			   &(player->prototype->config),
+			   this_frame_x_acceleration,
+			   this_frame_x_decceleration,
+			   &velocity.x );
     break;
 
   case PLAYER__STATE_DUCKING:
-    _coast( &velocity.x, this_frame_x_decceleration );
+    _coast( this_frame_x_decceleration, &velocity.x );
     break;
     
-
-  }
-
-
-  /* x acceleration */
-  if ( player->state.value == PLAYER__STATE_DUCKING )
-  {
-  }
-  else if ( player->state.value != PLAYER__STATE_JUMPING_OFF_WALL &&
-	    player->state.value != PLAYER__STATE_BACK_FLIP )
-  {
-    if ( player->control->left.value )
-    {
-      maximum_x_velocity = 
-	(0.75 < player->control->left.value ? 
-	 config->velocity_limit_running : 
-	 config->velocity_limit_walking);
-
-      if (-maximum_x_velocity < (velocity.x-this_frame_x_acceleration))
-      {
-	velocity.x -= this_frame_x_acceleration;
-      }
-      else if ( velocity.x+this_frame_x_acceleration < -maximum_x_velocity )
-      {
-	velocity.x += this_frame_x_acceleration;
-      }
-      else
-      {
-	velocity.x = -maximum_x_velocity;
-      }
-    }
-    else if ( player->control->right.value )
-    {
-      maximum_x_velocity = 
-	(0.75 < player->control->right.value ? 
-	 config->velocity_limit_running : 
-	 config->velocity_limit_walking);
-
-      if ((velocity.x+this_frame_x_acceleration) < maximum_x_velocity)
-      {
-	velocity.x += this_frame_x_acceleration;
-      }
-      else if ( maximum_x_velocity < velocity.x-this_frame_x_acceleration )
-      {
-	velocity.x -= this_frame_x_acceleration;
-      }
-      else
-      {
-	velocity.x = maximum_x_velocity;
-      }
-    }
-    else /* x decceleration */
-    {
-
-      if ( velocity.x < -this_frame_x_decceleration )
-      {
-	velocity.x += this_frame_x_decceleration;
-      }
-      else if ( this_frame_x_decceleration < velocity.x )
-      {
-	velocity.x -= this_frame_x_decceleration;
-      }
-      else
-      {
-	velocity.x = 0;
-      }
-    }
-  }
-
-  /* y acceleration and velocity */
-
-  /* apply gravity */
-  switch ( player->state.value )
-  {
-  case PLAYER__STATE_NONE:
+  case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
+  case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
   case PLAYER__STATE_HANGING_ON_LEDGE:
-    /* no gravity calculations needed when on ground or hanging on ledge*/
-    velocity.y = 0;
+  case PLAYER__STATE_START_CLIMBING_LEDGE:
+    velocity.x = 0;
     break;
+
+  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT:
+    velocity.x = config->wall_jump_initial_x_velocity;
+    break;
+
+  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT:
+    velocity.x = -config->wall_jump_initial_x_velocity;
+    break;
+
+  case PLAYER__STATE_START_BACK_FLIP:
+    velocity.x = config->backflip_initial_x_velocity*(velocity.x < 0 ? 1 : -1);
+    break;
+
+  case PLAYER__STATE_JUMPING_OFF_WALL:
+  case PLAYER__STATE_BACK_FLIP:
+    /* no-op, maintain same x velocity */
+    break;
+
   default:
-    velocity.y += 
-      ( config->per_second_gravity_acceleration * frame_length)/1000;
+    fprintf(stderr, 
+	    "unhandled state in setting x velocity: %d\n", 
+	    player->state.value);
     break;
   }
 
-  /* other accelerations */
+  int gravity_this_frame = 
+    (config->per_second_gravity_acceleration * frame_length)/1000;
+
+  /* y velocity */
   switch ( player->state.value )
   {
-  case PLAYER__STATE_NONE:
+  case PLAYER__STATE_STANDING:
+  case PLAYER__STATE_WALKING:
+  case PLAYER__STATE_RUNNING:
+  case PLAYER__STATE_DUCKING:
+  case PLAYER__STATE_HANGING_ON_LEDGE:
     velocity.y = 0;
     break;
 
   case PLAYER__STATE_JUMPING:
-  case PLAYER__STATE_JUMPING_OFF_WALL:
-  case PLAYER__STATE_HANGING_ON_LEDGE:
-  case PLAYER__STATE_BACK_FLIP:
-    if ( jump_pressed )
-    {
-      if ( player->state.value == PLAYER__STATE_BACK_FLIP )
-      {
-	if ( velocity.x < 0 )
-	{
-	  velocity.x = config->velocity_limit_running;
-	}
-	else if ( 0 < velocity.x )
- 	{
-	  velocity.x = -config->velocity_limit_running;
-	}
-      }
-
-      if ( previous_state == PLAYER__STATE_SLIDING_WALL_ON_LEFT )
-      {
-	velocity.x = config->wall_jump_initial_x_velocity;
-	velocity.y = -config->wall_jump_initial_y_velocity;
-      }
-      else if ( previous_state == PLAYER__STATE_SLIDING_WALL_ON_RIGHT )
-      {
-	velocity.x = -config->wall_jump_initial_x_velocity;
-	velocity.y = -config->wall_jump_initial_y_velocity;
-      }
-      else if ( previous_state == PLAYER__STATE_HANGING_ON_LEDGE )
-      {
-	velocity.y = -config->jump_from_ledge_initial_y_velocity;
-      }
-      else
-      {
-	velocity.y = -(config->jump_initial_y_velocity + 
-			       config->jump_x_velocity_percent*abs(velocity.x)/100);
-      }
-    }
-    break;
-
   case PLAYER__STATE_FALLING:
-    if ( jump_released && velocity.y < -config->jump_final_y_velocity)
-    {
-      velocity.y = -config->jump_final_y_velocity;
-    }
-    else if ( config->velocity_limit_falling < velocity.y )
+  case PLAYER__STATE_JUMPING_OFF_WALL:
+  case PLAYER__STATE_BACK_FLIP:
+    velocity.y += gravity_this_frame;
+    if ( config->velocity_limit_falling < velocity.y )
     {
       velocity.y = config->velocity_limit_falling;
     }
-
     break;
 
+  case PLAYER__STATE_CEASE_JUMPING:
+    velocity.y += gravity_this_frame;
+    if ( velocity.y < config->jump_final_y_velocity )
+    {
+      velocity.y = -config->jump_final_y_velocity;
+    }
+
+    break;
+    
   case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
   case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
-
+    velocity.y += gravity_this_frame;
     if ( config->velocity_limit_wall_sliding < velocity.y )
     {
       velocity.y = config->velocity_limit_wall_sliding;
     }
     break;
 
+  case PLAYER__STATE_START_JUMPING:
+    velocity.y = -( config->jump_initial_y_velocity + 
+		    abs(config->jump_x_velocity_percent*velocity.x)/100 ); 
+    break;
+
+  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT:
+  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT:
+    velocity.y = -(config->wall_jump_initial_y_velocity);
+    break;
+
+  case PLAYER__STATE_START_CLIMBING_LEDGE:
+    velocity.y = -(config->climb_ledge_initial_y_velocity);
+    break;
+
+  case PLAYER__STATE_START_BACK_FLIP:
+    velocity.y = -(config->backflip_initial_y_velocity);
+    break;
+    
   default:
-    /* no other vertical accelerations */
+    fprintf(stderr, 
+	    "unhandled state in setting x velocity: %d\n", 
+	    player->state.value);
     break;
   }
 
@@ -582,8 +536,8 @@ bool_t _apply_config_value( const char* name,
 	                              &config->per_second_gravity_acceleration},
 	{"jump_initial_y_velocity",   &config->jump_initial_y_velocity},
 	{"jump_x_velocity_percent",   &config->jump_x_velocity_percent},
-	{"jump_from_ledge_initial_y_velocity", 
-	                              &config->jump_from_ledge_initial_y_velocity},
+	{"climb_ledge_initial_y_velocity", 
+	                              &config->climb_ledge_initial_y_velocity},
 	{"wall_jump_initial_x_velocity",     
 	                              &config->wall_jump_initial_x_velocity},
 	{"wall_jump_initial_y_velocity",     
@@ -641,7 +595,54 @@ const struct geo__rect_t* player__get_bounding_box( const struct player_t* playe
   return result;
 }
 
-void _coast( int* velocity_x_ptr, int this_frame_x_decceleration )
+void _walk_or_run_or_coast( const struct control__analog_t* left,
+			    const struct control__analog_t* right,
+			    const player__config_t* config,
+			    int this_frame_x_acceleration,
+			    int this_frame_x_decceleration,
+			    int* velocity_x_ptr )
+{
+  int maximum_x_velocity = 0;
+  int acceleration_direction = 0;
+
+  if ( left && control__at_least_low(left) )
+  {
+    maximum_x_velocity = (control__at_least_high(left) ? 
+			  config->velocity_limit_running : 
+			  config->velocity_limit_walking);
+   
+    acceleration_direction = -1;
+  }
+  else if ( right && control__at_least_low(right) )
+  {
+    maximum_x_velocity = (control__at_least_high(right) ? 
+			  config->velocity_limit_running : 
+			  config->velocity_limit_walking);
+   
+    acceleration_direction = 1;
+  }
+
+  if ( acceleration_direction )
+  {
+    this_frame_x_acceleration *= acceleration_direction;
+
+    if ( abs((*velocity_x_ptr)+this_frame_x_acceleration) < maximum_x_velocity)
+    {
+      (*velocity_x_ptr) += this_frame_x_acceleration;
+    }
+    else
+    {
+      (*velocity_x_ptr) = maximum_x_velocity*acceleration_direction;
+    }
+  }
+  else
+  {
+    _coast( this_frame_x_decceleration, velocity_x_ptr );
+  }
+}
+
+
+void _coast( int this_frame_x_decceleration, int* velocity_x_ptr )
 {
     if ( *velocity_x_ptr < -this_frame_x_decceleration )
     {
