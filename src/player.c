@@ -615,47 +615,51 @@ void _walk_or_run_or_coast( const struct control__analog_t* left,
 			    int* velocity_x_ptr )
 {
   int maximum_x_velocity = 0;
-  int acceleration_direction = 0;
 
-  if ( left && control__at_least_low(left) )
+  if ( control__at_least_low(left) )
   {
-    maximum_x_velocity = (control__at_least_high(left) ? 
-			  config->velocity_limit_running : 
-			  config->velocity_limit_walking);
-   
-    acceleration_direction = -1;
-  }
-  else if ( right && control__at_least_low(right) )
-  {
-    maximum_x_velocity = (control__at_least_high(right) ? 
-			  config->velocity_limit_running : 
-			  config->velocity_limit_walking);
-   
-    acceleration_direction = 1;
-  }
+    maximum_x_velocity =
+      (control__at_least_high(left) ?
+       config->velocity_limit_running :
+       config->velocity_limit_walking);
 
-  if ( acceleration_direction )
-  {
-
-    if ( abs(*velocity_x_ptr)+this_frame_x_acceleration < maximum_x_velocity)
+    if (-maximum_x_velocity < ((*velocity_x_ptr)-this_frame_x_acceleration))
     {
-      (*velocity_x_ptr) += this_frame_x_acceleration*acceleration_direction;
+      *velocity_x_ptr -= this_frame_x_acceleration;
     }
-    else if ( maximum_x_velocity < abs(*velocity_x_ptr)-this_frame_x_decceleration )
+    else if ( (*velocity_x_ptr)+this_frame_x_acceleration < -maximum_x_velocity )
     {
-      (*velocity_x_ptr) += (this_frame_x_decceleration*acceleration_direction);
+      *velocity_x_ptr += this_frame_x_acceleration;
     }
     else
     {
-      (*velocity_x_ptr) = maximum_x_velocity*acceleration_direction;
+      *velocity_x_ptr = -maximum_x_velocity;
     }
   }
-  else
+  else if ( control__at_least_low(right) )
+  {
+    maximum_x_velocity =
+      (control__at_least_high(right) ?
+       config->velocity_limit_running :
+       config->velocity_limit_walking);
+    if (((*velocity_x_ptr)+this_frame_x_acceleration) < maximum_x_velocity)
+    {
+      *velocity_x_ptr += this_frame_x_acceleration;
+    }
+    else if ( maximum_x_velocity < (*velocity_x_ptr)-this_frame_x_acceleration )
+    {
+      *velocity_x_ptr -= this_frame_x_acceleration;
+    }
+    else
+    {
+      *velocity_x_ptr = maximum_x_velocity;
+    }
+  }
+  else /* x decceleration */
   {
     _coast( this_frame_x_decceleration, velocity_x_ptr );
   }
 }
-
 
 void _coast( int this_frame_x_decceleration, int* velocity_x_ptr )
 {
