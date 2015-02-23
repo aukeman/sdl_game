@@ -55,10 +55,6 @@ void player__basic_update( struct player_t* player,
   enum player__state_e new_state = player__calculate_new_state( player );
   if ( new_state != previous_state )
   {
-    printf( "new state: %d; timestamp: %d\n",
-	    new_state,
-	    timing__get_top_of_frame() );
-	    
     player->state.value = new_state;
     player->state.timestamp = timing__get_top_of_frame();
   }

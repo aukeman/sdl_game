@@ -134,7 +134,7 @@ int main( int argc, char** argv ) {
 		      player.bottom_collision,
 		      player.left_collision,
 		      player.right_collision,
-		      player.state,
+		      player.state.value,
 		      player.against_ledge);
     stopwatch__stop(&draw_stats_sw);
 
