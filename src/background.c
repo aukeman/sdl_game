@@ -329,6 +329,7 @@ bool_t background__collision_test( const struct background_t* background,
 					   top_collision, 
 					   bottom_collision );
   
+
   return (*top_collision || 
 	  *bottom_collision || 
 	  *left_collision || 
@@ -474,15 +475,42 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 	  background->tiles[idx_x][idx_y].prototype->collision_type;
 
 	if ( standing_still ){
-	  *top_collision = 
-	    (*top_collision ||
-	     ((collision_type & BACKGROUND__COLLISION_BOTTOM) &&
-	      collision__touches_bottom(&pos_for_test, &tile_position)));
 
-	  *bottom_collision = 
-	    (*bottom_collision ||
-	     ((collision_type & BACKGROUND__COLLISION_TOP) &&
-	      collision__touches_top(&pos_for_test, &tile_position)));
+	  if ( collision_type & BACKGROUND__COLLISION_INCLINE_MASK ){
+
+	    struct geo__point_t standing_point = { pos_for_test.x + pos_for_test.width/2,
+						   pos_for_test.y + pos_for_test.height };
+
+	    if ( collision__point_in_rectangle( &standing_point, &tile_position ) ){
+
+	      int x_offset_from_tile_left = (standing_point.x - tile_position.x);
+	      int y_offset_from_tile_bottom = ((tile_position.y+tile_position.height)-standing_point.y);
+
+	      if ( y_offset_from_tile_bottom < x_offset_from_tile_left )
+	      {
+		*bottom_collision = TRUE;
+		*y_velocity += (y_offset_from_tile_bottom - x_offset_from_tile_left);
+
+		printf( "1) y offset from tile bottom: %d  "
+			"x offset from tile left: %d  "
+			"y velocity %d\n",
+			y_offset_from_tile_bottom,
+			x_offset_from_tile_left,
+			*y_velocity );
+	      }
+	    }
+	  }
+	  else{
+	    *top_collision = 
+	      (*top_collision ||
+	       ((collision_type & BACKGROUND__COLLISION_BOTTOM) &&
+		collision__touches_bottom(&pos_for_test, &tile_position)));
+
+	    *bottom_collision = 
+	      (*bottom_collision ||
+	       ((collision_type & BACKGROUND__COLLISION_TOP) &&
+		collision__touches_top(&pos_for_test, &tile_position)));
+	  }
 	}
 	else if (((moving_down) && 
 		  (collision_type & BACKGROUND__COLLISION_TOP)) ||
@@ -501,10 +529,39 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 
 	    *y_velocity = (*y_velocity / abs(*y_velocity)) * distance_until_collision;
 
-	    standing_still = (0 == *y_velocity);
 	  }
 	}
+	else if ((moving_down) && 
+		 (collision_type & BACKGROUND__COLLISION_INCLINE_MASK)){
+
+	  struct geo__point_t standing_point = { pos_for_test.x + pos_for_test.width/2,
+						 pos_for_test.y + pos_for_test.height + *y_velocity };
+
+	  if ( collision__point_in_rectangle( &standing_point, &tile_position ) ){
+
+	    int x_offset_from_tile_left = (standing_point.x - tile_position.x);
+	    int y_offset_from_tile_bottom = ((tile_position.y+tile_position.height)-standing_point.y);
+
+	    if ( y_offset_from_tile_bottom < x_offset_from_tile_left )
+	      {
+		*bottom_collision = TRUE;
+		*y_velocity -= (y_offset_from_tile_bottom - x_offset_from_tile_left);
+
+		printf( "2) y offset from tile bottom: %d  "
+			"x offset from tile left: %d  "
+			"y velocity %d\n",
+			y_offset_from_tile_bottom,
+			x_offset_from_tile_left,
+			*y_velocity );
+	      }
+	  }
+	}
+
+	standing_still = (0 == *y_velocity);
       }
     }
   }
+
+  return (*top_collision  || *bottom_collision);
 }
+
