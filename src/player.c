@@ -179,9 +179,14 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
   {
   case PLAYER__STATE_NONE:
   case PLAYER__STATE_STANDING:
+  case PLAYER__STATE_STANDING_ON_STAIRS:
   case PLAYER__STATE_DUCKING:
   case PLAYER__STATE_WALKING:
   case PLAYER__STATE_RUNNING:
+  case PLAYER__STATE_WALKING_UP_STAIRS:
+  case PLAYER__STATE_WALKING_DOWN_STAIRS:
+  case PLAYER__STATE_RUNNING_UP_STAIRS:
+  case PLAYER__STATE_RUNNING_DOWN_STAIRS:
     if ( !player->bottom_collision )
     {
       result = PLAYER__STATE_FALLING;
@@ -206,15 +211,21 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
     }
     else if ( config->velocity_limit_walking < abs(player->velocity.x) )
     {
-      result = PLAYER__STATE_RUNNING;
+      result = (player->on_incline ? 
+		PLAYER__STATE_RUNNING_UP_STAIRS : 
+		PLAYER__STATE_RUNNING);
     }
     else if ( 0 < abs(player->velocity.x) )
     {
-      result = PLAYER__STATE_WALKING;
+      result = (player->on_incline ?
+		PLAYER__STATE_WALKING_UP_STAIRS : 
+		PLAYER__STATE_WALKING);
     }
     else
     {
-      result = PLAYER__STATE_STANDING;
+      result = (player->on_incline ? 
+		PLAYER__STATE_STANDING_ON_STAIRS :
+		PLAYER__STATE_STANDING);
     }
     break;
 
@@ -368,8 +379,13 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
   switch ( player->state.value )
   {
   case PLAYER__STATE_STANDING:
+  case PLAYER__STATE_STANDING_ON_STAIRS:
   case PLAYER__STATE_WALKING:
+  case PLAYER__STATE_WALKING_UP_STAIRS:
+  case PLAYER__STATE_WALKING_DOWN_STAIRS:
   case PLAYER__STATE_RUNNING:
+  case PLAYER__STATE_RUNNING_UP_STAIRS:
+  case PLAYER__STATE_RUNNING_DOWN_STAIRS:
   case PLAYER__STATE_START_JUMPING:
   case PLAYER__STATE_JUMPING:
   case PLAYER__STATE_CEASE_JUMPING:
@@ -424,11 +440,22 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
   switch ( player->state.value )
   {
   case PLAYER__STATE_STANDING:
+  case PLAYER__STATE_STANDING_ON_STAIRS:
   case PLAYER__STATE_WALKING:
   case PLAYER__STATE_RUNNING:
   case PLAYER__STATE_DUCKING:
   case PLAYER__STATE_HANGING_ON_LEDGE:
     velocity.y = 0;
+    break;
+
+  case PLAYER__STATE_WALKING_UP_STAIRS:
+  case PLAYER__STATE_RUNNING_UP_STAIRS:
+    velocity.y = -velocity.x;
+    break;
+
+  case PLAYER__STATE_WALKING_DOWN_STAIRS:
+  case PLAYER__STATE_RUNNING_DOWN_STAIRS:
+    velocity.y = velocity.x;
     break;
 
   case PLAYER__STATE_JUMPING:

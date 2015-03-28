@@ -120,7 +120,7 @@ int main( int argc, char** argv ) {
 		      "Screen Pos: %5d %5d\n"
 		      "Pos: %4d %4d Vel: %3d %3d\n"
 		      "top: %d bottom: %d left: %d right: %d\n"
-		      "state: %d against ledge: %d on incline: %d",
+		      "state: %2d against ledge: %d on incline: %d",
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
