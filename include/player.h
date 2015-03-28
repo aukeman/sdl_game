@@ -92,6 +92,9 @@ struct player_t{
   const struct player_prototype_t* prototype;
   const struct control__state_t* control;
   
+  bool_t climbing_stairs;
+  bool_t descending_stairs;
+
   bool_t top_collision;
   bool_t bottom_collision;
   bool_t left_collision;

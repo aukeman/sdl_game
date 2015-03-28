@@ -304,6 +304,8 @@ void background__tile_basic_draw( size_t idx_x,
 
 bool_t background__collision_test( const struct background_t* background,
 				   const struct geo__rect_t* position,
+				   bool_t climbing_stairs,
+				   bool_t descending_stairs,
 				   struct geo__vector_t* velocity,
 				   bool_t* top_collision,
 				   bool_t* bottom_collision,
@@ -318,6 +320,7 @@ bool_t background__collision_test( const struct background_t* background,
 
   _collision_test_for_walls( background,
 			     &pos_for_test,
+			     climbing_stairs,
 			     &(velocity->x),
 			     left_collision, 
 			     right_collision,
@@ -341,6 +344,7 @@ bool_t background__collision_test( const struct background_t* background,
 
 bool_t _collision_test_for_walls( const struct background_t* background,
 				  const struct geo__rect_t* position,
+				  bool_t* climbing_stairs,
 				  int* x_velocity,
 				  bool_t* left_collision,
 				  bool_t* right_collision,
@@ -424,7 +428,8 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 	  }
 
 	}
-	else if ((moving_right) && 
+	else if (climbing_stairs && 
+		 moving_right && 
 		 (collision_type & BACKGROUND__COLLISION_INCLINE_UP_LEFT_TO_RIGHT)){
 
 	  struct geo__line_t velocity_line = { incline_hot_spot.x, 
@@ -447,7 +452,8 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 	    standing_still = (0 == *x_velocity);
 	  }
 	}
-	else if ((moving_left) && 
+	else if (climbing_stairs && 
+		 moving_left && 
 		 (collision_type & BACKGROUND__COLLISION_INCLINE_UP_RIGHT_TO_LEFT)){
 
 	  struct geo__line_t velocity_line = { incline_hot_spot.x, 

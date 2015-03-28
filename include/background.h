@@ -103,6 +103,8 @@ void background__tile_basic_draw( size_t idx_x,
 
 bool_t background__collision_test( const struct background_t* background,
 				   const struct geo__rect_t* position,
+				   bool_t climbing_stairs,
+				   bool_t descending_stairs,
 				   struct geo__vector_t* velocity,
 				   bool_t* top_collision,
 				   bool_t* bottom_collision,

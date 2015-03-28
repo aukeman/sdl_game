@@ -64,7 +64,7 @@ int main( int argc, char** argv ) {
       { 0, 0 }, 
       &default_player, 
       control__get_state(1), 
-      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
       {PLAYER__STATE_NONE, 0}, 
       {   0, 0, 255 } 
     };

@@ -73,8 +73,17 @@ void player__basic_update( struct player_t* player,
     { (player->velocity.x * frame_length)/1000, 
       (player->velocity.y * frame_length)/1000 };
 
+  player->climbing_stairs = 
+    (control__at_least_medium(&player->control->up) &&
+     (control__at_least_low(&player->control->left) ||
+      (control__at_least_low(&player->control->right))));
+
+  player->descending_stairs = FALSE;
+
   background__collision_test( terrain,
 			      &bbox,
+			      player->climbing_stairs,
+			      player->descending_stairs,
 			      &movement_this_frame,
 			      &(player->top_collision),
 			      &(player->bottom_collision),
@@ -113,6 +122,8 @@ void player__basic_update( struct player_t* player,
 
     background__collision_test( terrain,
 				&grabbing_box,
+				FALSE,
+				FALSE,
 				&zero_vector,
 				&top,
 				&bottom,
@@ -126,6 +137,8 @@ void player__basic_update( struct player_t* player,
 
       background__collision_test( terrain,
 				  &grabbing_box,
+				  FALSE,
+				  FALSE,
 				  &zero_vector,
 				  &top,
 				  &bottom,
