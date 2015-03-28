@@ -64,7 +64,7 @@ int main( int argc, char** argv ) {
       { 0, 0 }, 
       &default_player, 
       control__get_state(1), 
-      FALSE, FALSE, FALSE, FALSE, FALSE, 
+      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
       {PLAYER__STATE_NONE, 0}, 
       {   0, 0, 255 } 
     };
@@ -120,7 +120,7 @@ int main( int argc, char** argv ) {
 		      "Screen Pos: %5d %5d\n"
 		      "Pos: %4d %4d Vel: %3d %3d\n"
 		      "top: %d bottom: %d left: %d right: %d\n"
-		      "state: %d against ledge: %d",
+		      "state: %d against ledge: %d on incline: %d",
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
@@ -135,7 +135,8 @@ int main( int argc, char** argv ) {
 		      player.left_collision,
 		      player.right_collision,
 		      player.state.value,
-		      player.against_ledge);
+		      player.against_ledge,
+		      player.on_incline);
     stopwatch__stop(&draw_stats_sw);
 
     stopwatch__start(&flip_page_sw);

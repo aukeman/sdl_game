@@ -308,7 +308,8 @@ bool_t background__collision_test( const struct background_t* background,
 				   bool_t* top_collision,
 				   bool_t* bottom_collision,
 				   bool_t* left_collision,
-				   bool_t* right_collision ){
+				   bool_t* right_collision,
+				   bool_t* on_incline ){
 
   struct geo__rect_t pos_for_test = { position->x, 
 				      position->y,
@@ -319,7 +320,8 @@ bool_t background__collision_test( const struct background_t* background,
 			     &pos_for_test,
 			     &(velocity->x),
 			     left_collision, 
-			     right_collision );
+			     right_collision,
+			     on_incline );
 
   pos_for_test.x += velocity->x;
 
@@ -327,27 +329,32 @@ bool_t background__collision_test( const struct background_t* background,
 					   &pos_for_test,
 					   &(velocity->y),
 					   top_collision, 
-					   bottom_collision );
-  
+					   bottom_collision,
+					   on_incline );
 
   return (*top_collision || 
 	  *bottom_collision || 
 	  *left_collision || 
-	  *right_collision );
+	  *right_collision || 
+	  *on_incline);
 }
 
 bool_t _collision_test_for_walls( const struct background_t* background,
 				  const struct geo__rect_t* position,
 				  int* x_velocity,
 				  bool_t* left_collision,
-				  bool_t* right_collision ){
+				  bool_t* right_collision,
+				  bool_t* on_incline ){
 
-  *left_collision = *right_collision = FALSE;
+  *left_collision = *right_collision = *on_incline = FALSE;
 
   struct geo__rect_t pos_for_test = { position->x,
 				      position->y+1,
 				      position->width,
 				      position->height-2 };
+
+  struct geo__point_t incline_hot_spot = { position->x + position->width/2,
+					   position->y + position->height };
 
   bool_t moving_right = ( 0 < *x_velocity );
   bool_t moving_left = ( *x_velocity < 0 );
@@ -417,7 +424,53 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 	  }
 
 	}
-      } 
+	else if ((moving_right) && 
+		 (collision_type & BACKGROUND__COLLISION_INCLINE_UP_LEFT_TO_RIGHT)){
+
+	  struct geo__line_t velocity_line = { incline_hot_spot.x, 
+					       incline_hot_spot.y, 
+					       incline_hot_spot.x + *x_velocity,
+					       incline_hot_spot.y };
+
+	  struct geo__line_t incline =  { tile_position.x,
+					  tile_position.y + tile_position.height,
+					  tile_position.x + tile_position.width,
+					  tile_position.y };
+
+	  struct geo__point_t intersection;
+
+	  if ( collision__line_intersects_line( &velocity_line,
+						&incline,
+						&intersection ) ){
+	    
+	    *x_velocity = (intersection.x - velocity_line.x1);
+	    standing_still = (0 == *x_velocity);
+	  }
+	}
+	else if ((moving_left) && 
+		 (collision_type & BACKGROUND__COLLISION_INCLINE_UP_RIGHT_TO_LEFT)){
+
+	  struct geo__line_t velocity_line = { incline_hot_spot.x, 
+					       incline_hot_spot.y, 
+					       incline_hot_spot.x + *x_velocity,
+					       incline_hot_spot.y };
+
+	  struct geo__line_t incline =  { tile_position.x,
+					  tile_position.y,
+					  tile_position.x + tile_position.width,
+					  tile_position.y + tile_position.height };
+
+	  struct geo__point_t intersection;
+
+	  if ( collision__line_intersects_line( &velocity_line,
+						&incline,
+						&intersection ) ){
+	    
+	    *x_velocity = (intersection.x - velocity_line.x1);
+	    standing_still = (0 == *x_velocity);
+	  }
+	}
+      }
     }
   }
 
@@ -425,10 +478,11 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 }
 
 bool_t _collision_test_for_floors_and_ceilings(const struct background_t* background,
-				  const struct geo__rect_t* position,
-				  int* y_velocity,
-				  bool_t* top_collision,
-				  bool_t* bottom_collision ){
+					       const struct geo__rect_t* position,
+					       int* y_velocity,
+					       bool_t* top_collision,
+					       bool_t* bottom_collision,
+					       bool_t* on_incline){
 
   *top_collision = *bottom_collision = FALSE;
 
@@ -436,6 +490,11 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 				      position->y,
 				      position->width-2,
 				      position->height };
+
+  struct geo__rect_t incline_hot_spot = { position->x + position->width/2,
+					  position->y + position->height,
+					  0,
+					  0 };
 
   bool_t moving_down = ( 0 < *y_velocity );
   bool_t moving_up = ( *y_velocity < 0 );
@@ -475,42 +534,17 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 	  background->tiles[idx_x][idx_y].prototype->collision_type;
 
 	if ( standing_still ){
+	  *top_collision = 
+	    (*top_collision ||
+	     ((collision_type & BACKGROUND__COLLISION_BOTTOM) &&
+	      collision__touches_bottom(&pos_for_test, &tile_position)));
 
-	  if ( collision_type & BACKGROUND__COLLISION_INCLINE_MASK ){
+	  *bottom_collision = 
+	    (*bottom_collision ||
+	     ((collision_type & BACKGROUND__COLLISION_TOP) &&
+	      collision__touches_top(&pos_for_test, &tile_position)));
 
-	    struct geo__point_t standing_point = { pos_for_test.x + pos_for_test.width/2,
-						   pos_for_test.y + pos_for_test.height };
 
-	    if ( collision__point_in_rectangle( &standing_point, &tile_position ) ){
-
-	      int x_offset_from_tile_left = (standing_point.x - tile_position.x);
-	      int y_offset_from_tile_bottom = ((tile_position.y+tile_position.height)-standing_point.y);
-
-	      if ( y_offset_from_tile_bottom < x_offset_from_tile_left )
-	      {
-		*bottom_collision = TRUE;
-		*y_velocity += (y_offset_from_tile_bottom - x_offset_from_tile_left);
-
-		printf( "1) y offset from tile bottom: %d  "
-			"x offset from tile left: %d  "
-			"y velocity %d\n",
-			y_offset_from_tile_bottom,
-			x_offset_from_tile_left,
-			*y_velocity );
-	      }
-	    }
-	  }
-	  else{
-	    *top_collision = 
-	      (*top_collision ||
-	       ((collision_type & BACKGROUND__COLLISION_BOTTOM) &&
-		collision__touches_bottom(&pos_for_test, &tile_position)));
-
-	    *bottom_collision = 
-	      (*bottom_collision ||
-	       ((collision_type & BACKGROUND__COLLISION_TOP) &&
-		collision__touches_top(&pos_for_test, &tile_position)));
-	  }
 	}
 	else if (((moving_down) && 
 		  (collision_type & BACKGROUND__COLLISION_TOP)) ||
@@ -529,39 +563,63 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 
 	    *y_velocity = (*y_velocity / abs(*y_velocity)) * distance_until_collision;
 
+	    standing_still = (0 == *y_velocity);
 	  }
 	}
 	else if ((moving_down) && 
-		 (collision_type & BACKGROUND__COLLISION_INCLINE_MASK)){
+		 (collision_type & BACKGROUND__COLLISION_INCLINE_UP_LEFT_TO_RIGHT)){
 
-	  struct geo__point_t standing_point = { pos_for_test.x + pos_for_test.width/2,
-						 pos_for_test.y + pos_for_test.height + *y_velocity };
+	  struct geo__line_t velocity_line = { incline_hot_spot.x, 
+					       incline_hot_spot.y, 
+					       incline_hot_spot.x,
+					       incline_hot_spot.y + *y_velocity };
 
-	  if ( collision__point_in_rectangle( &standing_point, &tile_position ) ){
+	  struct geo__line_t incline =  { tile_position.x,
+					  tile_position.y + tile_position.height,
+					  tile_position.x + tile_position.width,
+					  tile_position.y };
 
-	    int x_offset_from_tile_left = (standing_point.x - tile_position.x);
-	    int y_offset_from_tile_bottom = ((tile_position.y+tile_position.height)-standing_point.y);
+	  struct geo__point_t intersection;
 
-	    if ( y_offset_from_tile_bottom < x_offset_from_tile_left )
-	      {
-		*bottom_collision = TRUE;
-		*y_velocity -= (y_offset_from_tile_bottom - x_offset_from_tile_left);
-
-		printf( "2) y offset from tile bottom: %d  "
-			"x offset from tile left: %d  "
-			"y velocity %d\n",
-			y_offset_from_tile_bottom,
-			x_offset_from_tile_left,
-			*y_velocity );
-	      }
+	  if ( collision__line_intersects_line( &velocity_line,
+						&incline,
+						&intersection ) ){
+	    
+	    *y_velocity = (intersection.y - velocity_line.y1);
+	    *bottom_collision = TRUE;
+	    *on_incline = TRUE;
+	    standing_still = (0 == *y_velocity);
 	  }
 	}
+	else if ((moving_down) && 
+		 (collision_type & BACKGROUND__COLLISION_INCLINE_UP_RIGHT_TO_LEFT)){
 
-	standing_still = (0 == *y_velocity);
+	  struct geo__line_t velocity_line = { incline_hot_spot.x, 
+					       incline_hot_spot.y, 
+					       incline_hot_spot.x,
+					       incline_hot_spot.y + *y_velocity };
+
+	  struct geo__line_t incline =  { tile_position.x,
+					  tile_position.y,
+					  tile_position.x + tile_position.width,
+					  tile_position.y + tile_position.height };
+
+	  struct geo__point_t intersection;
+
+	  if ( collision__line_intersects_line( &velocity_line,
+						&incline,
+						&intersection ) ){
+	    
+	    *y_velocity = (intersection.y - velocity_line.y1);
+
+	    *bottom_collision = TRUE;
+	    *on_incline = TRUE;
+	    standing_still = (0 == *y_velocity);
+	  }
+	}
       }
     }
   }
-
-  return (*top_collision  || *bottom_collision);
+  
+  return (*top_collision || *bottom_collision);
 }
-

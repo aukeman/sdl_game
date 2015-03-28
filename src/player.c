@@ -79,7 +79,8 @@ void player__basic_update( struct player_t* player,
 			      &(player->top_collision),
 			      &(player->bottom_collision),
 			      &(player->left_collision),
-			      &(player->right_collision) );
+			      &(player->right_collision),
+			      &(player->on_incline));
 
   player->position.x += movement_this_frame.x;
   player->position.y += movement_this_frame.y;
@@ -108,7 +109,7 @@ void player__basic_update( struct player_t* player,
     grabbing_box.x = bbox.x;
     grabbing_box.y = bbox.y-grabbing_box.height;
 
-    bool_t top, bottom, left, right;
+    bool_t top, bottom, left, right, on_incline;
 
     background__collision_test( terrain,
 				&grabbing_box,
@@ -116,7 +117,8 @@ void player__basic_update( struct player_t* player,
 				&top,
 				&bottom,
 				&left,
-				&right );
+				&right,
+				&on_incline );
 
     if (!top && !bottom && !left && !right)
     {
@@ -128,7 +130,8 @@ void player__basic_update( struct player_t* player,
 				  &top,
 				  &bottom,
 				  &left,
-				  &right );
+				  &right,
+				  &on_incline );
 
       player->against_ledge = (left || right);
     }

@@ -97,6 +97,8 @@ struct player_t{
   bool_t left_collision;
   bool_t right_collision;
 
+  bool_t on_incline;
+
   bool_t against_ledge;
 
   struct player_state_info_t state;
