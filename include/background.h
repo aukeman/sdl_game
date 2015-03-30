@@ -110,6 +110,6 @@ bool_t background__collision_test( const struct background_t* background,
 				   bool_t* bottom_collision,
 				   bool_t* left_collision,
 				   bool_t* right_collision,
-				   bool_t* on_incline );
+				   struct geo__vector_t* surface_vector );
 
 #endif

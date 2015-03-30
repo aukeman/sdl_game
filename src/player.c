@@ -55,6 +55,8 @@ void player__basic_update( struct player_t* player,
   enum player__state_e new_state = player__calculate_new_state( player );
   if ( new_state != previous_state )
   {
+    printf( "old state %d -> new state %d\n", previous_state, new_state );
+
     player->state.value = new_state;
     player->state.timestamp = timing__get_top_of_frame();
   }
@@ -74,11 +76,15 @@ void player__basic_update( struct player_t* player,
       (player->velocity.y * frame_length)/1000 };
 
   player->climbing_stairs = 
-    (control__at_least_medium(&player->control->up) &&
+    (control__at_least_high(&player->control->up) &&
      (control__at_least_low(&player->control->left) ||
       (control__at_least_low(&player->control->right))));
 
   player->descending_stairs = FALSE;
+
+  if ( player->state.value == PLAYER__STATE_WALKING_UP_STAIRS ){
+    printf( "movement this frame: %d, %d\n", movement_this_frame.x, movement_this_frame.y );
+  }
 
   background__collision_test( terrain,
 			      &bbox,
@@ -89,7 +95,7 @@ void player__basic_update( struct player_t* player,
 			      &(player->bottom_collision),
 			      &(player->left_collision),
 			      &(player->right_collision),
-			      &(player->on_incline));
+			      &(player->surface_vector));
 
   player->position.x += movement_this_frame.x;
   player->position.y += movement_this_frame.y;
@@ -118,7 +124,9 @@ void player__basic_update( struct player_t* player,
     grabbing_box.x = bbox.x;
     grabbing_box.y = bbox.y-grabbing_box.height;
 
-    bool_t top, bottom, left, right, on_incline;
+    bool_t top, bottom, left, right;
+
+    struct geo__vector_t surface_vector = {0, 0};
 
     background__collision_test( terrain,
 				&grabbing_box,
@@ -129,7 +137,7 @@ void player__basic_update( struct player_t* player,
 				&bottom,
 				&left,
 				&right,
-				&on_incline );
+				&surface_vector );
 
     if (!top && !bottom && !left && !right)
     {
@@ -144,7 +152,7 @@ void player__basic_update( struct player_t* player,
 				  &bottom,
 				  &left,
 				  &right,
-				  &on_incline );
+				  &surface_vector );
 
       player->against_ledge = (left || right);
     }
@@ -165,6 +173,10 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
 
   const bool_t jump_pressed = control__button_pressed( &player->control->jump );
   const bool_t jump_released = control__button_released( &player->control->jump );
+
+  const bool_t up_incline = (player->surface_vector.y < 0);
+  const bool_t down_incline = (0 < player->surface_vector.y);
+  const bool_t on_incline = (player->surface_vector.y != 0);
 
   const bool_t pushing_against_left_wall = 
     (player->left_collision && 
@@ -211,21 +223,25 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
     }
     else if ( config->velocity_limit_walking < abs(player->velocity.x) )
     {
-      result = (player->on_incline ? 
-		PLAYER__STATE_RUNNING_UP_STAIRS : 
-		PLAYER__STATE_RUNNING);
+      result = (!on_incline ? 
+		PLAYER__STATE_RUNNING : 
+		(up_incline ? 
+		 PLAYER__STATE_RUNNING_UP_STAIRS :
+		 PLAYER__STATE_RUNNING_DOWN_STAIRS));
     }
     else if ( 0 < abs(player->velocity.x) )
     {
-      result = (player->on_incline ?
-		PLAYER__STATE_WALKING_UP_STAIRS : 
-		PLAYER__STATE_WALKING);
+      result = (!on_incline ? 
+		PLAYER__STATE_WALKING : 
+		(up_incline ? 
+		 PLAYER__STATE_WALKING_UP_STAIRS :
+		 PLAYER__STATE_WALKING_DOWN_STAIRS));
     }
     else
     {
-      result = (player->on_incline ? 
-		PLAYER__STATE_STANDING_ON_STAIRS :
-		PLAYER__STATE_STANDING);
+      result = (!on_incline ? 
+		PLAYER__STATE_STANDING :
+		PLAYER__STATE_STANDING_ON_STAIRS);
     }
     break;
 
@@ -450,12 +466,13 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
 
   case PLAYER__STATE_WALKING_UP_STAIRS:
   case PLAYER__STATE_RUNNING_UP_STAIRS:
-    velocity.y = -velocity.x;
-    break;
-
   case PLAYER__STATE_WALKING_DOWN_STAIRS:
   case PLAYER__STATE_RUNNING_DOWN_STAIRS:
-    velocity.y = velocity.x;
+
+    velocity.y = velocity.x * player->surface_vector.y / player->surface_vector.x;
+
+    printf( "%d, %d\n", velocity.x, velocity.y );
+
     break;
 
   case PLAYER__STATE_JUMPING:
