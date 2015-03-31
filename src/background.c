@@ -497,10 +497,8 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 				      position->width-2,
 				      position->height };
 
-  struct geo__rect_t incline_hot_spot = { position->x + position->width/2,
-					  position->y + position->height,
-					  0,
-					  0 };
+  struct geo__vector_t incline_hot_spot = { position->x + position->width/2,
+					    position->y + position->height };
 
   struct geo__line_t incline =  { 0, 0, 0, 0 };
 
@@ -516,24 +514,12 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
     pos_for_test.height = 0;
   }
 
-  // TODO: the hit box for terrain collisions when moving up
-  // (as when climbing a hill) is getting scrunched up to the 
-  // top of the player.  this helps void issues such as colliding with 
-  // the ground during the first frame of a jump, before the player is
-  // repositioned off the ground
-  // but it also means that since we're only testing the space around the
-  // players head, when walking up stairs, we don't check for collision
-  // between the player's feet and the stairs, so we end up falling through
-  // the stairs
-
   /* get the range of background tiles to check */
   int32_t ul_idx_x = (pos_for_test.x) / background->tile_width;
   int32_t ul_idx_y = (pos_for_test.y + moving_up*(*y_velocity) - 1) / background->tile_height;
   
   int32_t lr_idx_x = (pos_for_test.x + pos_for_test.width) / background->tile_width;
-  int32_t lr_idx_y = (pos_for_test.y + pos_for_test.height + moving_down*(*y_velocity)) / background->tile_height;
-
-  //  printf("%d %d %d %d\n", ul_idx_x, ul_idx_y, lr_idx_x, lr_idx_y);
+  int32_t lr_idx_y = (incline_hot_spot.y + moving_down*(*y_velocity)) / background->tile_height;
 
   struct geo__rect_t tile_position = 
     { 0, 0, 
@@ -614,8 +600,6 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 	}
 	else if ((moving_down || moving_up) && 
 		 (collision_type & BACKGROUND__COLLISION_INCLINE_MASK)){
-
-	  printf("testing for incline collision\n");
 
 	  struct geo__line_t velocity_line = { incline_hot_spot.x, 
 					       incline_hot_spot.y, 
