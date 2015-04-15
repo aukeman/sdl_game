@@ -313,30 +313,37 @@ bool_t background__collision_test( const struct background_t* background,
 				   bool_t* right_collision,
 				   struct geo__vector_t* surface_vector){
 
-  struct geo__rect_t pos_for_test = { position->x, 
-				      position->y,
-				      position->width,
-				      position->height };
+  
+  if ( surface_vector->y == 0 ){
 
-  surface_vector->x = 0;
-  surface_vector->y = 0;
+    struct geo__rect_t pos_for_test = { position->x, 
+					position->y,
+					position->width,
+					position->height };
 
-  _collision_test_for_walls( background,
-			     &pos_for_test,
-			     climbing_stairs,
-			     &(velocity->x),
-			     left_collision, 
-			     right_collision,
-			     surface_vector );
+    surface_vector->x = 0;
+    surface_vector->y = 0;
 
-  pos_for_test.x += velocity->x;
+    _collision_test_for_walls( background,
+			       &pos_for_test,
+			       climbing_stairs,
+			       &(velocity->x),
+			       left_collision, 
+			       right_collision,
+			       surface_vector );
 
-  _collision_test_for_floors_and_ceilings( background,
-					   &pos_for_test,
-					   &(velocity->y),
-					   top_collision, 
-					   bottom_collision,
-					   surface_vector );
+    pos_for_test.x += velocity->x;
+
+    _collision_test_for_floors_and_ceilings( background,
+					     &pos_for_test,
+					     &(velocity->y),
+					     top_collision, 
+					     bottom_collision,
+					     surface_vector );
+  }
+  else{
+    
+  }
 
   return (*top_collision || 
 	  *bottom_collision || 
@@ -361,8 +368,6 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 
   struct geo__point_t incline_hot_spot = { position->x + position->width/2,
 					   position->y + position->height };
-
-  struct geo__line_t incline = {0, 0, 0, 0};
 
   bool_t moving_right = ( 0 < *x_velocity );
   bool_t moving_left = ( *x_velocity < 0 );
@@ -401,24 +406,6 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 	enum background__tile_collision_type_e collision_type = 
 	  background->tiles[idx_x][idx_y].prototype->collision_type;
 
-	switch (collision_type & BACKGROUND__COLLISION_INCLINE_MASK)
-	{
-	case BACKGROUND__COLLISION_INCLINE_UP_LEFT_TO_RIGHT:
-	  incline.x1 = tile_position.x;
-	  incline.y1 = tile_position.y + tile_position.height;
-	  incline.x2 = tile_position.x + tile_position.width;
-	  incline.y2 = tile_position.y;
-	  break;
-	case BACKGROUND__COLLISION_INCLINE_UP_RIGHT_TO_LEFT:
-	  incline.x1 = tile_position.x;
-	  incline.y1 = tile_position.y;
-	  incline.x2 = tile_position.x + tile_position.width;
-	  incline.y2 = tile_position.y + tile_position.height;
-	  break;
-	default:
-	  incline.x1 = incline.y1 = incline.x2 = incline.y2 = 0;
-	}
-
 	if ( standing_still ){
 	  *left_collision = 
 	    (*left_collision ||
@@ -448,35 +435,6 @@ bool_t _collision_test_for_walls( const struct background_t* background,
 
 	    standing_still = (0 == *x_velocity);
 	  }
-
-	}
-	else if (climbing_stairs && 
-		 (moving_right || moving_left) && 
-		 (collision_type & BACKGROUND__COLLISION_INCLINE_MASK)){
-
-	  struct geo__line_t velocity_line = { incline_hot_spot.x, 
-					       incline_hot_spot.y, 
-					       incline_hot_spot.x + *x_velocity,
-					       incline_hot_spot.y };
-
-	  struct geo__point_t intersection = {0,0};
-
-	  if ( collision__line_intersects_line( &velocity_line,
-						&incline,
-						&intersection ) ){
-	    
-	    if ( moving_left ){
-	      surface_vector->x = (incline.x1 - incline.x2);
-	      surface_vector->y = (incline.y1 - incline.y1);
-	    }
-	    else{
-	      surface_vector->x = (incline.x2 - incline.x1);
-	      surface_vector->y = (incline.y2 - incline.y1);
-	    }
-
-	    *x_velocity = (intersection.x - velocity_line.x1);
-	    standing_still = (0 == *x_velocity);
-	  }
 	}
       }
     }
@@ -499,8 +457,6 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 
   struct geo__vector_t incline_hot_spot = { position->x + position->width/2,
 					    position->y + position->height };
-
-  struct geo__line_t incline =  { 0, 0, 0, 0 };
 
   bool_t moving_down = ( 0 < *y_velocity );
   bool_t moving_up = ( *y_velocity < 0 );
@@ -541,31 +497,7 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 	enum background__tile_collision_type_e collision_type = 
 	  background->tiles[idx_x][idx_y].prototype->collision_type;
 
-	switch ( collision_type & BACKGROUND__COLLISION_INCLINE_MASK ){
-	case BACKGROUND__COLLISION_INCLINE_UP_LEFT_TO_RIGHT:
-	  incline.x1 = tile_position.x;
-	  incline.y1 = tile_position.y + tile_position.height;
-	  incline.x2 = tile_position.x + tile_position.width;
-	  incline.y2 = tile_position.y;
-	  break;
-	case BACKGROUND__COLLISION_INCLINE_UP_RIGHT_TO_LEFT:
-	  incline.x1 = tile_position.x;
-	  incline.y1 = tile_position.y;
-	  incline.x2 = tile_position.x + tile_position.width;
-	  incline.y2 = tile_position.y + tile_position.height;
-	  break;
-	default:
-	  incline.x1 = incline.x2 = incline.y1 = incline.y2 = 0;
-	}
-
 	if ( standing_still ){
-
-	  if ((collision_type & BACKGROUND__COLLISION_INCLINE_MASK) &&
-	      collision__point_on_line( &incline_hot_spot, &incline ) &&
-	      (surface_vector->y == 0)){
-	    surface_vector->x = (incline.x2 - incline.x1);
-	    surface_vector->y = (incline.y2 - incline.y1);
-	  }
 
 	  *top_collision = 
 	    (*top_collision ||
@@ -598,30 +530,7 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
 	    standing_still = (0 == *y_velocity);
 	  }
 	}
-	else if ((moving_down || moving_up) && 
-		 (collision_type & BACKGROUND__COLLISION_INCLINE_MASK)){
 
-	  struct geo__line_t velocity_line = { incline_hot_spot.x, 
-					       incline_hot_spot.y, 
-					       incline_hot_spot.x,
-					       incline_hot_spot.y + *y_velocity };
-
-	  struct geo__point_t intersection = {0, 0};
-
-	  if ( collision__line_intersects_line( &velocity_line,
-						&incline,
-						&intersection ) ){
-	    
-	    *y_velocity = (intersection.y - velocity_line.y1);
-	    *bottom_collision = TRUE;
-	    standing_still = (0 == *y_velocity);
-	    
-	    if ( surface_vector->y == 0 ){
-	      surface_vector->x = (incline.x2 - incline.x1);
-	      surface_vector->y = (incline.y2 - incline.y1);
-	    }
-	  }
-	}
       }
     }
   }
