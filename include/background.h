@@ -6,8 +6,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <geometry.h>
-
 enum{
   BACKGROUND__ERROR_CODE_BASE = 0x0,
   
@@ -29,6 +27,10 @@ enum background__tile_collision_type_e{
 
   BACKGROUND__COLLISION_INCLINE_MASK = 0x30
 };
+
+struct geo__vector_t;
+struct geo__point_t;
+struct geo__rect_t;
 
 struct background_t;
 struct background__tile_t;
@@ -76,11 +78,25 @@ struct background__tile_prototype_t{
   uint32_t tile_idx_x;
   uint32_t tile_idx_y;
 
-  struct geo__vector_t top_surface_vector; 
-  struct geo__point_t top_surface_origin; 
+  struct{
+    int32_t x;
+    int32_t y;
+  } top_surface_vector;
 
-  struct geo__vector_t bottom_surface_vector; 
-  struct geo__point_t bottom_surface_origin; 
+  struct{
+    int32_t x;
+    int32_t y;
+  } top_surface_origin;
+
+  struct{
+    int32_t x;
+    int32_t y;
+  } bottom_surface_vector;
+
+  struct{
+    int32_t x;
+    int32_t y;
+  } bottom_surface_origin;
 
   struct{
     float x1;

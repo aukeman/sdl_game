@@ -1,4 +1,4 @@
-1
+0
 up	joystick	0	axis	1	0.0	-1.0
 down	joystick	0	axis	1	0.0	1.0
 left	joystick	0	axis	0	0.0	-1.0
@@ -9,7 +9,7 @@ left2	joystick	0	axis	2	0.0	-1.0
 right2	joystick	0	axis	2	0.0	1.0
 jump	joystick	0	button	1
 fire	joystick	0	button	0
-0
+1
 up	keyboard	273
 down	keyboard	274
 left	keyboard	276

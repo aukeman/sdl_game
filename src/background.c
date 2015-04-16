@@ -101,7 +101,7 @@ int background__create( const char* background_config_file,
     struct background__tile_prototype_t* prototype = 
       &(*handle_ptr)->tile_prototypes[prototype_idx];
 
-    rc = fscanf(fin, "%c %d %d %x%*c", 
+    rc = fscanf(fin, "%c %d %d %x", 
 		&prototype_label,
 		&(prototype->tile_idx_x),
 		&(prototype->tile_idx_y),
@@ -113,6 +113,39 @@ int background__create( const char* background_config_file,
     
       fclose(fin);
       return BACKGROUND__BAD_CONFIG_FILE;
+    }
+
+    prototype->top_surface_vector.x = (*handle_ptr)->tile_width;
+    prototype->top_surface_vector.y = 0;
+
+    prototype->top_surface_origin.x = 0;
+    prototype->top_surface_origin.y = 0;
+
+    prototype->bottom_surface_vector.x = (*handle_ptr)->tile_width;
+    prototype->bottom_surface_vector.y = 0;
+
+    prototype->bottom_surface_origin.x = 0;
+    prototype->bottom_surface_origin.y = (*handle_ptr)->tile_height;
+
+    int32_t origin_y = 0;
+    int32_t vector_y = 0;
+
+    rc = fscanf(fin, " %d %d%*c",
+		&origin_y,
+		&vector_y);
+
+    if ( 2 <= rc ){
+      
+      if ( origin_y < 0 ){
+	/* bottom surface */
+	prototype->bottom_surface_origin.y = -(origin_y);
+	prototype->bottom_surface_vector.y = vector_y;
+      }
+      else{
+	/* top surface */
+	prototype->top_surface_origin.y = (*handle_ptr)->tile_height - origin_y;
+	prototype->top_surface_vector.y = vector_y;
+      }
     }
 
     prototype->tile_draw_fxn = &background__tile_basic_draw;
