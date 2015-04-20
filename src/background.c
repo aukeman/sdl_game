@@ -101,20 +101,6 @@ int background__create( const char* background_config_file,
     struct background__tile_prototype_t* prototype = 
       &(*handle_ptr)->tile_prototypes[prototype_idx];
 
-    rc = fscanf(fin, "%c %d %d %x", 
-		&prototype_label,
-		&(prototype->tile_idx_x),
-		&(prototype->tile_idx_y),
-		(unsigned int*)&(prototype->collision_type));
-
-    if ( rc != 4 ) {
-      background__free(*handle_ptr);
-      *handle_ptr = NULL;
-    
-      fclose(fin);
-      return BACKGROUND__BAD_CONFIG_FILE;
-    }
-
     prototype->top_surface_vector.x = (*handle_ptr)->tile_width;
     prototype->top_surface_vector.y = 0;
 
@@ -130,12 +116,19 @@ int background__create( const char* background_config_file,
     int32_t origin_y = 0;
     int32_t vector_y = 0;
 
-    rc = fscanf(fin, " %d %d%*c",
-		&origin_y,
-		&vector_y);
+    char buffer[256];
+    fgets(buffer, 255, fin);
 
-    if ( 2 <= rc ){
-      
+    rc = sscanf(buffer, 
+		"%c %d %d %x %d %d%*c", 
+		&prototype_label,
+		&(prototype->tile_idx_x),
+		&(prototype->tile_idx_y),
+		(unsigned int*)&(prototype->collision_type),
+		&origin_y,
+		&vector_y );
+
+    if ( rc == 6 ){
       if ( origin_y < 0 ){
 	/* bottom surface */
 	prototype->bottom_surface_origin.y = -(origin_y);
@@ -146,6 +139,13 @@ int background__create( const char* background_config_file,
 	prototype->top_surface_origin.y = (*handle_ptr)->tile_height - origin_y;
 	prototype->top_surface_vector.y = vector_y;
       }
+    }
+    else if ( rc != 4 ){
+      background__free(*handle_ptr);
+      *handle_ptr = NULL;
+    
+      fclose(fin);
+      return BACKGROUND__BAD_CONFIG_FILE;
     }
 
     prototype->tile_draw_fxn = &background__tile_basic_draw;
