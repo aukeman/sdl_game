@@ -80,6 +80,8 @@ int main( int argc, char** argv ) {
 
   video__clearscreen();
 
+  timing__set_frame_rate(0);
+
   while ( keep_looping ) {
 
     stopwatch__start(&frame_sw);

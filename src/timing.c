@@ -15,6 +15,9 @@ static timestamp_t tof_history[tof_history_size];
 static timestamp_t* tof_history_iter = tof_history;
 static const timestamp_t* tof_history_end = tof_history + tof_history_size;
 
+static int32_t frame_rate = 0;
+static timestamp_t top_of_next_frame=0;
+
 int timing__setup(){
 
   timing__teardown();
@@ -35,10 +38,25 @@ int timing__teardown(){
   return SUCCESS;
 }
 
+int timing__set_frame_rate(int32_t new_frame_rate){
+  return frame_rate = new_frame_rate;
+}
+
+int timing__get_frame_rate(){
+  return frame_rate;
+}
+
 int timing__declare_top_of_frame(){
  
   top_of_last_frame_timestamp = top_of_frame_timestamp;
+
+  while ( 0 < frame_rate && SDL_GetTicks() < top_of_next_frame ) { }
+
   top_of_frame_timestamp = SDL_GetTicks();
+
+  if ( 0 < frame_rate ){
+    top_of_next_frame = top_of_frame_timestamp + (1000 / frame_rate);
+  }
 
   *tof_history_iter = top_of_frame_timestamp;
   ++tof_history_iter;

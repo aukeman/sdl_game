@@ -6,6 +6,9 @@
 int timing__setup();
 int timing__teardown();
 
+int32_t timing__set_frame_rate(int32_t);
+int32_t timing__get_frame_rate();
+
 uint32_t timing__get_frame_count();
 
 int timing__declare_top_of_frame();
