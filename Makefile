@@ -3,7 +3,7 @@ HEADERS=$(wildcard include/*.h)
 
 MAIN=src/main.c
 
-OBJ_FILES=$(patsubst src/%.c, obj/%.o, $(wildcard src/*.c))
+OBJ_FILES=$(patsubst src/%.c, obj/%.o, $(SOURCES))
 
 TEST_CASES=$(filter-out test/main.c,$(wildcard test/*.c))
 TEST_MAIN=test/main.c
@@ -17,7 +17,7 @@ LDLIBS=-lm -lSDL -lSDL_image -lGL
 
 all: sdl_game 
 
-sdl_game : $(OBJ_FILES)
+sdl_game : $(OBJ_FILES) obj/main.o
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 obj/%.o : src/%.c obj
@@ -29,8 +29,15 @@ obj :
 test/bin: 
 	mkdir -p test/bin
 
-test/bin/% : test/%.c  $(C_DEFS) $(SOURCES) $(HEADERS) $(TEST_MAIN) $(TEST_HEADERS) test/bin
-	gcc -g -I./include -I./test -o $@  $(C_DEFS) $(SOURCES) $(TEST_MAIN) $<  -lm -lSDL -lSDL_image -lGL
+test/obj:
+	mkdir -p test/obj
+
+.PRECIOUS: test/obj/%.o
+test/obj/%.o : test/%.c test/obj
+	$(CC) -g -I./include -I./test -c -o $@ $<
+
+test/bin/% : test/obj/%.o test/obj/main.o $(OBJ_FILES) $(HEADERS) $(TEST_HEADERS) test/bin
+	$(CC) $(LDFLAGS) $< test/obj/main.o $(OBJ_FILES) $(LOADLIBES) $(LDLIBS) -o $@
 
 build_tests: $(TEST_EXES)
 
@@ -47,4 +54,5 @@ clean:
 	rm -f sdl_game
 	rm -f obj/*
 	rm -f test/bin/*
+	rm -f test/obj/*
 
