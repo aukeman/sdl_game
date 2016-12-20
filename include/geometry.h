@@ -27,6 +27,9 @@ struct geo__line_t{
   int y2;
 };
 
+void geo__init_rect( struct geo__rect_t*, int x, int y, int width, int height );
+void geo__copy_rect( struct geo__rect_t*, const struct geo__rect_t*);
+
 int geo__distance( const struct geo__point_t* a, const struct geo__point_t* b );
 int geo__distance_squared( const struct geo__point_t* a, const struct geo__point_t* b );
 

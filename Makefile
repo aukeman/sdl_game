@@ -20,6 +20,9 @@ all: sdl_game
 sdl_game : $(OBJ_FILES) obj/main.o
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
+obj/background.o : src/background.c obj
+	$(CC) $(CPPFLAGS) $(CFLAGS) -std=c89 -pedantic-errors -c -o $@ $<
+
 obj/%.o : src/%.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 

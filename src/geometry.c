@@ -4,6 +4,16 @@
 
 #include <math.h>
 
+void geo__init_rect( struct geo__rect_t* dest, int x, int y, int width, int height ){
+  dest->x = x;
+  dest->y = y;
+  dest->width = width;
+  dest->height = height;
+}
+
+void geo__copy_rect( struct geo__rect_t* dest, const struct geo__rect_t* src ){
+  geo__init_rect( dest, src->x, src->y, src->width, src->height );
+}
 
 int geo__distance( const struct geo__point_t* a, const struct geo__point_t* b ){
   int d_sqrd = geo__distance_squared(a, b);
