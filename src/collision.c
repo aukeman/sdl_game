@@ -74,7 +74,8 @@ bool_t collision__touches_right( const struct geo__rect_t* toucher,
 bool_t collision__point_in_rectangle( const struct geo__point_t* point,
 				      const struct geo__rect_t* rect ){
 
-  struct geo__rect_t point_as_rect = { point->x, point->y, 0, 0 };
+  struct geo__rect_t point_as_rect;
+  geo__init_rect( &point_as_rect, point->x, point->y, 0, 0 );
   
   return collision__rectangles_overlap( rect, &point_as_rect );
 }
@@ -145,8 +146,9 @@ bool_t collision__line_intersects_line( const struct geo__line_t* a,
 
     if ( intersection ){
       intersection->x = b->x1;
-      intersection->y = (int)rintf(y_at_intercept);
+      intersection->y = utils__round(y_at_intercept);
     }
+
   }
   else {
 
@@ -175,8 +177,8 @@ bool_t collision__line_intersects_line( const struct geo__line_t* a,
 	float y_at_intercept = 
 	  slope_a * x_at_intercept + (a->y2 - slope_a*a->x2);
 	
-	intersection->x = (int)rintf(x_at_intercept);
-	intersection->y = (int)rintf(y_at_intercept);
+	intersection->x = utils__round(x_at_intercept);
+	intersection->y = utils__round(y_at_intercept);
       }
     }
   }
@@ -190,8 +192,12 @@ bool_t collision__line_intersects_rectangle( const struct geo__line_t* line,
 
   bool_t result = FALSE;
 
-  struct geo__rect_t line_bbox = { line->x1, line->y1, 
-				   line->x2 - line->x1, line->y2 - line->y1 };
+  struct geo__rect_t line_bbox;
+  geo__init_rect( &line_bbox,
+		  line->x1, 
+		  line->y1, 
+		  line->x2 - line->x1, 
+		  line->y2 - line->y1 );
 
   if (intersection){
     intersection->x = 0;
@@ -200,23 +206,23 @@ bool_t collision__line_intersects_rectangle( const struct geo__line_t* line,
 
   if ( collision__rectangles_overlap( rect, &line_bbox ) ){
 
-    struct geo__line_t side_1 = { rect->x+rect->width, rect->y,
-				  rect->x, rect->y };
-    
-    struct geo__line_t side_2 = { rect->x+rect->width, rect->y, 
-				  rect->x+rect->width, rect->y+rect->height };
-    
-    struct geo__line_t side_3 = { rect->x, rect->y+rect->height,
-				  rect->x+rect->width, rect->y+rect->height };
-    
-    struct geo__line_t side_4 = { rect->x, rect->y+rect->height, 
-				  rect->x, rect->y };
-
-    struct geo__line_t* sides[] = { &side_1, &side_2, &side_3, &side_4 };
-
-    struct geo__point_t current_intersection = {0, 0};
-
+    struct geo__point_t current_intersection;
+    struct geo__line_t side_1, side_2, side_3, side_4;
+    struct geo__line_t* sides[4];
     int idx;
+
+    geo__init_line(&side_1, rect->x+rect->width, rect->y, rect->x, rect->y );
+    geo__init_line(&side_2, rect->x+rect->width, rect->y, rect->x+rect->width, rect->y+rect->height);
+    geo__init_line(&side_3, rect->x, rect->y+rect->height, rect->x+rect->width, rect->y+rect->height);
+    geo__init_line(&side_4, rect->x, rect->y+rect->height, rect->x, rect->y);
+
+    sides[0] = &side_1;
+    sides[1] = &side_2;
+    sides[2] = &side_3;
+    sides[3] = &side_4;
+
+    geo__init_point( &current_intersection, 0, 0 );
+
     for ( idx = 0; idx < 4 && !result; ++idx ){
 
       int dot_product_line_with_side_normal = 
@@ -238,7 +244,8 @@ bool_t collision__line_intersects_rectangle( const struct geo__line_t* line,
 
     if ( !result )
     {
-      struct geo__point_t origin = { line->x1, line->y1 };
+      struct geo__point_t origin;
+      geo__init_point( &origin, line->x1, line->y1 );
 
       if ( collision__point_in_rectangle( &origin, rect ) ) {
 	result = TRUE;
@@ -261,10 +268,6 @@ bool_t collision__moving_rectangle_intersects_rectangle(
 
   bool_t result = FALSE;
 
-  if ( distance_until_collision ){
-    *distance_until_collision = INT_MAX;
-  }
-
   const int amx = a_motion->x;
   const int amy = a_motion->y;
 
@@ -273,13 +276,19 @@ bool_t collision__moving_rectangle_intersects_rectangle(
   const int w = a->width;
   const int h = a->height;
 
-  struct geo__line_t motion_lines[] = 
-    { { ax,     ay,        ax + amx,     ay + amy },
-      { ax + w, ay,        ax + w + amx, ay + amy },
-      { ax,     a->y + h,  ax + amx,     a->y + h + amy },
-      { ax + w, a->y + h,  ax + w + amx, a->y + h + amy } };
-
   int idx;
+
+  struct geo__line_t motion_lines[4];
+  geo__init_line( &motion_lines[0], ax, ay, ax + amx, ay + amy );
+  geo__init_line( &motion_lines[1], ax + w, ay, ax + w + amx, ay + amy );
+  geo__init_line( &motion_lines[2], ax, a->y + h, ax + amx, a->y + h + amy );
+  geo__init_line( &motion_lines[3], ax + w, a->y + h,  ax + w + amx, a->y + h + amy );
+
+  if ( distance_until_collision ){
+    *distance_until_collision = INT_MAX;
+  }
+
+
   for ( idx = 0; idx < 4; ++idx ){
 
     struct geo__point_t cp;
@@ -291,9 +300,11 @@ bool_t collision__moving_rectangle_intersects_rectangle(
 
       if ( distance_until_collision ){
 
-	struct geo__point_t start = { motion_lines[idx].x1, motion_lines[idx].y1 };
+	int d_sqrd = 0;
+	struct geo__point_t start;
+	geo__init_point( &start, motion_lines[idx].x1, motion_lines[idx].y1 );
 
-	int d_sqrd = geo__distance_squared( &start, &cp );
+	d_sqrd = geo__distance_squared( &start, &cp );
 
 	if ( d_sqrd < *distance_until_collision ){
 	  *distance_until_collision = d_sqrd;
@@ -305,10 +316,10 @@ bool_t collision__moving_rectangle_intersects_rectangle(
     }
   }
 
-  if ( result ){
+  if ( result && distance_until_collision ){
     *distance_until_collision = utils__sqrt(*distance_until_collision);
   }
-  
+
   return result;
 }
 
@@ -318,9 +329,10 @@ bool_t __parallel_line_collision( const struct geo__line_t* a,
 				  struct geo__point_t* intersection ){
 
 
-  struct geo__point_t a1 = { a->x1, a->y1 };
-  
   bool_t result = FALSE;
+
+  struct geo__point_t a1;
+  geo__init_point( &a1, a->x1, a->y1 );
 
   if ( collision__point_on_line( &a1, b ) ){
     if ( intersection ){
@@ -331,11 +343,14 @@ bool_t __parallel_line_collision( const struct geo__line_t* a,
   }
   else {
 
-    struct geo__point_t b1 = { b->x1, b->y1 };
-    struct geo__point_t b2 = { b->x2, b->y2 };
+    struct geo__point_t b1, b2;
+    bool_t b1_on_a, b2_on_a;
 
-    bool_t b1_on_a = collision__point_on_line(&b1, a);
-    bool_t b2_on_a = collision__point_on_line(&b2, a);
+    geo__init_point( &b1, b->x1, b->y1 );
+    geo__init_point( &b2, b->x2, b->y2 );
+    
+    b1_on_a = collision__point_on_line(&b1, a);
+    b2_on_a = collision__point_on_line(&b2, a);
 
     if ( b1_on_a && b2_on_a ){
 

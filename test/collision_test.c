@@ -1344,7 +1344,7 @@ void moving_rect_intersects_no_distance(){
     collision__moving_rectangle_intersects_rectangle( &a, &v, &b, NULL );
 
   TEST_ASSERT_TRUE( result );
-}
+} 
 
 void moving_rect_intersects(){
 

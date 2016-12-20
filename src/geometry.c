@@ -4,6 +4,11 @@
 
 #include <math.h>
 
+void geo__init_point( struct geo__point_t* dest, int x, int y ){
+  dest->x = x;
+  dest->y = y;
+}
+
 void geo__init_rect( struct geo__rect_t* dest, int x, int y, int width, int height ){
   dest->x = x;
   dest->y = y;
@@ -11,8 +16,11 @@ void geo__init_rect( struct geo__rect_t* dest, int x, int y, int width, int heig
   dest->height = height;
 }
 
-void geo__copy_rect( struct geo__rect_t* dest, const struct geo__rect_t* src ){
-  geo__init_rect( dest, src->x, src->y, src->width, src->height );
+void geo__init_line( struct geo__line_t* dest, int x1, int y1, int x2, int y2 ){
+  dest->x1 = x1;
+  dest->y1 = y1;
+  dest->x2 = x2;
+  dest->y2 = y2;
 }
 
 int geo__distance( const struct geo__point_t* a, const struct geo__point_t* b ){
