@@ -10,4 +10,6 @@ int utils__screen2pos( int screen );
 
 int utils__round( float );
 
+float utils__clamp( float min, float max, float value );
+
 #endif

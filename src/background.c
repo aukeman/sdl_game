@@ -3,6 +3,7 @@
 #include <video.h>
 #include <utils.h>
 #include <geometry.h>
+#include <collision.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,18 @@
 
 static struct 
 video__blit_params_t blit_params = { NULL, FALSE, {0, 0, 0, 0}, TRUE };
+
+bool_t _collision_test_for_walls( const struct background_t* background,
+				  const struct geo__rect_t* position,
+				  int* x_velocity,
+				  bool_t* left_collision,
+				  bool_t* right_collision );
+
+bool_t _collision_test_for_floors_and_ceilings(const struct background_t* background,
+					       const struct geo__rect_t* position,
+					       int* y_velocity,
+					       bool_t* top_collision,
+					       bool_t* bottom_collision );
 
 int background__create( const char* background_config_file, 
 			struct background_t** handle_ptr ){
@@ -150,7 +163,7 @@ int background__create( const char* background_config_file,
       (float)((prototype->tile_idx_y+1) * (*handle_ptr)->tile_screen_height) / 
       (float)texture_height;
 
-    prototype_dictionary[prototype_label] = prototype;
+    prototype_dictionary[(int)prototype_label] = prototype;
   }
 
   rc = fscanf(fin, "%u %u%*c", 
@@ -533,4 +546,6 @@ bool_t _collision_test_for_floors_and_ceilings(const struct background_t* backgr
       }
     }
   }
+  
+  return (*top_collision || *bottom_collision);
 }

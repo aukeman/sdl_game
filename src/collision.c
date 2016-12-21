@@ -10,11 +10,6 @@ bool_t __parallel_line_collision( const struct geo__line_t* a,
 				  const struct geo__line_t* b, 
 				  struct geo__point_t* intersection );
 
-static
-uint32_t __distance_squared( const struct geo__point_t* a,
-			     const struct geo__point_t* b );
-
-
 bool_t collision__rectangles_overlap( const struct geo__rect_t* a,
 				      const struct geo__rect_t* b ){
 
@@ -85,8 +80,8 @@ bool_t collision__point_on_line( const struct geo__point_t* point,
   
   bool_t result = FALSE;
 
-  if ( line->x1 <= point->x && point->x <= line->x2 ||
-       line->x2 <= point->x && point->x <= line->x1 ){
+  if ( (line->x1 <= point->x && point->x <= line->x2) ||
+       (line->x2 <= point->x && point->x <= line->x1) ){
 
     if ( line->y1 == line->y2 && point->y == line->y1 ){
       result = TRUE;

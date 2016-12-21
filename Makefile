@@ -21,9 +21,15 @@ sdl_game : $(OBJ_FILES) obj/main.o
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 obj/background.o : src/background.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -Wall -Werror -c -o $@ $<
 
 obj/collision.o : src/collision.c obj
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -Wall -Werror -c -o $@ $<
+
+obj/control.o : src/control.c obj
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -Wall -Werror -c -o $@ $<
+
+obj/utils.o : src/utils.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
 
 obj/%.o : src/%.c obj

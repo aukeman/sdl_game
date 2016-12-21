@@ -5,9 +5,11 @@
 #include <constants.h>
 #include <stdio.h>
 #include <string.h>
+#include <utils.h>
+#include <timing.h>
 
-#include <math.h>
 #include <stdlib.h>
+
 
 enum control_type_e {
   NO_CONTROL_MAPPING,
@@ -22,10 +24,10 @@ struct control_mapping_t{
   float min_input;
   float max_input;
 
-  union{
+  union {
     struct control__analog_t* analog;
     struct control__binary_t* binary;
-  };
+  } control_type;
 };
 
 struct control__state_t control_state[CONTROL__MAX_PLAYERS];
@@ -69,6 +71,8 @@ bool_t _apply_mapping( const char* control_type, int player_idx, struct control_
 int control__setup(const char* mapping_file){
 
   int result = CONTROL__BAD_MAPPING_FILE;
+  int idx1 = 0, idx2 = 0;
+  FILE* fin = NULL;
 
   events__add_callback( EVENTS__TYPE_KEYUP, _handle_keyup, NULL );
   events__add_callback( EVENTS__TYPE_KEYDOWN, _handle_keydown, NULL );
@@ -76,7 +80,6 @@ int control__setup(const char* mapping_file){
   events__add_callback( EVENTS__TYPE_JOYSTICK_AXIS, _handle_axis, NULL );
   events__add_callback( EVENTS__TYPE_JOYSTICK_BUTTON, _handle_button, NULL );
 
-  int idx1, idx2;
   for (idx1 = 0; idx1 < 512; ++idx1){
     linked_list__setup( &keyboard_mappings[512] );
   }
@@ -93,7 +96,7 @@ int control__setup(const char* mapping_file){
 
   memset(control_state, '\0', sizeof(control_state));
 
-  FILE* fin = fopen(mapping_file, "r");
+  fin = fopen(mapping_file, "r");
 
   if ( !fin ){
     result = CONTROL__MAPPING_FILE_NOT_FOUND;
@@ -112,13 +115,14 @@ int control__setup(const char* mapping_file){
 
 int control__teardown(){
 
+  int idx1 = 0, idx2 = 0;
+
   events__remove_callback( EVENTS__TYPE_KEYUP, _handle_keyup );
   events__remove_callback( EVENTS__TYPE_KEYDOWN, _handle_keydown );
 
   events__remove_callback( EVENTS__TYPE_JOYSTICK_AXIS, _handle_axis );
   events__remove_callback( EVENTS__TYPE_JOYSTICK_BUTTON, _handle_button );
 
-  int idx1, idx2;
   for (idx1 = 0; idx1 < 512; ++idx1){
     linked_list__teardown( &keyboard_mappings[idx1], TRUE );
   }
@@ -163,12 +167,12 @@ void _handle_keydown(events__type_e event,
     case NO_CONTROL_MAPPING:
       break;
     case ANALOG:
-      mapping->analog->value = 1.0f;
-      mapping->analog->timestamp = timing__get_top_of_frame();
+      mapping->control_type.analog->value = 1.0f;
+      mapping->control_type.analog->timestamp = timing__get_top_of_frame();
       break;
     case BINARY:
-      mapping->binary->value = TRUE;
-      mapping->binary->timestamp = timing__get_top_of_frame();
+      mapping->control_type.binary->value = TRUE;
+      mapping->control_type.binary->timestamp = timing__get_top_of_frame();
       break;
     }
     
@@ -192,12 +196,12 @@ void _handle_keyup(events__type_e event,
     case NO_CONTROL_MAPPING:
       break;
     case ANALOG:
-      mapping->analog->value = 0.0f;
-      mapping->analog->timestamp = timing__get_top_of_frame();
+      mapping->control_type.analog->value = 0.0f;
+      mapping->control_type.analog->timestamp = timing__get_top_of_frame();
       break;
     case BINARY:
-      mapping->binary->value = FALSE;
-      mapping->binary->timestamp = timing__get_top_of_frame();
+      mapping->control_type.binary->value = FALSE;
+      mapping->control_type.binary->timestamp = timing__get_top_of_frame();
       break;
     }
 
@@ -223,16 +227,16 @@ void _handle_axis(events__type_e event,
     case NO_CONTROL_MAPPING:
       break;
     case ANALOG:
-      if ( mapping->analog->value != axis_value ){
-	mapping->analog->value = axis_value;
-	mapping->analog->timestamp = timing__get_top_of_frame();
+      if ( mapping->control_type.analog->value != axis_value ){
+	mapping->control_type.analog->value = axis_value;
+	mapping->control_type.analog->timestamp = timing__get_top_of_frame();
       }
       break;
  
     case BINARY:
-      if ( mapping->binary->value != (0.75f < axis_value) ){
-	mapping->binary->value = (0.75f < axis_value);
-	mapping->binary->timestamp = timing__get_top_of_frame();
+      if ( mapping->control_type.binary->value != (0.75f < axis_value) ){
+	mapping->control_type.binary->value = (0.75f < axis_value);
+	mapping->control_type.binary->timestamp = timing__get_top_of_frame();
       }
       break;
     }
@@ -257,12 +261,12 @@ void _handle_button(events__type_e event,
     case NO_CONTROL_MAPPING:
       break;
     case ANALOG:
-      mapping->analog->value = param->js_button.value ? 1.0f : 0.0f;
-      mapping->analog->timestamp = timing__get_top_of_frame();
+      mapping->control_type.analog->value = param->js_button.value ? 1.0f : 0.0f;
+      mapping->control_type.analog->timestamp = timing__get_top_of_frame();
       break;
     case BINARY:
-      mapping->binary->value = param->js_button.value;
-      mapping->binary->timestamp = timing__get_top_of_frame();
+      mapping->control_type.binary->value = param->js_button.value;
+      mapping->control_type.binary->timestamp = timing__get_top_of_frame();
       break;
     }
 
@@ -274,10 +278,21 @@ void _handle_button(events__type_e event,
 float _get_axis_value( float input_value, 
 		       const struct control_mapping_t* control_mapping ){
 
-  return fminf(1.0, 
-	       fmaxf(0.0, 
-		     (input_value-control_mapping->min_input) / 
-		     (control_mapping->max_input-control_mapping->min_input)));
+  float value = 
+    (input_value-control_mapping->min_input) / 
+    (control_mapping->max_input-control_mapping->min_input);
+
+  return utils__clamp(0.0f, 1.0f, value);
+
+  /* if ( value <= 0.0f ){ */
+  /*   return 0.0f; */
+  /* } */
+  /* else if ( 1.0f <= value ){ */
+  /*   return 1.0f; */
+  /* } */
+  /* else{ */
+  /*   return value; */
+  /* } */
 }
 
 bool_t _apply_mapping( const char* control_type, int player_idx, struct control_mapping_t* mapping ){
@@ -286,43 +301,43 @@ bool_t _apply_mapping( const char* control_type, int player_idx, struct control_
 
   if ( !strcmp("up", control_type) ){
     mapping->type = ANALOG;
-    mapping->analog = &control_state[player_idx].up;
+    mapping->control_type.analog = &control_state[player_idx].up;
   }
   else if ( !strcmp("down", control_type) ){
     mapping->type = ANALOG;
-    mapping->analog = &control_state[player_idx].down;
+    mapping->control_type.analog = &control_state[player_idx].down;
   }
   else if ( !strcmp("left", control_type) ){
     mapping->type = ANALOG;
-    mapping->analog = &control_state[player_idx].left;
+    mapping->control_type.analog = &control_state[player_idx].left;
   }
   else if ( !strcmp("right", control_type) ){
     mapping->type = ANALOG;
-    mapping->analog = &control_state[player_idx].right;
+    mapping->control_type.analog = &control_state[player_idx].right;
   }
   else   if ( !strcmp("up2", control_type) ){
     mapping->type = ANALOG;
-    mapping->analog = &control_state[player_idx].up2;
+    mapping->control_type.analog = &control_state[player_idx].up2;
   }
   else if ( !strcmp("down2", control_type) ){
     mapping->type = ANALOG;
-    mapping->analog = &control_state[player_idx].down2;
+    mapping->control_type.analog = &control_state[player_idx].down2;
   }
   else if ( !strcmp("left2", control_type) ){
     mapping->type = ANALOG;
-    mapping->analog = &control_state[player_idx].left2;
+    mapping->control_type.analog = &control_state[player_idx].left2;
   }
   else if ( !strcmp("right2", control_type) ){
     mapping->type = ANALOG;
-    mapping->analog = &control_state[player_idx].right2;
+    mapping->control_type.analog = &control_state[player_idx].right2;
   }
   else if ( !strcmp("jump", control_type) ){
     mapping->type = BINARY;
-    mapping->binary = &control_state[player_idx].jump;
+    mapping->control_type.binary = &control_state[player_idx].jump;
   }
   else if ( !strcmp("fire", control_type) ){
     mapping->type = BINARY;
-    mapping->binary = &control_state[player_idx].fire;
+    mapping->control_type.binary = &control_state[player_idx].fire;
   }
   else{
     result = FALSE;
