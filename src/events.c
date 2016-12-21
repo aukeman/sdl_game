@@ -159,8 +159,8 @@ struct events__callback_record_t{
 struct linked_list_t events__callbacks[EVENTS__TYPE_LAST];
 
 bool_t callback_record_equality(const void* needle, const void* haystack){
-  return (needle == 
-	  ((const struct events__callback_record_t*)haystack)->callback);
+  return ((uintptr_t)needle == 
+	  (uintptr_t)((const struct events__callback_record_t*)haystack)->callback);
 }
 
 int events__setup(){
@@ -276,7 +276,7 @@ int events__remove_callback( events__type_e event_type,
        event_type < EVENTS__TYPE_LAST ) {
 
     struct events__callback_record_t* record = 
-      linked_list__remove(callback, 
+      linked_list__remove(*(void**)&callback, 
 			  callback_record_equality, 
 			  &events__callbacks[event_type] );
 

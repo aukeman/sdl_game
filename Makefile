@@ -32,6 +32,10 @@ obj/control.o : src/control.c obj
 obj/utils.o : src/utils.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
 
+obj/events.o : src/events.c obj
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
+
+
 obj/%.o : src/%.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
