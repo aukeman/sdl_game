@@ -46,14 +46,15 @@ void handle_button_event(events__type_e event,
 
 int js__setup(){
 
-  int joystick_idx;
+  int joystick_idx = 0;
+  int number_of_joysticks;
 
   SDL_Init(SDL_INIT_JOYSTICK);
 
   events__add_callback( EVENTS__TYPE_JOYSTICK_AXIS, handle_axis_event, NULL );
   events__add_callback( EVENTS__TYPE_JOYSTICK_BUTTON, handle_button_event, NULL );
 
-  const int number_of_joysticks = SDL_NumJoysticks();
+  number_of_joysticks = SDL_NumJoysticks();
 
   for ( joystick_idx = 0; joystick_idx < number_of_joysticks; ++joystick_idx ){
     setup_joystick(joystick_idx);
@@ -83,17 +84,17 @@ int js__teardown(){
 
 int setup_joystick(int idx){
 
-  int axis_idx, button_idx;
+  int axis_idx = 0, button_idx = 0, number_of_axes = 0, number_of_buttons = 0;
 
   teardown_joystick(idx);
 
   js__joystick_info[idx].context = SDL_JoystickOpen(idx);
   js__joystick_info[idx].name = SDL_JoystickName(idx);
 
-  const int number_of_axes = 
+  number_of_axes = 
     SDL_JoystickNumAxes(js__joystick_info[idx].context);
 
-  const int number_of_buttons = 
+  number_of_buttons = 
     SDL_JoystickNumButtons(js__joystick_info[idx].context);
 
   for ( axis_idx = 0; axis_idx < number_of_axes; ++axis_idx ){
