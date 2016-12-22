@@ -45,6 +45,9 @@ obj/geometry.o : src/geometry.c obj
 obj/joystick.o : src/joystick.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
 
+obj/level.o : src/level.c obj
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
+
 obj/%.o : src/%.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 

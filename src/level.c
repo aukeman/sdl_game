@@ -12,11 +12,13 @@
 int level__create( const char* level_config_file, struct level_t** handle_ptr ){
 
   int result = UNKNOWN_FAILURE;
+  FILE* fin = NULL;
+  char buffer[1024];
 
   *handle_ptr = malloc( sizeof(**handle_ptr) );
   memset(*handle_ptr, '\0', sizeof(**handle_ptr) );
 
-  FILE* fin = fopen(level_config_file, "r");
+  fin = fopen(level_config_file, "r");
   if ( !fin ) {
     level__free(*handle_ptr);
     *handle_ptr = NULL;
@@ -25,12 +27,7 @@ int level__create( const char* level_config_file, struct level_t** handle_ptr ){
     return LEVEL__CONFIG_FILE_NOT_FOUND;
   }
 
-  const int BUFFER_LENGTH=1023;
-  char buffer[BUFFER_LENGTH+1];
-
-  int rc = fscanf(fin, "%1023s%*c", buffer);
-
-  if ( rc < 1 ){
+  if ( fscanf(fin, "%1023s%*c", buffer) < 1 ){
     level__free(*handle_ptr);
     *handle_ptr = NULL;
 
@@ -75,9 +72,8 @@ bool_t _create_layers( FILE* fin,
 		       struct layer_t** layers_ptr,
 		       size_t* number_of_layers_ptr ){
 
-  const int BUFFER_LENGTH=1023;
-  char buffer[BUFFER_LENGTH+1];
-
+  char buffer[1024];
+  size_t idx = 0;
   int rc = fscanf(fin, "%u*c", number_of_layers_ptr);
   
   if ( rc < 1 ){
@@ -90,7 +86,6 @@ bool_t _create_layers( FILE* fin,
   memset( *layers_ptr, '\0', 
 	  sizeof(struct layer_t)*(*number_of_layers_ptr) );
 
-  size_t idx;
   for ( idx = 0; idx < (*number_of_layers_ptr); ++idx ){
     
     rc = fscanf(fin, "%1023s %d %d*c", 
@@ -146,15 +141,15 @@ int level__update( struct level_t* level,
 		   int32_t scroll_position_x,
 		   int32_t scroll_position_y ){
 
+  int32_t terrain_scroll_position_x = 0, terrain_scroll_position_y = 0, idx = 0;
 
   background__scroll_to( level->terrain_layer.background,
 			 scroll_position_x, 
 			 scroll_position_y );
 
-  int32_t terrain_scroll_position_x = level->terrain_layer.background->scroll_position_x;
-  int32_t terrain_scroll_position_y = level->terrain_layer.background->scroll_position_y;
+  terrain_scroll_position_x = level->terrain_layer.background->scroll_position_x;
+  terrain_scroll_position_y = level->terrain_layer.background->scroll_position_y;
 
-  int idx;
   for ( idx = 0; idx < level->number_of_background_layers; ++idx ){
 
     struct layer_t* background_layer = &level->background_layers[idx];
