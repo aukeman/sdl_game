@@ -23,13 +23,13 @@ video__blit_params_t blit_params = { NULL, FALSE, { 0, 0, 0, 0 }, FALSE };
 
 int font__create( const char* font_config_file, struct font__handle_t** handle_ptr){
   int result = SUCCESS;
+  FILE* fin = NULL;
 
   *handle_ptr = (struct font__handle_t*)malloc(sizeof(**handle_ptr));
 
   memset(*handle_ptr, '\0', sizeof(**handle_ptr));
 
-  FILE* fin = fopen(font_config_file, "r");
-
+  fin = fopen(font_config_file, "r");
   if ( !fin ) {
     result = FONT__CONFIG_FILE_NOT_FOUND;
     free(*handle_ptr);
@@ -37,8 +37,7 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
   }
   else {
     
-    const int BUFFER_LENGTH=1023;
-    char buffer[BUFFER_LENGTH+1];
+    char buffer[1024];
 
     int rc = fscanf(fin, "%1023s%*c", buffer);
 
@@ -58,7 +57,7 @@ int font__create( const char* font_config_file, struct font__handle_t** handle_p
       uint32_t x, y, width, height;
 
       do{
-	rc = fscanf(fin, "%c %d %d %d %d%*c", 
+	rc = fscanf(fin, "%c %u %u %u %u%*c", 
 		    &ascii, &x, &y, &width, &height);
 	
 	if ( rc == 5 ){
@@ -107,11 +106,14 @@ int font__free( struct font__handle_t* handle ){
 
 int font__draw_string( const struct font__handle_t* handle, int x, int y, const char* fmt, ... ){
 
-  struct geo__rect_t dest = {x, y, 0, 0};
-
+  int result = 0;
   va_list ap;
+
+  struct geo__rect_t dest;
+  geo__init_rect(&dest, x, y, 0, 0);
+
   va_start(ap, fmt);
-  int result = _process_string(handle, &dest, TRUE, fmt, ap);
+  result = _process_string(handle, &dest, TRUE, fmt, ap);
   va_end(ap);
   
   return result;
@@ -119,14 +121,17 @@ int font__draw_string( const struct font__handle_t* handle, int x, int y, const 
 
 int font__dimensions( const struct font__handle_t* handle, int* width, int* height, const char* fmt, ... ){
 
-  struct geo__rect_t dest = {0, 0, 0, 0};
+  int result = 0;
+  struct geo__rect_t dest;
+  va_list ap;
+
+  geo__init_rect(&dest, 0, 0, 0, 0);
 
   *width = 0;
   *height = 0;
 
-  va_list ap;
   va_start(ap, fmt);
-  int result = _process_string(handle, &dest, FALSE, fmt, ap);
+  result = _process_string(handle, &dest, FALSE, fmt, ap);
   va_end(ap);
   
   if ( result == SUCCESS ){
@@ -140,6 +145,8 @@ int font__dimensions( const struct font__handle_t* handle, int* width, int* heig
 int _process_string( const struct font__handle_t* handle, struct geo__rect_t* dest, bool_t render, const char* fmt, va_list ap ){
 
   static char buffer[1024];
+  int original_x = 0;
+  const char* iter = NULL;
 
   size_t formatted_string_length = vsnprintf(buffer, 1024, fmt, ap);
 
@@ -147,13 +154,13 @@ int _process_string( const struct font__handle_t* handle, struct geo__rect_t* de
     return FONT__STRING_TOO_LONG;
   }
 
-  int original_x = dest->x;
-
+  original_x = dest->x;
+  
   blit_params.texture_handle = handle->texture;
 
   video__begin_blits(&blit_params);
 
-  const char* iter = buffer;
+  iter = buffer;
   while ( *iter != '\0' ){
     const struct geo__rect_t* src = &handle->ascii_to_rect[*iter];
 

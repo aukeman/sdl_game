@@ -36,6 +36,10 @@ obj/events.o : src/events.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
 
 
+obj/font.o : src/font.c obj
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
+
+
 obj/%.o : src/%.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
