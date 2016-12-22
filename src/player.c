@@ -31,15 +31,16 @@ void player__basic_draw( int32_t pos_x,
   int32_t screen_pos_x = utils__pos2screen(pos_x);
   int32_t screen_pos_y = utils__pos2screen(pos_y);
 
-  video__translate( -screen_pos_x, -screen_pos_y );
-
   const struct geo__rect_t* bbox = player__get_bounding_box(player);
 
-  struct geo__rect_t dest = 
-    { utils__pos2screen(player->position.x + bbox->x), 
-      utils__pos2screen(player->position.y + bbox->y), 
-      utils__pos2screen(bbox->width), 
-      utils__pos2screen(bbox->height) };
+  struct geo__rect_t dest;
+  geo__init_rect( &dest, 
+		  utils__pos2screen(player->position.x + bbox->x), 
+		  utils__pos2screen(player->position.y + bbox->y), 
+		  utils__pos2screen(bbox->width), 
+		  utils__pos2screen(bbox->height) );
+
+  video__translate( -screen_pos_x, -screen_pos_y );
 
   video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
 
@@ -53,6 +54,13 @@ void player__basic_update( struct player_t* player,
 {
   enum player__state_e previous_state = player->state.value;
   enum player__state_e new_state = player__calculate_new_state( player );
+  struct geo__rect_t bbox = *player__get_bounding_box(player);
+  struct geo__vector_t movement_this_frame;
+  movement_this_frame.x = (player->velocity.x * frame_length)/1000;
+  movement_this_frame.y = (player->velocity.y * frame_length)/1000;
+  
+  
+
   if ( new_state != previous_state )
   {
     player->state.value = new_state;
@@ -64,14 +72,8 @@ void player__basic_update( struct player_t* player,
 				  frame_length, 
 				  &player->velocity );
 
-  struct geo__rect_t bbox = *player__get_bounding_box(player);
-
   bbox.x += player->position.x;
   bbox.y += player->position.y;
-
-  struct geo__vector_t movement_this_frame = 
-    { (player->velocity.x * frame_length)/1000, 
-      (player->velocity.y * frame_length)/1000 };
 
   background__collision_test( terrain,
 			      &bbox,
@@ -102,13 +104,18 @@ void player__basic_update( struct player_t* player,
        player->state.value == PLAYER__STATE_SLIDING_WALL_ON_RIGHT ||
        player->state.value == PLAYER__STATE_HANGING_ON_LEDGE )
   {
-    struct geo__vector_t zero_vector = {0, 0};
-    struct geo__rect_t grabbing_box = { 0, 0, bbox.width, 4 };
+    struct geo__vector_t zero_vector;
+    struct geo__rect_t grabbing_box;
+
+    bool_t top = FALSE, bottom = FALSE, left = FALSE, right = FALSE;
+
+    zero_vector.x = 0;
+    zero_vector.y = 0;
+    
+    geo__init_rect(&grabbing_box, 0, 0, bbox.width, 4);
 
     grabbing_box.x = bbox.x;
     grabbing_box.y = bbox.y-grabbing_box.height;
-
-    bool_t top, bottom, left, right;
 
     background__collision_test( terrain,
 				&grabbing_box,
@@ -331,149 +338,152 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
 				    milliseconds_t frame_length,
 				    struct geo__vector_t* new_velocity )
 {
-  if ( !new_velocity )
-  {
+  if ( !new_velocity ) {
     return UNKNOWN_FAILURE;
   }
+  else {
 
-  struct geo__vector_t velocity = player->velocity;
+    struct geo__vector_t velocity = player->velocity;
 
-  const bool_t jump_pressed = control__button_pressed( &player->control->jump );
-  const bool_t jump_released = control__button_released( &player->control->jump );
+    const bool_t jump_pressed = control__button_pressed( &player->control->jump );
+    const bool_t jump_released = control__button_released( &player->control->jump );
 
-  const player__config_t* config = &(player->prototype->config);
+    const player__config_t* config = &(player->prototype->config);
 
-  const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / 1000;
-  const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / 1000;
+    const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / 1000;
+    const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / 1000;
 
-  int maximum_x_velocity = 0;
+    int maximum_x_velocity = 0, gravity_this_frame = 0;
 
-  /* x velocity */
-  switch ( player->state.value )
-  {
-  case PLAYER__STATE_STANDING:
-  case PLAYER__STATE_WALKING:
-  case PLAYER__STATE_RUNNING:
-  case PLAYER__STATE_START_JUMPING:
-  case PLAYER__STATE_JUMPING:
-  case PLAYER__STATE_CEASE_JUMPING:
-  case PLAYER__STATE_FALLING:
-    _walk_or_run_or_coast( &(player->control->left),
-			   &(player->control->right),
-			   &(player->prototype->config),
-			   this_frame_x_acceleration,
-			   this_frame_x_decceleration,
-			   &velocity.x );
-    break;
+    /* x velocity */
+    switch ( player->state.value )
+      {
+      case PLAYER__STATE_STANDING:
+      case PLAYER__STATE_WALKING:
+      case PLAYER__STATE_RUNNING:
+      case PLAYER__STATE_START_JUMPING:
+      case PLAYER__STATE_JUMPING:
+      case PLAYER__STATE_CEASE_JUMPING:
+      case PLAYER__STATE_FALLING:
+	_walk_or_run_or_coast( &(player->control->left),
+			       &(player->control->right),
+			       &(player->prototype->config),
+			       this_frame_x_acceleration,
+			       this_frame_x_decceleration,
+			       &velocity.x );
+	break;
 
-  case PLAYER__STATE_DUCKING:
-    _coast( this_frame_x_decceleration, &velocity.x );
-    break;
+      case PLAYER__STATE_DUCKING:
+	_coast( this_frame_x_decceleration, &velocity.x );
+	break;
     
-  case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
-  case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
-  case PLAYER__STATE_HANGING_ON_LEDGE:
-  case PLAYER__STATE_START_CLIMBING_LEDGE:
-    velocity.x = 0;
-    break;
+      case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
+      case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
+      case PLAYER__STATE_HANGING_ON_LEDGE:
+      case PLAYER__STATE_START_CLIMBING_LEDGE:
+	velocity.x = 0;
+	break;
 
-  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT:
-    velocity.x = config->wall_jump_initial_x_velocity;
-    break;
+      case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT:
+	velocity.x = config->wall_jump_initial_x_velocity;
+	break;
 
-  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT:
-    velocity.x = -config->wall_jump_initial_x_velocity;
-    break;
+      case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT:
+	velocity.x = -config->wall_jump_initial_x_velocity;
+	break;
 
-  case PLAYER__STATE_START_BACK_FLIP:
-    velocity.x = config->backflip_initial_x_velocity*(velocity.x < 0 ? 1 : -1);
-    break;
+      case PLAYER__STATE_START_BACK_FLIP:
+	velocity.x = config->backflip_initial_x_velocity*(velocity.x < 0 ? 1 : -1);
+	break;
 
-  case PLAYER__STATE_JUMPING_OFF_WALL:
-  case PLAYER__STATE_BACK_FLIP:
-    /* no-op, maintain same x velocity */
-    break;
+      case PLAYER__STATE_JUMPING_OFF_WALL:
+      case PLAYER__STATE_BACK_FLIP:
+	/* no-op, maintain same x velocity */
+	break;
 
-  default:
-    fprintf(stderr, 
-	    "unhandled state in setting x velocity: %d\n", 
-	    player->state.value);
-    break;
+      default:
+	fprintf(stderr, 
+		"unhandled state in setting x velocity: %d\n", 
+		player->state.value);
+	break;
+      }
+
+    gravity_this_frame = 
+      (config->per_second_gravity_acceleration * frame_length)/1000;
+
+    /* y velocity */
+    switch ( player->state.value )
+      {
+      case PLAYER__STATE_STANDING:
+      case PLAYER__STATE_WALKING:
+      case PLAYER__STATE_RUNNING:
+      case PLAYER__STATE_DUCKING:
+      case PLAYER__STATE_HANGING_ON_LEDGE:
+	velocity.y = 0;
+	break;
+
+      case PLAYER__STATE_JUMPING:
+      case PLAYER__STATE_JUMPING_OFF_WALL:
+      case PLAYER__STATE_BACK_FLIP:
+	velocity.y += gravity_this_frame;
+	break;
+
+      case PLAYER__STATE_FALLING:
+	velocity.y += gravity_this_frame;
+	if ( config->velocity_limit_falling < velocity.y )
+	  {
+	    velocity.y = config->velocity_limit_falling;
+	  }
+	break;
+
+      case PLAYER__STATE_CEASE_JUMPING:
+	velocity.y += gravity_this_frame;
+	if ( velocity.y < config->jump_final_y_velocity )
+	  {
+	    velocity.y = -config->jump_final_y_velocity;
+	  }
+
+	break;
+    
+      case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
+      case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
+	velocity.y += gravity_this_frame;
+	if ( config->velocity_limit_wall_sliding < velocity.y )
+	  {
+	    velocity.y = config->velocity_limit_wall_sliding;
+	  }
+	break;
+
+      case PLAYER__STATE_START_JUMPING:
+	velocity.y = -( config->jump_initial_y_velocity + 
+			abs(config->jump_x_velocity_percent*velocity.x)/100 ); 
+	break;
+
+      case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT:
+      case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT:
+	velocity.y = -(config->wall_jump_initial_y_velocity);
+	break;
+
+      case PLAYER__STATE_START_CLIMBING_LEDGE:
+	velocity.y = -(config->climb_ledge_initial_y_velocity);
+	break;
+
+      case PLAYER__STATE_START_BACK_FLIP:
+	velocity.y = -(config->backflip_initial_y_velocity);
+
+	break;
+    
+      default:
+	fprintf(stderr, 
+		"unhandled state in setting x velocity: %d\n", 
+		player->state.value);
+	break;
+      }
+
+    *new_velocity = velocity;
+
+    return SUCCESS;
   }
-
-  int gravity_this_frame = 
-    (config->per_second_gravity_acceleration * frame_length)/1000;
-
-  /* y velocity */
-  switch ( player->state.value )
-  {
-  case PLAYER__STATE_STANDING:
-  case PLAYER__STATE_WALKING:
-  case PLAYER__STATE_RUNNING:
-  case PLAYER__STATE_DUCKING:
-  case PLAYER__STATE_HANGING_ON_LEDGE:
-    velocity.y = 0;
-    break;
-
-  case PLAYER__STATE_JUMPING:
-  case PLAYER__STATE_JUMPING_OFF_WALL:
-  case PLAYER__STATE_BACK_FLIP:
-    velocity.y += gravity_this_frame;
-    break;
-
-  case PLAYER__STATE_FALLING:
-    velocity.y += gravity_this_frame;
-    if ( config->velocity_limit_falling < velocity.y )
-    {
-      velocity.y = config->velocity_limit_falling;
-    }
-    break;
-
-  case PLAYER__STATE_CEASE_JUMPING:
-    velocity.y += gravity_this_frame;
-    if ( velocity.y < config->jump_final_y_velocity )
-    {
-      velocity.y = -config->jump_final_y_velocity;
-    }
-
-    break;
-    
-  case PLAYER__STATE_SLIDING_WALL_ON_LEFT:
-  case PLAYER__STATE_SLIDING_WALL_ON_RIGHT:
-    velocity.y += gravity_this_frame;
-    if ( config->velocity_limit_wall_sliding < velocity.y )
-    {
-      velocity.y = config->velocity_limit_wall_sliding;
-    }
-    break;
-
-  case PLAYER__STATE_START_JUMPING:
-    velocity.y = -( config->jump_initial_y_velocity + 
-		    abs(config->jump_x_velocity_percent*velocity.x)/100 ); 
-    break;
-
-  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_LEFT:
-  case PLAYER__STATE_START_JUMPING_OFF_WALL_ON_RIGHT:
-    velocity.y = -(config->wall_jump_initial_y_velocity);
-    break;
-
-  case PLAYER__STATE_START_CLIMBING_LEDGE:
-    velocity.y = -(config->climb_ledge_initial_y_velocity);
-    break;
-
-  case PLAYER__STATE_START_BACK_FLIP:
-    velocity.y = -(config->backflip_initial_y_velocity);
-
-    break;
-    
-  default:
-    fprintf(stderr, 
-	    "unhandled state in setting x velocity: %d\n", 
-	    player->state.value);
-    break;
-  }
-
-  *new_velocity = velocity;
 }
 
 int player__load_config( const char* config_file,
@@ -518,69 +528,51 @@ bool_t _apply_config_value( const char* name,
 			    int value, 
 			    struct player_prototype_t* prototype )
 {
-  bool_t result = FALSE;
-
   player__config_t* config = &(prototype->config);
 
-  int idx = 0;
+#define APPLY_CONFIG(config_name, config_value) \
+  if ( !strcmp(config_name, name) ){		\
+    config_value = value;			\
+    return TRUE;				\
+  } 
 
-  struct 
-  { 
-    const char* value_name; 
-    int* value_ptr;
-  } name_to_value_map[] = 
-      { {"velocity_limit_running",    &config->velocity_limit_running},
-	{"velocity_limit_walking",    &config->velocity_limit_walking},
-	{"velocity_limit_wall_sliding", 
-	                              &config->velocity_limit_wall_sliding},
-	{"velocity_limit_falling",    &config->velocity_limit_falling},
-	{"per_second_x_acceleration", &config->per_second_x_acceleration},
-	{"per_second_x_decceleration",&config->per_second_x_decceleration},
-	{"per_second_gravity_acceleration", 
-	                              &config->per_second_gravity_acceleration},
-	{"jump_initial_y_velocity",   &config->jump_initial_y_velocity},
-	{"jump_x_velocity_percent",   &config->jump_x_velocity_percent},
-	{"climb_ledge_initial_y_velocity", 
-	                              &config->climb_ledge_initial_y_velocity},
-	{"wall_jump_initial_x_velocity",     
-	                              &config->wall_jump_initial_x_velocity},
-	{"wall_jump_initial_y_velocity",     
-	                              &config->wall_jump_initial_y_velocity},
-	{"jump_final_y_velocity",     &config->jump_final_y_velocity},
-	{"minimum_backflip_starting_velocity", 
-	                              &config->minimum_backflip_starting_velocity },
-	{"backflip_initial_x_velocity",
-	                              &config->backflip_initial_x_velocity },
-	{"backflip_initial_y_velocity",
-	                              &config->backflip_initial_y_velocity },
-	{"bounding_box_standing_x",   &prototype->bounding_box_standing.x},
-	{"bounding_box_standing_y",   &prototype->bounding_box_standing.y},
-	{"bounding_box_standing_width", &prototype->bounding_box_standing.width},
-	{"bounding_box_standing_height",&prototype->bounding_box_standing.height},
-	{"bounding_box_ducking_x",     &prototype->bounding_box_ducking.x},
-	{"bounding_box_ducking_y",     &prototype->bounding_box_ducking.y},
-	{"bounding_box_ducking_width", &prototype->bounding_box_ducking.width},
-	{"bounding_box_ducking_height",&prototype->bounding_box_ducking.height},
-	{NULL, NULL}
-      };
+  APPLY_CONFIG("velocity_limit_running", config->velocity_limit_running);
+  APPLY_CONFIG("velocity_limit_walking", config->velocity_limit_walking);
+  APPLY_CONFIG("velocity_limit_wall_sliding", 
+	       config->velocity_limit_wall_sliding);
+  APPLY_CONFIG("velocity_limit_falling", config->velocity_limit_falling);
+  APPLY_CONFIG("per_second_x_acceleration", config->per_second_x_acceleration);
+  APPLY_CONFIG("per_second_x_decceleration",config->per_second_x_decceleration);
+  APPLY_CONFIG("per_second_gravity_acceleration", 
+	       config->per_second_gravity_acceleration);
+  APPLY_CONFIG("jump_initial_y_velocity", config->jump_initial_y_velocity);
+  APPLY_CONFIG("jump_x_velocity_percent", config->jump_x_velocity_percent);
+  APPLY_CONFIG("climb_ledge_initial_y_velocity", 
+	       config->climb_ledge_initial_y_velocity);
+  APPLY_CONFIG("wall_jump_initial_x_velocity",     
+	       config->wall_jump_initial_x_velocity);
+  APPLY_CONFIG("wall_jump_initial_y_velocity",     
+	       config->wall_jump_initial_y_velocity);
+  APPLY_CONFIG("jump_final_y_velocity", config->jump_final_y_velocity);
+  APPLY_CONFIG("minimum_backflip_starting_velocity", 
+	       config->minimum_backflip_starting_velocity );
+  APPLY_CONFIG("backflip_initial_x_velocity",
+	       config->backflip_initial_x_velocity );
+  APPLY_CONFIG("backflip_initial_y_velocity",
+	       config->backflip_initial_y_velocity );
+  APPLY_CONFIG("bounding_box_standing_x", prototype->bounding_box_standing.x);
+  APPLY_CONFIG("bounding_box_standing_y", prototype->bounding_box_standing.y);
+  APPLY_CONFIG("bounding_box_standing_width", prototype->bounding_box_standing.width);
+  APPLY_CONFIG("bounding_box_standing_height",prototype->bounding_box_standing.height);
+  APPLY_CONFIG("bounding_box_ducking_x", prototype->bounding_box_ducking.x);
+  APPLY_CONFIG("bounding_box_ducking_y", prototype->bounding_box_ducking.y);
+  APPLY_CONFIG("bounding_box_ducking_width", prototype->bounding_box_ducking.width);
+  APPLY_CONFIG("bounding_box_ducking_height",prototype->bounding_box_ducking.height);
 
-  for ( idx = 0; name_to_value_map[idx].value_name != NULL; ++idx )
-  {
-    if ( !strcmp( name_to_value_map[idx].value_name, name ) )
-    {
-      result = TRUE;
-      *(name_to_value_map[idx].value_ptr) = value;
 
-      break;
-    }
-  }
+  fprintf( stderr, "unknown value %s in player configuration file\n", name );
+  return FALSE;
 
-  if ( !result )
-  {
-    fprintf( stderr, "unknown value %s in player configuration file\n", name );
-  }
-
-  return result;
 }
 
 const struct geo__rect_t* player__get_bounding_box( const struct player_t* player )

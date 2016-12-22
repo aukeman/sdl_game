@@ -48,6 +48,12 @@ obj/joystick.o : src/joystick.c obj
 obj/level.o : src/level.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
 
+obj/linked_list.o : src/linked_list.c obj
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
+
+obj/player.o : src/player.c obj
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
+
 obj/%.o : src/%.c obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
