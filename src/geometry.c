@@ -44,8 +44,14 @@ int geo__length( const struct geo__line_t* l ){
 }
 
 int geo__length_squared( const struct geo__line_t* l ){
-  struct geo__point_t a = { l->x1, l->y1 };
-  struct geo__point_t b = { l->x2, l->y2 };
+  struct geo__point_t a;
+  struct geo__point_t b;
+
+  a.x = l->x1;
+  a.y = l->y1;
+
+  b.x = l->x2;
+  b.y = l->y2;
 
   return geo__distance_squared( &a, &b );
 }
