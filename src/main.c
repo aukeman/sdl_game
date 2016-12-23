@@ -8,8 +8,10 @@
 #include <level.h>
 #include <background.h>
 #include <stopwatch.h>
+#include <joystick.h>
 #include <utils.h>
 
+#include <string.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <math.h>
@@ -28,48 +30,55 @@ void on_quit( events__type_e type,
 
 int main( int argc, char** argv ) {
 
+  int keep_looping = TRUE;
+  struct level_t* level = NULL;
+  struct font__handle_t* font = NULL;
+  struct player_prototype_t default_player;
+  struct player_t player;
+  struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
+
+
   video__setup(1600, 1200, 400, 300, (1 < argc) && !strcmp("-f", argv[1]) );
   js__setup();
   timing__setup();
   control__setup("data/controls.dat");
 
-  int keep_looping = TRUE;
-
   events__add_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
   events__add_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
 
-  struct font__handle_t* font = NULL;
   font__create("resources/font/test_font.dat", &font);
 
-  struct level_t* level = NULL;
   if ( level__create("resources/level/level.dat", &level) != SUCCESS ){
     fprintf(stderr, "could not create level\n");
   }
 
-  struct player_prototype_t default_player = { { },
-					       { },
-					       { },
-					       &player__basic_draw,
-					       &player__basic_update,
-					       NULL };
+  memset(&default_player, '0', sizeof(default_player));
+  default_player.draw_fxn = &player__basic_draw;
+  default_player.update_fxn = &player__basic_update;
 
   if ( player__load_config("data/player.dat", &default_player) != SUCCESS )
   {
     fprintf( stderr, "could not load player config\n" );
   }
 
-  struct player_t player =
-    { 
-      { 225, 225 }, 
-      { 0, 0 }, 
-      &default_player, 
-      control__get_state(1), 
-      FALSE, FALSE, FALSE, FALSE, FALSE, 
-      {PLAYER__STATE_NONE, 0}, 
-      {   0, 0, 255 } 
-    };
+  geo__init_point( &player.position, 225, 225 );
+  geo__init_vector( &player.velocity, 0, 0 );
+  player.prototype = &default_player;
+  player.control = control__get_state(1);
 
-  struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
+  player.top_collision = FALSE;
+  player.bottom_collision = FALSE;
+  player.left_collision = FALSE;
+  player.right_collision = FALSE;
+
+  player.against_ledge = FALSE;
+
+  player.state.value = PLAYER__STATE_NONE;
+  player.state.timestamp = 0;
+  player.color[0] = 0;
+  player.color[1] = 0;
+  player.color[2] = 255;
+
   stopwatch__init(&process_events_sw);
   stopwatch__init(&draw_bg_sw);
   stopwatch__init(&draw_players_sw);
@@ -83,12 +92,12 @@ int main( int argc, char** argv ) {
   timing__set_frame_rate(0);
 
   while ( keep_looping ) {
+    milliseconds_t frame_length = 0;
 
     stopwatch__start(&frame_sw);
 
     timing__declare_top_of_frame();
-
-    milliseconds_t frame_length = timing__get_frame_length();
+    frame_length = timing__get_frame_length();
 
     stopwatch__start(&process_events_sw);
     events__process_events();

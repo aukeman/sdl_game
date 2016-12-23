@@ -29,6 +29,8 @@ struct geo__line_t{
 
 void geo__init_point( struct geo__point_t*, int x, int y );
 
+void geo__init_vector( struct geo__vector_t*, int x, int y );
+
 void geo__init_rect( struct geo__rect_t*, int x, int y, int width, int height );
 
 void geo__init_line( struct geo__line_t*, int x1, int y1, int x2, int y2 );

@@ -9,6 +9,11 @@ void geo__init_point( struct geo__point_t* dest, int x, int y ){
   dest->y = y;
 }
 
+void geo__init_vector( struct geo__vector_t* dest, int x, int y ){
+  dest->x = x;
+  dest->y = y;
+}
+
 void geo__init_rect( struct geo__rect_t* dest, int x, int y, int width, int height ){
   dest->x = x;
   dest->y = y;
