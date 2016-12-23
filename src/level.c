@@ -8,10 +8,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool_t _create_layers( FILE*,
+		       struct layer_t**,
+		       size_t* number_of_layers_ptr );
 
 int level__create( const char* level_config_file, struct level_t** handle_ptr ){
 
-  int result = UNKNOWN_FAILURE;
   FILE* fin = NULL;
   char buffer[1024];
 
@@ -204,4 +206,5 @@ int level__draw( struct level_t* level ){
     background__draw( level->foreground_layers[idx].background );
   }
 
+  return SUCCESS;
 }

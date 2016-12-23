@@ -6,6 +6,7 @@
 
 #include <geometry.h>
 #include <background.h>
+#include <video.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -345,15 +346,12 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
 
     struct geo__vector_t velocity = player->velocity;
 
-    const bool_t jump_pressed = control__button_pressed( &player->control->jump );
-    const bool_t jump_released = control__button_released( &player->control->jump );
-
     const player__config_t* config = &(player->prototype->config);
 
     const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / 1000;
     const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / 1000;
 
-    int maximum_x_velocity = 0, gravity_this_frame = 0;
+    int gravity_this_frame = 0;
 
     /* x velocity */
     switch ( player->state.value )

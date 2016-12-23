@@ -21,6 +21,8 @@ struct font__handle_t {
 static struct 
 video__blit_params_t blit_params = { NULL, FALSE, { 0, 0, 0, 0 }, FALSE };
 
+int _process_string( const struct font__handle_t*, struct geo__rect_t*, bool_t, const char*, va_list ap );
+
 int font__create( const char* font_config_file, struct font__handle_t** handle_ptr){
   int result = SUCCESS;
   FILE* fin = NULL;
@@ -101,8 +103,9 @@ int font__free( struct font__handle_t* handle ){
 
   video__teardown_texture(handle->texture);
   free(handle);
-}
 
+  return SUCCESS;
+}
 
 int font__draw_string( const struct font__handle_t* handle, int x, int y, const char* fmt, ... ){
 
@@ -148,7 +151,7 @@ int _process_string( const struct font__handle_t* handle, struct geo__rect_t* de
   int original_x = 0;
   const char* iter = NULL;
 
-  size_t formatted_string_length = vsnprintf(buffer, 1024, fmt, ap);
+  size_t formatted_string_length = vsprintf(buffer, fmt, ap);
 
   if ( 1023 < formatted_string_length ){
     return FONT__STRING_TOO_LONG;
@@ -162,7 +165,7 @@ int _process_string( const struct font__handle_t* handle, struct geo__rect_t* de
 
   iter = buffer;
   while ( *iter != '\0' ){
-    const struct geo__rect_t* src = &handle->ascii_to_rect[*iter];
+    const struct geo__rect_t* src = &handle->ascii_to_rect[(unsigned char)*iter];
 
     switch (*iter){
     case ' ':

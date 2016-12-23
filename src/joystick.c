@@ -14,6 +14,9 @@ typedef struct{
 
 js__joystick_info_t js__joystick_info[JS__MAX_JOYSTICKS];
 
+int _setup_joystick(int idx);
+int _teardown_joystick(int idx);
+
 void handle_axis_event(events__type_e event, 
 		       const events__event_parameter_t* param, 
 		       void* context){
@@ -57,11 +60,11 @@ int js__setup(){
   number_of_joysticks = SDL_NumJoysticks();
 
   for ( joystick_idx = 0; joystick_idx < number_of_joysticks; ++joystick_idx ){
-    setup_joystick(joystick_idx);
+    _setup_joystick(joystick_idx);
   }
 
   for ( ; joystick_idx < JS__MAX_JOYSTICKS; ++joystick_idx){
-    teardown_joystick(joystick_idx);
+    _teardown_joystick(joystick_idx);
   }
 
   SDL_JoystickEventState(SDL_ENABLE);
@@ -73,7 +76,7 @@ int js__teardown(){
   int joystick_idx;
 
   for ( joystick_idx = 0; joystick_idx < JS__MAX_JOYSTICKS; ++joystick_idx ){
-    teardown_joystick(joystick_idx);
+    _teardown_joystick(joystick_idx);
   }
 
   events__remove_callback( EVENTS__TYPE_JOYSTICK_AXIS, handle_axis_event );
@@ -82,11 +85,11 @@ int js__teardown(){
   return SUCCESS;
 }
 
-int setup_joystick(int idx){
+int _setup_joystick(int idx){
 
   int axis_idx = 0, button_idx = 0, number_of_axes = 0, number_of_buttons = 0;
 
-  teardown_joystick(idx);
+  _teardown_joystick(idx);
 
   js__joystick_info[idx].context = SDL_JoystickOpen(idx);
   js__joystick_info[idx].name = SDL_JoystickName(idx);
@@ -110,14 +113,18 @@ int setup_joystick(int idx){
   }
 
   js__joystick_info[idx].state.enabled = TRUE;
+
+  return SUCCESS;
 }
 
-int teardown_joystick(int idx){
+int _teardown_joystick(int idx){
   if ( js__joystick_info[idx].context ){
     SDL_JoystickClose(js__joystick_info[idx].context);
   }
 
   memset(&js__joystick_info[idx], '\0', sizeof(js__joystick_info[idx]));
+
+  return SUCCESS;
 }
 
 const js__joystick_state_t* js__get_joystick_state(uint32_t joystick_index){

@@ -148,11 +148,6 @@ int video__flip() {
 
 int video__setup_texture(const char* file, 
 			 struct video__texture_handle_t** texture_handle_ptr){
-  uint32_t red_mask = 0;
-  uint32_t green_mask = 0;
-  uint32_t blue_mask = 0;
-  uint32_t alpha_mask = 0;
-
   SDL_Surface* img_surface = NULL;
   SDL_Surface* alpha_surface = NULL;
   SDL_Surface* rgba_surface = NULL;
@@ -184,7 +179,6 @@ int video__setup_texture(const char* file,
 
   if ( !rgba_surface ){
     fprintf(stderr, "cannot create RGB buffer\n");
-    *texture_handle_ptr;
     return VIDEO__COULD_NOT_LOAD_IMAGE;
   }
 
@@ -192,7 +186,6 @@ int video__setup_texture(const char* file,
 
   if ( SUCCESS != SDL_BlitSurface(alpha_surface, NULL, rgba_surface, NULL) ){
     fprintf(stderr, "cannot blit image to buffer: %s\n", SDL_GetError());
-    *texture_handle_ptr;
     return VIDEO__COULD_NOT_LOAD_IMAGE;
   }
 
@@ -231,6 +224,8 @@ int video__teardown_texture(struct video__texture_handle_t* texture_handle){
 
 int video__translate( int32_t x, int32_t y ){
   glTranslatef(x, y, 0);
+  
+  return SUCCESS;
 }
 
 int video__begin_blits( const struct video__blit_params_t* params ){
@@ -257,6 +252,7 @@ int video__begin_blits( const struct video__blit_params_t* params ){
 
   glBegin(GL_QUADS);
 
+  return SUCCESS;
 }
 
 int video__end_blits(){
@@ -273,6 +269,8 @@ int video__end_blits(){
   }
 
   blit_operation.params = NULL;
+
+  return SUCCESS;
 }
 
 int video__blit( const struct geo__rect_t* src,
