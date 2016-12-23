@@ -20,42 +20,8 @@ all: sdl_game
 sdl_game : $(OBJ_FILES) obj/main.o
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-obj/background.o : src/background.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -Wall -Werror -c -o $@ $<
-
-obj/collision.o : src/collision.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -Wall -Werror -c -o $@ $<
-
-obj/control.o : src/control.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -Wall -Werror -c -o $@ $<
-
-obj/utils.o : src/utils.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
-
-obj/events.o : src/events.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
-
-
-obj/font.o : src/font.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
-
-obj/geometry.o : src/geometry.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
-
-obj/joystick.o : src/joystick.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
-
-obj/level.o : src/level.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
-
-obj/linked_list.o : src/linked_list.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
-
-obj/player.o : src/player.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -ansi -pedantic-errors -c -o $@ $<
-
 obj/%.o : src/%.c obj
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -ansi -pedantic-errors -Wall -Werror -o $@ $<
 
 obj :
 	mkdir -p obj

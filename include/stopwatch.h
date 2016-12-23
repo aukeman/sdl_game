@@ -17,14 +17,20 @@ struct stopwatch_t
   uint32_t invocations;
 };
 
-static inline
+static
 void stopwatch__init( struct stopwatch_t* sw )
 {
-  timerclear( &(sw->start) );
-  timerclear( &(sw->stop) );
+  sw->start.tv_sec = 0;
+  sw->start.tv_usec = 0;
 
-  timerclear( &(sw->total) );
-  timerclear( &(sw->longest) );
+  sw->stop.tv_sec = 0;
+  sw->stop.tv_usec = 0;
+
+  sw->total.tv_sec = 0;
+  sw->total.tv_usec = 0;
+
+  sw->longest.tv_sec = 0;
+  sw->longest.tv_usec = 0;
 
   sw->shortest.tv_sec = 0x7FFFFFFF;
   sw->shortest.tv_usec = 0x7FFFFFFF;
@@ -34,38 +40,53 @@ void stopwatch__init( struct stopwatch_t* sw )
 
 #ifdef STOPWATCH_ENABLED
 
-static inline
+static
 void stopwatch__start( struct stopwatch_t* sw ){
   gettimeofday( &(sw->start), NULL );
 }
 
-static inline
+static
 void stopwatch__stop( struct stopwatch_t* sw ){
 
+  struct timeval diff;
+  
   gettimeofday( &(sw->stop), NULL );
 
-  struct timeval diff, temp;
-  
-  timersub( &(sw->stop), &(sw->start), &diff );
-  timeradd( &diff, &(sw->total), &temp );
-  sw->total = temp;
+  diff.tv_sec = sw->stop.tv_sec - sw->start.tv_sec;
+  diff.tv_usec = sw->stop.tv_usec - sw->start.tv_usec;
+  if ( diff.tv_usec < 0 ){
+    diff.tv_sec -= 1;
+    diff.tv_usec += 1000000;
+  }
 
-  if ( timercmp( &(sw->longest), &diff, < ) ) {
+  sw->total.tv_sec += diff.tv_sec;
+  sw->total.tv_usec += diff.tv_usec;
+  if ( 1000000 < sw->total.tv_usec ){
+    diff.tv_sec += 1;
+    diff.tv_usec -= 1000000;
+  }
+
+  if ((sw->longest.tv_sec < diff.tv_usec) ||
+      ((sw->longest.tv_sec == diff.tv_usec) &&
+       (sw->longest.tv_usec < diff.tv_usec))){
     sw->longest = diff;
   }
 
-  if ( timercmp( &diff, &(sw->shortest), < ) ){
+  if ((diff.tv_sec < sw->shortest.tv_usec) ||
+      ((diff.tv_sec == sw->shortest.tv_usec) &&
+       (diff.tv_usec < sw->shortest.tv_usec))){
     sw->shortest = diff;
   }
 
   ++(sw->invocations);
 }
 
-static inline
+static
 void stopwatch__dump( struct stopwatch_t* sw, const char* name, FILE* fout )
 {
-  struct timeval mean = { sw->total.tv_sec / sw->invocations,
-			  sw->total.tv_usec / sw->invocations }; 
+  struct timeval mean;
+  mean.tv_sec = sw->total.tv_sec / sw->invocations;
+  mean.tv_usec = sw->total.tv_usec / sw->invocations;
 
   if ( sw->total.tv_sec % sw->invocations )
   {
@@ -89,13 +110,13 @@ void stopwatch__dump( struct stopwatch_t* sw, const char* name, FILE* fout )
 
 #else
 
-static inline
+static
 void stopwatch__start( struct stopwatch_t* sw ) { }
 
-static inline
+static
 void stopwatch__stop( struct stopwatch_t* sw ) { }
 
-static inline
+static
 void stopwatch__dump( struct stopwatch_t* sw, const char* name, FILE* fout )
 {
   fprintf( fout, "%s: STOPWATCHES NOT ENABLED\n", name );

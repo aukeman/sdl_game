@@ -321,12 +321,19 @@ int video__blit_single(const struct video__texture_handle_t* texture_handle,
 		       const struct geo__rect_t* src,
 		       const struct geo__rect_t* dest){
 
+  struct video__blit_params_t params;
+
   if ( blit_operation.in_progress ) {
     return UNKNOWN_FAILURE;
   }
 
-  struct video__blit_params_t params = 
-    { texture_handle, FALSE, { 0, 0, 0, 0 }, FALSE };
+  params.texture_handle = texture_handle;
+  params.set_color = FALSE;
+  params.color.red = 0;
+  params.color.green = 0;
+  params.color.blue = 0;
+  params.color.alpha = 0;
+  params.suppress_transparency = FALSE;
 
   video__begin_blits( &params );
 
