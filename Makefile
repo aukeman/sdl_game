@@ -20,7 +20,7 @@ all: sdl_game
 sdl_game : $(OBJ_FILES) obj/main.o
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-obj/%.o : src/%.c obj
+obj/%.o : src/%.c | obj
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -ansi -pedantic-errors -Wall -Werror -o $@ $<
 
 obj :
@@ -33,10 +33,10 @@ test/obj:
 	mkdir -p test/obj
 
 .PRECIOUS: test/obj/%.o
-test/obj/%.o : test/%.c test/obj
+test/obj/%.o : test/%.c | test/obj
 	$(CC) -g -I./include -I./test -c -o $@ $<
 
-test/bin/% : test/obj/%.o test/obj/main.o $(OBJ_FILES) $(HEADERS) $(TEST_HEADERS) test/bin
+test/bin/% : test/obj/%.o test/obj/main.o $(OBJ_FILES) $(HEADERS) $(TEST_HEADERS) | test/bin
 	$(CC) $(LDFLAGS) $< test/obj/main.o $(OBJ_FILES) $(LOADLIBES) $(LDLIBS) -o $@
 
 build_tests: $(TEST_EXES)
@@ -52,7 +52,7 @@ test: build_tests
 
 clean: 
 	rm -f sdl_game
-	rm -f obj/*
-	rm -f test/bin/*
-	rm -f test/obj/*
+	rm -rf obj
+	rm -rf test/bin
+	rm -rf test/obj
 
