@@ -530,8 +530,14 @@ bool_t _apply_config_value( const char* name,
 
 #define APPLY_CONFIG(config_name, config_value) \
   if ( !strcmp(config_name, name) ){		\
-    config_value = value;			\
+    config_value = utils__screen2pos(value);	\
     return TRUE;				\
+  } 
+
+#define APPLY_PERCENT(config_name, config_value) \
+  if ( !strcmp(config_name, name) ){ \
+    config_value = value;	     \
+    return TRUE;                     \
   } 
 
   APPLY_CONFIG("velocity_limit_running", config->velocity_limit_running);
@@ -544,7 +550,7 @@ bool_t _apply_config_value( const char* name,
   APPLY_CONFIG("per_second_gravity_acceleration", 
 	       config->per_second_gravity_acceleration);
   APPLY_CONFIG("jump_initial_y_velocity", config->jump_initial_y_velocity);
-  APPLY_CONFIG("jump_x_velocity_percent", config->jump_x_velocity_percent);
+  APPLY_PERCENT("jump_x_velocity_percent", config->jump_x_velocity_percent);
   APPLY_CONFIG("climb_ledge_initial_y_velocity", 
 	       config->climb_ledge_initial_y_velocity);
   APPLY_CONFIG("wall_jump_initial_x_velocity",     

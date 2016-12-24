@@ -61,7 +61,7 @@ int main( int argc, char** argv ) {
     fprintf( stderr, "could not load player config\n" );
   }
 
-  geo__init_point( &player.position, 225, 225 );
+  geo__init_point( &player.position, utils__screen2pos(225), utils__screen2pos(225) );
   geo__init_vector( &player.velocity, 0, 0 );
   player.prototype = &default_player;
   player.control = control__get_state(1);
