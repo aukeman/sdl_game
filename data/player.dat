@@ -7,13 +7,15 @@ per_second_x_decceleration 150
 per_second_gravity_acceleration 250
 jump_initial_y_velocity 150
 jump_x_velocity_percent 25
-climb_ledge_initial_y_velocity 100
+climb_ledge_initial_y_velocity 75
 wall_jump_initial_y_velocity 200
 wall_jump_initial_x_velocity 100
 jump_final_y_velocity 25
 minimum_backflip_starting_velocity 50
 backflip_initial_x_velocity 200
 backflip_initial_y_velocity 250
+
+ledge_grab_height 2
 
 bounding_box_standing_x 0
 bounding_box_standing_y 0

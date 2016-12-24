@@ -64,6 +64,8 @@ typedef struct
   int backflip_initial_y_velocity;
   int backflip_initial_x_velocity;
 
+  int ledge_grab_height;
+
 } player__config_t;
 
 struct player_prototype_t{

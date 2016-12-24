@@ -113,7 +113,7 @@ void player__basic_update( struct player_t* player,
     zero_vector.x = 0;
     zero_vector.y = 0;
     
-    geo__init_rect(&grabbing_box, 0, 0, bbox.width, 4);
+    geo__init_rect(&grabbing_box, 0, 0, bbox.width, player->prototype->config.ledge_grab_height);
 
     grabbing_box.x = bbox.x;
     grabbing_box.y = bbox.y-grabbing_box.height;
@@ -572,6 +572,7 @@ bool_t _apply_config_value( const char* name,
   APPLY_CONFIG("bounding_box_ducking_y", prototype->bounding_box_ducking.y);
   APPLY_CONFIG("bounding_box_ducking_width", prototype->bounding_box_ducking.width);
   APPLY_CONFIG("bounding_box_ducking_height",prototype->bounding_box_ducking.height);
+  APPLY_CONFIG("ledge_grab_height",config->ledge_grab_height);
 
 
   fprintf( stderr, "unknown value %s in player configuration file\n", name );
