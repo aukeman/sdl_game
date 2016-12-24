@@ -34,7 +34,7 @@ test/obj:
 
 .PRECIOUS: test/obj/%.o
 test/obj/%.o : test/%.c | test/obj
-	$(CC) -g -I./include -I./test -c -o $@ $<
+	$(CC) -g -I./include -I./test -c -ansi -pedantic-errors -Wall -error -o $@ $<
 
 test/bin/% : test/obj/%.o test/obj/main.o $(OBJ_FILES) $(HEADERS) $(TEST_HEADERS) | test/bin
 	$(CC) $(LDFLAGS) $< test/obj/main.o $(OBJ_FILES) $(LOADLIBES) $(LDLIBS) -o $@

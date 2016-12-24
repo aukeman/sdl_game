@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <SDL/SDL.h>
 #include <geometry.h>
+#include <video.h>
 
 typedef struct geo__rect_t ascii_to_rect_t[256];
 struct font__handle_t {
@@ -33,7 +34,8 @@ void no_font_file(){
 
 void no_image_file(){
 
-  struct font__handle_t* font;
+  struct font__handle_t* font = NULL;
+  int rc = 0;
 
   font_file = write_test_font_file("dummy_filename\n"
 				   "a  0 0 8 8\n"
@@ -42,13 +44,16 @@ void no_image_file(){
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
-  int rc = font__create( font_file, &font );
+  rc = font__create( font_file, &font );
 
   TEST_ASSERT_INT( rc, FONT__IMAGE_NOT_FOUND );
   TEST_ASSERT_PTR( font, NULL );
 }
 
 void load_font_file(){
+
+  int rc = 0, idx = 0;
+  ascii_to_rect_t ascii_to_rect;
 
   image_file = write_test_image_file();
 
@@ -69,15 +74,13 @@ void load_font_file(){
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
-  int rc = font__create( font_file, &font );
+  rc = font__create( font_file, &font );
 
-  ascii_to_rect_t ascii_to_rect;
   memcpy(ascii_to_rect, font->ascii_to_rect, sizeof(ascii_to_rect));
   
   TEST_ASSERT_INT( rc, SUCCESS );
   TEST_ASSERT_TRUE( font != NULL );
 
-  int idx = 0;
   for ( idx = 0; idx < 256; ++idx ){
     switch(idx){
     case ' ': 
@@ -160,6 +163,7 @@ void load_font_file(){
 
 void test_empty_string(){
 
+  int rc = 0, w = 0, h = 0, rc_empty = 0;
   image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
@@ -170,11 +174,8 @@ void test_empty_string(){
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
-  int rc = font__create( font_file, &font );
-
-  int w, h;
-
-  int rc_empty = font__dimensions(font, &w, &h, "");
+  rc = font__create( font_file, &font );
+  rc_empty = font__dimensions(font, &w, &h, "");
 
   TEST_ASSERT_INT(rc, SUCCESS);
   TEST_ASSERT_INT(rc_empty, SUCCESS);
@@ -185,6 +186,7 @@ void test_empty_string(){
 
 void test_tab_string(){
 
+  int rc = 0, w = 0, h = 0, rc_tab = 0;
   image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
@@ -195,22 +197,19 @@ void test_tab_string(){
 				   image_file);
 
   TEST_ASSERT_TRUE( font_file != NULL );
-
-  int rc = font__create( font_file, &font );
-
-  int w, h;
-
-  int rc_tab = font__dimensions(font, &w, &h, "\t");
+  
+  rc = font__create( font_file, &font );
+  rc_tab = font__dimensions(font, &w, &h, "\t");
 
   TEST_ASSERT_INT(rc, SUCCESS);
   TEST_ASSERT_INT(rc_tab, SUCCESS);
   TEST_ASSERT_INT(w, 40);
   TEST_ASSERT_INT(h, 8);
-
 }
 
 void test_newline_string(){
 
+  int rc = 0, w = 0, h = 0, rc_tab = 0;
   image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
@@ -221,11 +220,9 @@ void test_newline_string(){
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
-  int rc = font__create( font_file, &font );
+  rc = font__create( font_file, &font );
 
-  int w, h;
-
-  int rc_tab = font__dimensions(font, &w, &h, "\n");
+  rc_tab = font__dimensions(font, &w, &h, "\n");
 
   TEST_ASSERT_INT(rc, SUCCESS);
   TEST_ASSERT_INT(rc_tab, SUCCESS);
@@ -236,6 +233,9 @@ void test_newline_string(){
 
 void test_long_string(){
 
+  int w_1023 = 0, h_1023 = 0, w_1024 = 0, h_1024 = 0, w_2047 = 0, h_2047 = 0;
+  int rc = 0, rc_1023 = 0, rc_1024 = 0, rc_2047 = 0;
+  char buffer[2048];
 
   image_file = write_test_image_file();
 
@@ -256,23 +256,22 @@ void test_long_string(){
 
   TEST_ASSERT_TRUE( font_file != NULL );
 
-  int rc = font__create( font_file, &font );
+  rc = font__create( font_file, &font );
 
-  char buffer[2048];
+  TEST_ASSERT_INT(rc, SUCCESS);
+
   memset(buffer, '\0', sizeof(buffer));
   memset(buffer, 'a', 1023);
   
-  int w_1023, h_1023, w_1024, h_1024, w_2047, h_2047;
-
-  int rc_1023 = font__dimensions(font, &w_1023, &h_1023, "%s", buffer);
+  rc_1023 = font__dimensions(font, &w_1023, &h_1023, "%s", buffer);
 
   memset(buffer, 'b', 1024);
   
-  int rc_1024 = font__dimensions(font, &w_1024, &h_1024, "%s", buffer);
+  rc_1024 = font__dimensions(font, &w_1024, &h_1024, "%s", buffer);
   
   memset(buffer, 'c', 2047);
   
-  int rc_2047 = font__dimensions(font, &w_2047, &h_2047, "%s", buffer);
+  rc_2047 = font__dimensions(font, &w_2047, &h_2047, "%s", buffer);
   
   TEST_ASSERT_INT(rc_1023, SUCCESS);
   TEST_ASSERT_INT(w_1023, 1023*8);
@@ -289,6 +288,7 @@ void test_long_string(){
 
 void font_dimensions(){
 
+  int rc = 0;
   image_file = write_test_image_file();
 
   TEST_ASSERT_TRUE( image_file != NULL );
@@ -308,7 +308,9 @@ void font_dimensions(){
   
   TEST_ASSERT_TRUE( font_file != NULL );
 
-  int rc = font__create( font_file, &font );
+  rc = font__create( font_file, &font );
+
+  TEST_ASSERT_INT( rc, SUCCESS );
 }
 
 int setup(){
@@ -352,20 +354,24 @@ TEST_SUITE_END()
 
 const char* write_test_font_file(const char* contents, ...){
 
+  FILE* fout = NULL;
+  size_t len = 0;
+  size_t characters_written = 0;
+  va_list ap;
+
   static char filename_buffer[1024];
-  snprintf( filename_buffer, 1023, "%s", tmpnam(NULL) );
+  sprintf( filename_buffer, "%s", tmpnam(NULL) );
 
-  FILE* fout = fopen(filename_buffer, "w");
+  fout = fopen(filename_buffer, "w");
 
-  size_t len = strlen(contents);
+  len = strlen(contents);
 
   if ( !fout ){
     return NULL;
   }
 
-  va_list ap;
   va_start(ap, contents);
-  size_t characters_written = vfprintf(fout, contents, ap);
+  characters_written = vfprintf(fout, contents, ap);
   va_end(ap);
 
   fclose(fout);
@@ -382,7 +388,6 @@ const char* write_test_font_file(const char* contents, ...){
 const char* write_test_image_file(){
 
   static char filename_buffer[1024];
-  snprintf( filename_buffer, 1023, "%s", tmpnam(NULL) );
 
   static const unsigned char test_png_image_data[] = {
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
@@ -458,8 +463,11 @@ const char* write_test_image_file(){
     0x82
   };
   static const unsigned int test_png_image_data_length = 841;
+  FILE* fout = NULL;
 
-  FILE* fout = fopen(filename_buffer, "wb");
+  sprintf( filename_buffer, "%s", tmpnam(NULL) );
+  fout = fopen(filename_buffer, "wb");
+
 
   if ( !fout ){
     return NULL;

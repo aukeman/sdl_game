@@ -76,13 +76,13 @@ if ( (a) ) {                          \
   TEST_ASSERT_FLOAT_EPSILON(actual, expected, 0.000001f)
 
 #define TEST_ASSERT_PTR(  actual,expected) \
-  __ASSERTION_EQUALITY( (actual) == (expected), actual, expected, p )
+  __ASSERTION_EQUALITY( (actual) == (expected), (void*)actual, (void*)expected, p )
 
 #define TEST_ASSERT_NULL( actual ) \
-  TEST_ASSERT_PTR(actual, NULL)
+  TEST_ASSERT_PTR(actual, (void*)NULL)
 
 #define TEST_ASSERT_NOT_NULL( actual ) \
-  __ASSERTION_INEQUALITY( (actual) != NULL, actual, NULL, p )
+  __ASSERTION_INEQUALITY( (actual) != NULL, (void*)actual, (void*)NULL, p )
 
 #define TEST_ASSERT_SUCCESS( actual ) \
   TEST_ASSERT_INT(actual, SUCCESS)

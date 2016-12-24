@@ -4,9 +4,6 @@
 
 #include <SDL/SDL.h>
 
-int _invoke_callback( events__type_e,
-		      events__event_parameter_t* );
-
 
 const uint32_t EVENTS__KEYMOD_LSHIFT = KMOD_LSHIFT;
 const uint32_t EVENTS__KEYMOD_RSHIFT = KMOD_RSHIFT;
@@ -244,7 +241,7 @@ int events__process_events() {
       break;
     }
 
-    _invoke_callback(event_type, param_ptr);
+    events__invoke_callback(event_type, param_ptr);
 
   }
 
@@ -297,8 +294,8 @@ int events__remove_callback( events__type_e event_type,
   return result;
 }
 
-int _invoke_callback( events__type_e event_type,
-		      events__event_parameter_t* event_param ){
+int events__invoke_callback( events__type_e event_type,
+			     events__event_parameter_t* event_param ){
 
   int result = EVENTS__CALLBACK_NOT_REGISTERED;
 

@@ -42,6 +42,25 @@ struct control__state_t {
   struct control__binary_t fire;
 };
 
+enum control_type_e {
+  NO_CONTROL_MAPPING,
+  ANALOG,
+  BINARY
+};
+
+struct control_mapping_t{
+
+  enum control_type_e type;
+
+  float min_input;
+  float max_input;
+
+  union {
+    struct control__analog_t* analog;
+    struct control__binary_t* binary;
+  } control_type;
+};
+
 int control__setup(const char* mapping_file);
 int control__teardown();
 

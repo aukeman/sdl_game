@@ -10,26 +10,6 @@
 
 #include <stdlib.h>
 
-
-enum control_type_e {
-  NO_CONTROL_MAPPING,
-  ANALOG,
-  BINARY
-};
-
-struct control_mapping_t{
-
-  enum control_type_e type;
-
-  float min_input;
-  float max_input;
-
-  union {
-    struct control__analog_t* analog;
-    struct control__binary_t* binary;
-  } control_type;
-};
-
 struct control__state_t control_state[CONTROL__MAX_PLAYERS];
 
 struct linked_list_t keyboard_mappings[512];

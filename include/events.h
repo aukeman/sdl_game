@@ -210,4 +210,7 @@ int events__remove_callback( events__type_e,
 			     events__callback_fxn callback );
 
 
+int events__invoke_callback( events__type_e,
+			     events__event_parameter_t* );
+
 #endif

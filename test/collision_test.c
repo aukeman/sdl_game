@@ -907,13 +907,15 @@ void vertical_line_intersects_rectangle(){
 
 void diagonal_line_intersects_rectangle(){
 
-  struct geo__rect_t r = { 0, 0, 10, 10 };
-
-  struct geo__line_t l1 = { -5, -5,   15, 15 };
-  struct geo__line_t l2 = { 15, 15,   -5, -5 };
-  struct geo__line_t l3 = { 10, 10,   -5, -5 };
-
+  struct geo__rect_t r;
+  struct geo__line_t l1, l2, l3;
   struct geo__point_t p;
+
+  geo__init_rect(&r, 0, 0, 10, 10);
+  geo__init_line(&l1, -5, -5, 15, 15);
+  geo__init_line(&l2, 15, 15, -5, -5);
+  geo__init_line(&l3, 10, 10, -5, -5);
+
 
   p.x = 0; p.y = 0;
   TEST_ASSERT_TRUE(collision__line_intersects_rectangle( &l1, &r, NULL ));

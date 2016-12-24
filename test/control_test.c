@@ -19,29 +19,12 @@ const char* write_config_file(const char* contents, ...);
 const char* setup(int* setup_result, const char* contents, ...);
 void teardown(const char* mapping_filename);
 
-enum control_type_e {
-  NO_CONTROL_MAPPING,
-  ANALOG,
-  BINARY
-};
-
-struct control_mapping_t{
-
-  enum control_type_e type;
-
-  float min_input;
-  float max_input;
-
-  union{
-    struct control__analog_t* analog;
-    struct control__binary_t* binary;
-  };
-};
-
 void no_mapping_file(){
-  TEST_ASSERT_INT(control__setup(""), CONTROL__MAPPING_FILE_NOT_FOUND);
 
   int idx1, idx2;
+
+  TEST_ASSERT_INT(control__setup(""), CONTROL__MAPPING_FILE_NOT_FOUND);
+
   for ( idx1 = 0; idx1 < 512; ++idx1 ){
     linked_list__empty( &keyboard_mappings[idx1] );
   }
@@ -62,11 +45,10 @@ void no_mapping_file(){
 
 void no_mappings(){
 
-  int setup_result;
+  int setup_result, idx1, idx2;
   const char* mapping_file = setup(&setup_result, "");
   TEST_ASSERT_INT(setup_result, CONTROL__NO_DEVICES_TO_MAP);
 
-  int idx1, idx2;
   for ( idx1 = 0; idx1 < 512; ++idx1 ){
     linked_list__empty( &keyboard_mappings[idx1] );
   }
@@ -87,7 +69,7 @@ void no_mappings(){
 
 void map_directions_to_axes(){
   
-  int setup_result;
+  int setup_result, idx1, idx2;
   const char* mapping_file = setup(&setup_result, 
 				   "0\n"
 				   "up joystick 3 axis 4 0.0 1.0\n"
@@ -96,8 +78,6 @@ void map_directions_to_axes(){
 				   "right joystick 3 axis 5 0.0 -1.0\n");
   TEST_ASSERT_SUCCESS(setup_result);
 
-
-  int idx1, idx2;
   for ( idx1 = 0; idx1 < 512; ++idx1 ){
     linked_list__empty( &keyboard_mappings[idx1] );
   }
@@ -120,7 +100,7 @@ void map_directions_to_axes(){
 	TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
 	
 	TEST_ASSERT_NOT_NULL( control__get_state(0) );
-	TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->up );
+	TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->up );
 
 	mapping = 
 	  (const struct control_mapping_t*)linked_list__next(&iter);
@@ -131,7 +111,7 @@ void map_directions_to_axes(){
 	TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
 	TEST_ASSERT_FLOAT( mapping->max_input, -1.0f );
 	
-	TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->down );
+	TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->down );
 
 	mapping = 
 	  (const struct control_mapping_t*)linked_list__next(&iter);
@@ -152,7 +132,7 @@ void map_directions_to_axes(){
 	TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
 	
 	TEST_ASSERT_NOT_NULL( control__get_state(0) );
-	TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->left );
+	TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->left );
 
 	mapping = 
 	  (const struct control_mapping_t*)linked_list__next(&iter);
@@ -163,7 +143,7 @@ void map_directions_to_axes(){
 	TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
 	TEST_ASSERT_FLOAT( mapping->max_input, -1.0f );
 	
-	TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->right );
+	TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->right );
 
 	mapping = 
 	  (const struct control_mapping_t*)linked_list__next(&iter);
@@ -186,26 +166,29 @@ void map_directions_to_axes(){
 
 void map_directions_to_buttons(){
   
-  int setup_result;
+  int setup_result = 0;
+  struct linked_list__node_t* iter = NULL;
+  const struct control_mapping_t* mapping = NULL;
   const char* mapping_file = setup(&setup_result, 
 				   "1\n"
 				   "up joystick 4 button 10\n"
 				   "down joystick 4 button 11\n"
 				   "left joystick 4 button 12\n"
 				   "right joystick 4 button 13\n");
-  TEST_ASSERT_SUCCESS(setup_result);
 
-  struct linked_list__node_t* iter;
-  const struct control_mapping_t* mapping = 
+  mapping = 
     (const struct control_mapping_t*)
     linked_list__begin(&js_button_mappings[4][10], &iter);
+
+
+  TEST_ASSERT_SUCCESS(setup_result);
 
   TEST_ASSERT_NOT_NULL( mapping );
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
   TEST_ASSERT_NOT_NULL( control__get_state(1) );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->up );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->up );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -218,7 +201,7 @@ void map_directions_to_buttons(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->down );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->down );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -231,7 +214,7 @@ void map_directions_to_buttons(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->left );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->left );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -243,7 +226,7 @@ void map_directions_to_buttons(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->right );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->right );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -252,7 +235,9 @@ void map_directions_to_buttons(){
 
 void map_directions_to_keys(){
   
-  int setup_result;
+  int setup_result = 0;
+  struct linked_list__node_t* iter = NULL;
+  const struct control_mapping_t* mapping = NULL;
   const char* mapping_file = setup(&setup_result, 
 				   "1\n"
 				   "up keyboard 273\n"
@@ -261,8 +246,7 @@ void map_directions_to_keys(){
 				   "right keyboard 275\n");
   TEST_ASSERT_SUCCESS(setup_result);
 
-  struct linked_list__node_t* iter;
-  const struct control_mapping_t* mapping = 
+  mapping = 
     (const struct control_mapping_t*)
     linked_list__begin(&keyboard_mappings[EVENTS__KEY_UP], &iter);
 
@@ -271,7 +255,7 @@ void map_directions_to_keys(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
   TEST_ASSERT_NOT_NULL( control__get_state(1) );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->up );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->up );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -283,7 +267,7 @@ void map_directions_to_keys(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->down );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->down );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -296,7 +280,7 @@ void map_directions_to_keys(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->left );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->left );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -308,7 +292,7 @@ void map_directions_to_keys(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->right );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->right );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -317,15 +301,16 @@ void map_directions_to_keys(){
 
 void map_jump_and_fire_to_axes(){
   
-  int setup_result;
+  int setup_result = 0;
+  struct linked_list__node_t* iter = NULL;
+  const struct control_mapping_t* mapping = NULL;
   const char* mapping_file = setup(&setup_result, 
 				   "2\n"
 				   "jump joystick 5 axis 0 -1.0 1.0\n"
 				   "fire joystick 5 axis 1 -1.0 1.0\n");
   TEST_ASSERT_SUCCESS(setup_result);
 
-  struct linked_list__node_t* iter;
-  const struct control_mapping_t* mapping = 
+  mapping = 
     (const struct control_mapping_t*)
     linked_list__begin(&js_axis_mappings[5][0], &iter);
 
@@ -334,7 +319,7 @@ void map_jump_and_fire_to_axes(){
   TEST_ASSERT_FLOAT( mapping->min_input, -1.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
   TEST_ASSERT_NOT_NULL( control__get_state(2) );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->jump );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(2)->jump );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -347,7 +332,7 @@ void map_jump_and_fire_to_axes(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, -1.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->fire );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(2)->fire );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -357,15 +342,16 @@ void map_jump_and_fire_to_axes(){
 
 void map_jump_and_fire_to_buttons(){
   
-  int setup_result;
+  int setup_result = 0;
+  struct linked_list__node_t* iter = NULL;
+  const struct control_mapping_t* mapping = NULL;
   const char* mapping_file = setup(&setup_result, 
 				   "2\n"
 				   "jump joystick 5 button 3\n"
 				   "fire joystick 5 button 10\n");
   TEST_ASSERT_SUCCESS(setup_result);
 
-  struct linked_list__node_t* iter;
-  const struct control_mapping_t* mapping = 
+  mapping = 
     (const struct control_mapping_t*)
     linked_list__begin(&js_button_mappings[5][3], &iter);
 
@@ -374,7 +360,7 @@ void map_jump_and_fire_to_buttons(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
   TEST_ASSERT_NOT_NULL( control__get_state(2) );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->jump );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(2)->jump );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -387,7 +373,7 @@ void map_jump_and_fire_to_buttons(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->fire );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(2)->fire );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -396,15 +382,16 @@ void map_jump_and_fire_to_buttons(){
 
 void map_jump_and_fire_to_keys(){
   
-  int setup_result;
+  int setup_result = 0;
+  struct linked_list__node_t* iter = NULL;
+  const struct control_mapping_t* mapping = NULL;
   const char* mapping_file = setup(&setup_result, 
 				   "2\n"
 				   "jump keyboard 306\n"
 				   "fire keyboard 32\n");
   TEST_ASSERT_SUCCESS(setup_result);
 
-  struct linked_list__node_t* iter;
-  const struct control_mapping_t* mapping = 
+  mapping = 
     (const struct control_mapping_t*)
     linked_list__begin(&keyboard_mappings[306], &iter);
 
@@ -413,7 +400,7 @@ void map_jump_and_fire_to_keys(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
   TEST_ASSERT_NOT_NULL( control__get_state(2) );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->jump );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(2)->jump );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -425,7 +412,7 @@ void map_jump_and_fire_to_keys(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(2)->fire );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(2)->fire );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -434,7 +421,9 @@ void map_jump_and_fire_to_keys(){
 
 void map_to_both_joystick_and_keyboard(){
 
-  int setup_result;
+  int setup_result = 0;
+  struct linked_list__node_t* iter = NULL;
+  const struct control_mapping_t* mapping = NULL;
   const char* mapping_file = setup(&setup_result, 
 				   "0\n"
 				   "up    joystick 0 axis    1  0.0  1.0\n"
@@ -451,8 +440,7 @@ void map_to_both_joystick_and_keyboard(){
 				   "fire  keyboard           32\n");
   TEST_ASSERT_SUCCESS(setup_result);
 
-  struct linked_list__node_t* iter;
-  const struct control_mapping_t* mapping = 
+  mapping = 
     (const struct control_mapping_t*)
     linked_list__begin(&js_axis_mappings[0][1], &iter);
 
@@ -463,7 +451,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
 	
   TEST_ASSERT_NOT_NULL( control__get_state(0) );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->up );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->up );
 
   mapping = (const struct control_mapping_t*)linked_list__next(&iter);
 
@@ -473,7 +461,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, -1.0f );
 	
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->down );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->down );
 
   mapping = (const struct control_mapping_t*)linked_list__next(&iter);
   
@@ -489,7 +477,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
 	
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->left );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->left );
 
   mapping = 
     (const struct control_mapping_t*)linked_list__next(&iter);
@@ -500,7 +488,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, -1.0f );
 	
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->right );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->right );
 
   mapping = 
     (const struct control_mapping_t*)linked_list__next(&iter);
@@ -515,7 +503,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(0)->jump );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(0)->jump );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -527,7 +515,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(0)->fire );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(0)->fire );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -539,7 +527,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->up );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->up );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -552,7 +540,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->down );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->down );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -565,7 +553,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->left );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->left );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -577,7 +565,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->right );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->right );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -589,7 +577,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(0)->jump );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(0)->jump );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -602,7 +590,7 @@ void map_to_both_joystick_and_keyboard(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(0)->fire );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(0)->fire );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -611,7 +599,9 @@ void map_to_both_joystick_and_keyboard(){
 
 void map_player_1_to_joystick_and_player_2_to_keyboard(){
 
-  int setup_result;
+  int setup_result = 0;
+  struct linked_list__node_t* iter = NULL;
+  const struct control_mapping_t* mapping = NULL;
   const char* mapping_file = setup(&setup_result, 
 				   "0\n"
 				   "up    joystick 0 axis    1  0.0  1.0\n"
@@ -629,8 +619,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
 				   "fire  keyboard           32\n");
   TEST_ASSERT_SUCCESS(setup_result);
 
-  struct linked_list__node_t* iter;
-  const struct control_mapping_t* mapping = 
+  mapping = 
     (const struct control_mapping_t*)
     linked_list__begin(&js_axis_mappings[0][1], &iter);
 
@@ -641,7 +630,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
 	
   TEST_ASSERT_NOT_NULL( control__get_state(0) );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->up );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->up );
 
   mapping = (const struct control_mapping_t*)linked_list__next(&iter);
 
@@ -651,7 +640,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, -1.0f );
 	
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->down );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->down );
 
   mapping = (const struct control_mapping_t*)linked_list__next(&iter);
 
@@ -667,7 +656,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 1.0f );
 	
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->left );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->left );
 
   mapping = 
     (const struct control_mapping_t*)linked_list__next(&iter);
@@ -678,7 +667,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, -1.0f );
 	
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(0)->right );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(0)->right );
 
   mapping = 
     (const struct control_mapping_t*)linked_list__next(&iter);
@@ -693,7 +682,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(0)->jump );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(0)->jump );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -705,7 +694,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(0)->fire );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(0)->fire );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -718,7 +707,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
   TEST_ASSERT_NOT_NULL( control__get_state(1) );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->up );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->up );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -731,7 +720,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->down );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->down );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -743,7 +732,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->left );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->left );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -755,7 +744,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_INT( mapping->type, ANALOG );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->analog, &control__get_state(1)->right );
+  TEST_ASSERT_PTR( mapping->control_type.analog, &control__get_state(1)->right );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -767,7 +756,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(1)->jump );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(1)->jump );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -780,7 +769,7 @@ void map_player_1_to_joystick_and_player_2_to_keyboard(){
   TEST_ASSERT_INT( mapping->type, BINARY );
   TEST_ASSERT_FLOAT( mapping->min_input, 0.0f );
   TEST_ASSERT_FLOAT( mapping->max_input, 0.0f );
-  TEST_ASSERT_PTR( mapping->binary, &control__get_state(1)->fire );
+  TEST_ASSERT_PTR( mapping->control_type.binary, &control__get_state(1)->fire );
 
   TEST_ASSERT_NULL( linked_list__next(&iter) );
 
@@ -827,12 +816,14 @@ TEST_SUITE_END()
 
 const char* setup(int* setup_result, const char* contents, ...){
 
+  FILE* fout = NULL;
+  size_t len = 0, characters_written = 0;
   static char filename_buffer[1024];
-  snprintf( filename_buffer, 1023, "%s", tmpnam(NULL) );
+  va_list ap;
 
-  FILE* fout = fopen(filename_buffer, "w");
-
-  size_t len = strlen(contents);
+  sprintf( filename_buffer, "%s", tmpnam(NULL) );
+  fout = fopen(filename_buffer, "w");
+  len = strlen(contents);
   
   *setup_result = UNKNOWN_FAILURE;
 
@@ -840,9 +831,8 @@ const char* setup(int* setup_result, const char* contents, ...){
     return NULL;
   }
 
-  va_list ap;
   va_start(ap, contents);
-  size_t characters_written = vfprintf(fout, contents, ap);
+  characters_written = vfprintf(fout, contents, ap);
   va_end(ap);
 
   fclose(fout);

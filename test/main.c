@@ -6,15 +6,12 @@ int g_test_result = TRUE;
 
 int main(int argc, char** argv){
 
-  int result = 0;
-
+  int result = 0, test_idx = 0;
   test_case_t* iter = test_suite;
-
   FILE* fout = stdout;
 
   fprintf(fout, "%s\n", test_suite_name);
 
-  int test_idx = 0;
   while ( iter->test_fxn != NULL && result < 2 ){
 
     fprintf(fout, " %3d: %-48s", test_idx, iter->title);
