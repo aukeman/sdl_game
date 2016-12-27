@@ -89,6 +89,8 @@ int main( int argc, char** argv ) {
 
   video__clearscreen();
 
+  timing__set_update_rate(120);
+
   while ( keep_looping ) {
     stopwatch__start(&frame_sw);
 
@@ -157,7 +159,7 @@ int main( int argc, char** argv ) {
   fprintf( stdout, 
 	   "%d frames; %f seconds %f fps average %f fps instantaneous\n",
 	   timing__get_frame_count(),
-	   timing__get_top_of_frame() / 1000.0f,
+	   timing__get_top_of_frame() / (float)TIMING__TICKS_PER_SECOND,
 	   timing__get_average_fps(),
 	   timing__get_instantaneous_fps());
 
