@@ -89,7 +89,7 @@ int main( int argc, char** argv ) {
 
   video__clearscreen();
 
-  timing__set_update_rate(120);
+  timing__set_update_rate(60);
 
   while ( keep_looping ) {
     stopwatch__start(&frame_sw);
@@ -125,16 +125,19 @@ int main( int argc, char** argv ) {
 
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
-    		      "FPS:         %5.1f\n"
-    		      "Frame Count: %5d\n"
-    		      "Fame Length: %5d\n"
+    		      "FPS:         %5.1f (%5.1f)\n"
+    		      "Frame Count: %5d (%5d)\n"
+    		      "Fame Length: %5d (%5d)\n"
 		      "Screen Pos: %5d %5d\n"
 		      "Pos: %4d %4d Vel: %3d %3d\n"
 		      "top: %d bottom: %d left: %d right: %d\n"
 		      "state: %d against ledge: %d",
     		      timing__get_instantaneous_fps(),
+		      timing__get_instantaneous_ups(),
     		      timing__get_frame_count(),
+		      timing__get_update_count(),
     		      timing__get_frame_length(),
+		      timing__get_update_length(),
 		      level->terrain_layer.background->scroll_position_x,
 		      level->terrain_layer.background->scroll_position_y,
 		      player.position.x, 
