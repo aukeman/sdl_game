@@ -36,7 +36,7 @@ int main( int argc, char** argv ) {
   struct player_prototype_t default_player;
   struct player_t player;
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
-
+  bool_t update_this_frame = FALSE;
 
   video__setup(1600, 1200, 400, 300, (1 < argc) && !strcmp("-f", argv[1]) );
   js__setup();
@@ -89,19 +89,10 @@ int main( int argc, char** argv ) {
 
   video__clearscreen();
 
-  timing__set_frame_rate(0);
-
   while ( keep_looping ) {
-    milliseconds_t frame_length = 0;
-
     stopwatch__start(&frame_sw);
 
-    timing__declare_top_of_frame();
-    frame_length = timing__get_frame_length();
-
-    stopwatch__start(&process_events_sw);
-    events__process_events();
-    stopwatch__stop(&process_events_sw);
+    timing__declare_top_of_frame(&update_this_frame);
 
     stopwatch__start(&draw_bg_sw);
     level__draw(level);
@@ -112,16 +103,23 @@ int main( int argc, char** argv ) {
 				level->terrain_layer.background->scroll_position_y, 
 				&player );
     stopwatch__stop(&draw_players_sw);
+
+    if ( update_this_frame ){
+
+      stopwatch__start(&process_events_sw);
+      events__process_events();
+      stopwatch__stop(&process_events_sw);
+
+      stopwatch__start(&update_players_sw);
+      player.prototype->update_fxn( &player, 
+				    level->terrain_layer.background,
+				    timing__get_ticks_between_updates() );
+      stopwatch__stop(&update_players_sw);
     
-    stopwatch__start(&update_players_sw);
-    player.prototype->update_fxn( &player, 
-				  level->terrain_layer.background,
-				  frame_length );
-    stopwatch__stop(&update_players_sw);
-    
-    level__update( level, 
-		   player.position.x - video__get_screen_extents()->viewport_position_width/2,
-		   player.position.y - video__get_screen_extents()->viewport_position_height/2 );
+      level__update( level, 
+		     player.position.x - video__get_screen_extents()->viewport_position_width/2,
+		     player.position.y - video__get_screen_extents()->viewport_position_height/2 );
+    }
 
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,

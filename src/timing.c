@@ -3,6 +3,7 @@
 
 #include <SDL/SDL.h>
 
+#include <sys/time.h>
 #include <stdint.h>
 
 static timestamp_t top_of_frame_timestamp = 0;
@@ -15,14 +16,18 @@ static timestamp_t tof_history[tof_history_size];
 static timestamp_t* tof_history_iter = tof_history;
 static const timestamp_t* tof_history_end = tof_history + tof_history_size;
 
-static int32_t frame_rate = 0;
-static timestamp_t top_of_next_frame=0;
+static hertz_t update_rate = 60;
+static ticks_t ticks_between_updates = 1666;
+static timestamp_t start_of_next_update_frame=0;
+
+static struct timeval epoch = { 0, 0 };
 
 int timing__setup(){
 
   timing__teardown();
 
   SDL_Init(SDL_INIT_TIMER);
+  gettimeofday( &epoch, NULL );
 
   return SUCCESS;
 }
@@ -35,27 +40,36 @@ int timing__teardown(){
 
   frame_count = 0;
 
+  epoch.tv_sec = 0;
+  epoch.tv_usec = 0;
+
   return SUCCESS;
 }
 
-int timing__set_frame_rate(int32_t new_frame_rate){
-  return frame_rate = new_frame_rate;
+hertz_t timing__set_update_rate(hertz_t new_update_rate){
+  ticks_between_updates = 100000 / new_update_rate;
+  return update_rate = new_update_rate;
 }
 
-int timing__get_frame_rate(){
-  return frame_rate;
+hertz_t timing__get_update_rate(){
+  return update_rate;
 }
 
-int timing__declare_top_of_frame(){
+ticks_t timing__get_ticks_between_updates(){
+  return ticks_between_updates;
+}
+
+int timing__declare_top_of_frame(bool_t* update_this_frame){
  
   top_of_last_frame_timestamp = top_of_frame_timestamp;
+  top_of_frame_timestamp = timing__get_timestamp();
 
-  while ( 0 < frame_rate && SDL_GetTicks() < top_of_next_frame ) { }
-
-  top_of_frame_timestamp = SDL_GetTicks();
-
-  if ( 0 < frame_rate ){
-    top_of_next_frame = top_of_frame_timestamp + (1000 / frame_rate);
+  if ( start_of_next_update_frame <= top_of_frame_timestamp ){
+    *update_this_frame = TRUE;
+    start_of_next_update_frame += ticks_between_updates;
+  }
+  else{
+    *update_this_frame = FALSE;
   }
 
   *tof_history_iter = top_of_frame_timestamp;
@@ -77,12 +91,12 @@ timestamp_t timing__get_top_of_frame(){
   return top_of_frame_timestamp;
 }
 
-milliseconds_t timing__get_frame_length(){
+ticks_t timing__get_frame_length(){
   return top_of_frame_timestamp - top_of_last_frame_timestamp;
 }
 
 float timing__get_average_fps(){
-  return ((float)frame_count / top_of_frame_timestamp) * 1000;
+  return ((float)frame_count / top_of_frame_timestamp) * TIMING__TICKS_PER_SECOND;
 }
 
 float timing__get_instantaneous_fps(){
@@ -92,6 +106,17 @@ float timing__get_instantaneous_fps(){
   }
   else{
     return ((float)tof_history_size / 
-	    (top_of_frame_timestamp - *tof_history_iter)) * 1000;
+	    (top_of_frame_timestamp - *tof_history_iter)) * TIMING__TICKS_PER_SECOND;
   }
+}
+
+timestamp_t timing__get_timestamp(){
+  int32_t timestamp = 0;
+  struct timeval now = {0, 0};
+  gettimeofday(&now, NULL);
+
+  timestamp = (now.tv_usec - epoch.tv_usec)/10;
+  timestamp += (now.tv_sec - epoch.tv_sec)*TIMING__TICKS_PER_SECOND;
+
+  return timestamp;
 }
