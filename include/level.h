@@ -1,6 +1,9 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
+#include <geometry.h>
+#include <physics.h>
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -34,11 +37,14 @@ struct level_t {
 int level__create( const char* level_config_file, struct level_t** handle_ptr );
 int level__free( struct level_t* handle );
 
-int level__update( struct level_t* level,
-		   int32_t scroll_position_x,
-		   int32_t scroll_position_y );
+int level__clamp_scroll( const struct level_t*, struct physics__location_t* );
 
-int level__draw( struct level_t* level );
+/* int level__update( struct level_t* level, */
+/* 		   int32_t scroll_position_x, */
+/* 		   int32_t scroll_position_y ); */
+
+int level__draw( struct level_t* level, 
+		 const struct geo__point_t* scroll_position );
 
 
 #endif

@@ -244,12 +244,14 @@ int background__free( struct background_t* handle ){
   return SUCCESS;
 }
 
-void background__draw( const struct background_t* background ){
+void background__draw( const struct background_t* background,
+		       int32_t scroll_position_x,
+		       int32_t scroll_position_y ){
 
   int32_t col_idx = 0, row_idx = 0;
 
-  int32_t screen_pos_x = utils__pos2screen(background->scroll_position_x);
-  int32_t screen_pos_y = utils__pos2screen(background->scroll_position_y);
+  int32_t screen_pos_x = utils__pos2screen(scroll_position_x);
+  int32_t screen_pos_y = utils__pos2screen(scroll_position_y);
 
   int32_t min_col_idx = screen_pos_x / background->tile_screen_width;
   int32_t min_row_idx = screen_pos_y / background->tile_screen_height;

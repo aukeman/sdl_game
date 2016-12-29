@@ -139,71 +139,131 @@ int level__free( struct level_t* handle ){
   return result;
 }
 
-int level__update( struct level_t* level,
-		   int32_t scroll_position_x,
-		   int32_t scroll_position_y ){
+int level__clamp_scroll( const struct level_t* level,
+			 struct physics__location_t* scroll ){
+  
+  int minimum_scroll_position_x = 0;
+  int minimum_scroll_position_y = 0;
+  struct background_t* background = level->terrain_layer.background;
+  int maximum_scroll_position_x = background->tiles_wide*background->tile_width - video__get_screen_extents()->viewport_position_width;
+  int maximum_scroll_position_y = background->tiles_high*background->tile_height - video__get_screen_extents()->viewport_position_height;
 
-  int32_t terrain_scroll_position_x = 0, terrain_scroll_position_y = 0, idx = 0;
-
-  background__scroll_to( level->terrain_layer.background,
-			 scroll_position_x, 
-			 scroll_position_y );
-
-  terrain_scroll_position_x = level->terrain_layer.background->scroll_position_x;
-  terrain_scroll_position_y = level->terrain_layer.background->scroll_position_y;
-
-  for ( idx = 0; idx < level->number_of_background_layers; ++idx ){
-
-    struct layer_t* background_layer = &level->background_layers[idx];
-
-    int32_t background_scroll_position_x = 0;
-    int32_t background_scroll_position_y = 0;
-
-    if ( 0 < background_layer->scroll_factor_x ){
-      background_scroll_position_x = 
-	(terrain_scroll_position_x/background_layer->scroll_factor_x);
-    }
-
-    if ( 0 < background_layer->scroll_factor_y ){
-      background_scroll_position_y = 
-	(terrain_scroll_position_y/background_layer->scroll_factor_y);
-    }
-
-    background__scroll_to( background_layer->background, 
-			   background_scroll_position_x,
-			   background_scroll_position_y );
+  if ( scroll->position.x < minimum_scroll_position_x ){
+    scroll->position.x = minimum_scroll_position_x;
+    scroll->velocity.x = 0;
   }
-
-
-  for ( idx = 0; idx < level->number_of_foreground_layers; ++idx ){
-
-    struct layer_t* foreground_layer = &level->foreground_layers[idx];
-
-    int32_t foreground_scroll_position_x = 
-      (terrain_scroll_position_x*foreground_layer->scroll_factor_x);
-
-    int32_t foreground_scroll_position_y = 
-      (terrain_scroll_position_y*foreground_layer->scroll_factor_y);
-
-    background__scroll_to( foreground_layer->background, 
-			   foreground_scroll_position_x,
-			   foreground_scroll_position_y );
+  else if ( maximum_scroll_position_x < scroll->position.x ){
+    scroll->position.x = maximum_scroll_position_x;
+    scroll->velocity.x = 0;
   }
-
+  
+  if ( scroll->position.y < minimum_scroll_position_y ){
+    scroll->position.y = minimum_scroll_position_y;
+    scroll->velocity.y = 0;
+  }
+  else if ( maximum_scroll_position_y < scroll->position.y ){
+    scroll->position.y = maximum_scroll_position_y;
+    scroll->velocity.y = 0;
+  }
+  
   return SUCCESS;
 }
 
-int level__draw( struct level_t* level ){
+/* int level__update( struct level_t* level, */
+/* 		   const struct player_t* player ){ */
+
+/*   int32_t terrain_scroll_position_x = 0, terrain_scroll_position_y = 0, idx = 0; */
+
+/*   background__scroll_to( level->terrain_layer.background, */
+/* 			 scroll_position_x,  */
+/* 			 scroll_position_y ); */
+
+/*   terrain_scroll_position_x = level->terrain_layer.background->scroll_position_x; */
+/*   terrain_scroll_position_y = level->terrain_layer.background->scroll_position_y; */
+
+/*   for ( idx = 0; idx < level->number_of_background_layers; ++idx ){ */
+
+/*     struct layer_t* background_layer = &level->background_layers[idx]; */
+
+/*     int32_t background_scroll_position_x = 0; */
+/*     int32_t background_scroll_position_y = 0; */
+
+/*     if ( 0 < background_layer->scroll_factor_x ){ */
+/*       background_scroll_position_x =  */
+/* 	(terrain_scroll_position_x/background_layer->scroll_factor_x); */
+/*     } */
+
+/*     if ( 0 < background_layer->scroll_factor_y ){ */
+/*       background_scroll_position_y =  */
+/* 	(terrain_scroll_position_y/background_layer->scroll_factor_y); */
+/*     } */
+
+/*     background__scroll_to( background_layer->background,  */
+/* 			   background_scroll_position_x, */
+/* 			   background_scroll_position_y ); */
+/*   } */
+
+
+/*   for ( idx = 0; idx < level->number_of_foreground_layers; ++idx ){ */
+
+/*     struct layer_t* foreground_layer = &level->foreground_layers[idx]; */
+
+/*     int32_t foreground_scroll_position_x =  */
+/*       (terrain_scroll_position_x*foreground_layer->scroll_factor_x); */
+
+/*     int32_t foreground_scroll_position_y =  */
+/*       (terrain_scroll_position_y*foreground_layer->scroll_factor_y); */
+
+/*     background__scroll_to( foreground_layer->background,  */
+/* 			   foreground_scroll_position_x, */
+/* 			   foreground_scroll_position_y ); */
+/*   } */
+
+/*   return SUCCESS; */
+/* } */
+
+int level__draw( struct level_t* level, 
+		 const struct geo__point_t* scroll_position ){
 
   size_t idx;
   for ( idx = 0; idx < level->number_of_background_layers; ++idx ){
-    background__draw( level->background_layers[idx].background );
+
+    int32_t scroll_position_x = 0;
+    int32_t scroll_position_y = 0;
+
+    if ( 0 < level->background_layers[idx].scroll_factor_x ){
+      scroll_position_x = scroll_position->x / level->background_layers[idx].scroll_factor_x;
+    }
+
+    if ( 0 < level->background_layers[idx].scroll_factor_y ){
+      scroll_position_y = scroll_position->y / level->background_layers[idx].scroll_factor_y;
+    }
+
+    background__draw( level->background_layers[idx].background,
+		      scroll_position_x,
+		      scroll_position_y );
   }
 
-  background__draw( level->terrain_layer.background );
+  background__draw( level->terrain_layer.background,
+		    scroll_position->x,
+		    scroll_position->y );
 
   for ( idx = 0; idx < level->number_of_foreground_layers; ++idx ){
-    background__draw( level->foreground_layers[idx].background );
+
+    int32_t scroll_position_x = 0;
+    int32_t scroll_position_y = 0;
+
+    if ( 0 < level->foreground_layers[idx].scroll_factor_x ){
+      scroll_position_x = scroll_position->x / level->foreground_layers[idx].scroll_factor_x;
+    }
+
+    if ( 0 < level->foreground_layers[idx].scroll_factor_y ){
+      scroll_position_y = scroll_position->y / level->foreground_layers[idx].scroll_factor_y;
+    }
+
+    background__draw( level->foreground_layers[idx].background,
+		      scroll_position_x,
+		      scroll_position_y );
   }
 
   return SUCCESS;

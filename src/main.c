@@ -98,26 +98,40 @@ int main( int argc, char** argv ) {
     int32_t screen_pos_y = 0;
 
     struct player_t player_to_draw;
+    struct physics__location_t screen_scrolling;
 
     stopwatch__start(&frame_sw);
 
     timing__declare_top_of_frame(&update_this_frame);
 
     stopwatch__start(&draw_bg_sw);
-    level__draw(level);
+
+    screen_scrolling.position.x = player.location.position.x - video__get_screen_extents()->viewport_position_width/2;
+    screen_scrolling.position.y = player.location.position.y - video__get_screen_extents()->viewport_position_height/2;
+    screen_scrolling.velocity = player.location.velocity;
+
+    level__clamp_scroll( level, &screen_scrolling );
+
+    physics__dead_reckon( timing__get_top_of_update(),
+			  &screen_scrolling,
+			  timing__get_top_of_frame(),
+			  &screen_scrolling );
+
+    screen_pos_x = utils__pos2screen(screen_scrolling.position.x);
+    screen_pos_y = utils__pos2screen(screen_scrolling.position.y);
+
+    /* video__translate( -screen_pos_x, -screen_pos_y ); */
+    level__draw(level, &screen_scrolling.position);
+    /* video__translate( screen_pos_x, screen_pos_y ); */
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
 
     player_to_draw = player;
-    
     physics__dead_reckon( timing__get_top_of_update(),
 			  &player.location,
 			  timing__get_top_of_frame(),
 			  &player_to_draw.location );
-
-    screen_pos_x = utils__pos2screen(level->terrain_layer.background->scroll_position_x);
-    screen_pos_y = utils__pos2screen(level->terrain_layer.background->scroll_position_y);
 
     video__translate( -screen_pos_x, -screen_pos_y );
     player.prototype->draw_fxn(&player_to_draw);
@@ -135,10 +149,6 @@ int main( int argc, char** argv ) {
 				    level->terrain_layer.background,
 				    timing__get_ticks_between_updates() );
       stopwatch__stop(&update_players_sw);
-    
-      level__update( level, 
-		     player.location.position.x - video__get_screen_extents()->viewport_position_width/2,
-		     player.location.position.y - video__get_screen_extents()->viewport_position_height/2 );
     }
 
     stopwatch__start(&draw_stats_sw);
