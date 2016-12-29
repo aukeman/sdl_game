@@ -61,8 +61,8 @@ int main( int argc, char** argv ) {
     fprintf( stderr, "could not load player config\n" );
   }
 
-  geo__init_point( &player.position, utils__screen2pos(225), utils__screen2pos(225) );
-  geo__init_vector( &player.velocity, 0, 0 );
+  geo__init_point( &player.location.position, utils__screen2pos(225), utils__screen2pos(225) );
+  geo__init_vector( &player.location.velocity, 0, 0 );
   player.prototype = &default_player;
   player.control = control__get_state(1);
 
@@ -92,6 +92,10 @@ int main( int argc, char** argv ) {
   timing__set_update_rate(60);
 
   while ( keep_looping ) {
+
+    int32_t screen_pos_x = 0;
+    int32_t screen_pos_y = 0;
+
     stopwatch__start(&frame_sw);
 
     timing__declare_top_of_frame(&update_this_frame);
@@ -101,9 +105,12 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
-    player.prototype->draw_fxn( level->terrain_layer.background->scroll_position_x, 
-				level->terrain_layer.background->scroll_position_y, 
-				&player );
+    screen_pos_x = utils__pos2screen(level->terrain_layer.background->scroll_position_x);
+    screen_pos_y = utils__pos2screen(level->terrain_layer.background->scroll_position_y);
+
+    video__translate( -screen_pos_x, -screen_pos_y );
+    player.prototype->draw_fxn(&player);
+    video__translate( screen_pos_x, screen_pos_y );
     stopwatch__stop(&draw_players_sw);
 
     if ( update_this_frame ){
@@ -119,8 +126,8 @@ int main( int argc, char** argv ) {
       stopwatch__stop(&update_players_sw);
     
       level__update( level, 
-		     player.position.x - video__get_screen_extents()->viewport_position_width/2,
-		     player.position.y - video__get_screen_extents()->viewport_position_height/2 );
+		     player.location.position.x - video__get_screen_extents()->viewport_position_width/2,
+		     player.location.position.y - video__get_screen_extents()->viewport_position_height/2 );
     }
 
     stopwatch__start(&draw_stats_sw);
@@ -140,10 +147,10 @@ int main( int argc, char** argv ) {
 		      timing__get_update_length(),
 		      level->terrain_layer.background->scroll_position_x,
 		      level->terrain_layer.background->scroll_position_y,
-		      player.position.x, 
-		      player.position.y, 
-		      player.velocity.x, 
-		      player.velocity.y,
+		      player.location.position.x, 
+		      player.location.position.y, 
+		      player.location.velocity.x, 
+		      player.location.velocity.y,
 		      player.top_collision,
 		      player.bottom_collision,
 		      player.left_collision,

@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include <geometry.h>
+#include <physics.h>
 #include <control.h> 
 
 #include <stdint.h>
@@ -9,7 +10,7 @@
 struct player_t;
 struct background_t;
 
-typedef void player__draw_fxn( int32_t screen_pos_x, int32_t screen_pos_y, const struct player_t* player );
+typedef void player__draw_fxn( const struct player_t* player );
 typedef void player__update_fxn( struct player_t* player, 
 				 const struct background_t* terrain,
 				 milliseconds_t frame_length );
@@ -88,8 +89,7 @@ struct player_state_info_t
 
 struct player_t{
 
-  struct geo__point_t position;
-  struct geo__vector_t velocity;
+  struct physics__location_t location;
 
   const struct player_prototype_t* prototype;
   const struct control__state_t* control;
@@ -106,7 +106,7 @@ struct player_t{
   uint8_t color[3];
 };
 
-void player__basic_draw( int32_t screen_pos_x, int32_t screen_pos_y, const struct player_t* player );
+void player__basic_draw( const struct player_t* player );
 void player__basic_update( struct player_t* player, 
 			   const struct  background_t* background,
 			   milliseconds_t frame_length );

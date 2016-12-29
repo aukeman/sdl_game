@@ -24,28 +24,19 @@ static void _walk_or_run_or_coast( const struct control__analog_t* left,
 static void _coast( int this_frame_x_decceleration,
 		    int* velocity_x_ptr );
 
-void player__basic_draw( int32_t pos_x, 
-			 int32_t pos_y, 
-			 const struct player_t* player )
+void player__basic_draw( const struct player_t* player )
 {
-
-  int32_t screen_pos_x = utils__pos2screen(pos_x);
-  int32_t screen_pos_y = utils__pos2screen(pos_y);
 
   const struct geo__rect_t* bbox = player__get_bounding_box(player);
 
   struct geo__rect_t dest;
   geo__init_rect( &dest, 
-		  utils__pos2screen(player->position.x + bbox->x), 
-		  utils__pos2screen(player->position.y + bbox->y), 
+		  utils__pos2screen(player->location.position.x + bbox->x), 
+		  utils__pos2screen(player->location.position.y + bbox->y), 
 		  utils__pos2screen(bbox->width), 
 		  utils__pos2screen(bbox->height) );
 
-  video__translate( -screen_pos_x, -screen_pos_y );
-
   video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
-
-  video__translate( screen_pos_x, screen_pos_y );
 
 }
 
@@ -57,8 +48,8 @@ void player__basic_update( struct player_t* player,
   enum player__state_e new_state = player__calculate_new_state( player );
   struct geo__rect_t bbox = *player__get_bounding_box(player);
   struct geo__vector_t movement_this_frame;
-  movement_this_frame.x = (player->velocity.x * frame_length)/TIMING__TICKS_PER_SECOND;
-  movement_this_frame.y = (player->velocity.y * frame_length)/TIMING__TICKS_PER_SECOND;
+  movement_this_frame.x = (player->location.velocity.x * frame_length)/TIMING__TICKS_PER_SECOND;
+  movement_this_frame.y = (player->location.velocity.y * frame_length)/TIMING__TICKS_PER_SECOND;
   
   
 
@@ -71,10 +62,10 @@ void player__basic_update( struct player_t* player,
   player__calculate_new_velocity( previous_state,
 				  player, 
 				  frame_length, 
-				  &player->velocity );
+				  &player->location.velocity );
 
-  bbox.x += player->position.x;
-  bbox.y += player->position.y;
+  bbox.x += player->location.position.x;
+  bbox.y += player->location.position.y;
 
   background__collision_test( terrain,
 			      &bbox,
@@ -84,20 +75,20 @@ void player__basic_update( struct player_t* player,
 			      &(player->left_collision),
 			      &(player->right_collision) );
 
-  player->position.x += movement_this_frame.x;
-  player->position.y += movement_this_frame.y;
+  player->location.position.x += movement_this_frame.x;
+  player->location.position.y += movement_this_frame.y;
 
   bbox.x += movement_this_frame.x;
   bbox.y += movement_this_frame.y;
 
-  if ( (player->top_collision && player->velocity.y < 0) ||
-       (player->bottom_collision && 0 < player->velocity.y) ){
-    player->velocity.y = 0;
+  if ( (player->top_collision && player->location.velocity.y < 0) ||
+       (player->bottom_collision && 0 < player->location.velocity.y) ){
+    player->location.velocity.y = 0;
   }
 
-  if ( (player->left_collision && player->velocity.x < 0) ||
-       (player->right_collision && 0 < player->velocity.x) ){
-       player->velocity.x = 0;
+  if ( (player->left_collision && player->location.velocity.x < 0) ||
+       (player->right_collision && 0 < player->location.velocity.x) ){
+       player->location.velocity.x = 0;
   }
 
   /* check for a ledge to grab */
@@ -181,9 +172,9 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
     else if ( jump_pressed )
     {
       if (( control__at_least_low(&player->control->left) && 
-	    config->minimum_backflip_starting_velocity < player->velocity.x) ||
+	    config->minimum_backflip_starting_velocity < player->location.velocity.x) ||
 	  ( control__at_least_low(&player->control->right) && 
-	    player->velocity.x < -config->minimum_backflip_starting_velocity))
+	    player->location.velocity.x < -config->minimum_backflip_starting_velocity))
       {
 	result = PLAYER__STATE_START_BACK_FLIP;
       }
@@ -196,11 +187,11 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
     {  
       result = PLAYER__STATE_DUCKING;
     }
-    else if ( config->velocity_limit_walking < abs(player->velocity.x) )
+    else if ( config->velocity_limit_walking < abs(player->location.velocity.x) )
     {
       result = PLAYER__STATE_RUNNING;
     }
-    else if ( 0 < abs(player->velocity.x) )
+    else if ( 0 < abs(player->location.velocity.x) )
     {
       result = PLAYER__STATE_WALKING;
     }
@@ -213,7 +204,7 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
   case PLAYER__STATE_JUMPING:
   case PLAYER__STATE_JUMPING_OFF_WALL:
   case PLAYER__STATE_BACK_FLIP:
-    if ( 0 < player->velocity.y )
+    if ( 0 < player->location.velocity.y )
     {
       result = PLAYER__STATE_FALLING;
     }
@@ -344,7 +335,7 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
   }
   else {
 
-    struct geo__vector_t velocity = player->velocity;
+    struct geo__vector_t velocity = player->location.velocity;
 
     const player__config_t* config = &(player->prototype->config);
 
