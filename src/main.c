@@ -9,6 +9,7 @@
 #include <background.h>
 #include <stopwatch.h>
 #include <joystick.h>
+#include <physics.h>
 #include <utils.h>
 
 #include <string.h>
@@ -96,6 +97,8 @@ int main( int argc, char** argv ) {
     int32_t screen_pos_x = 0;
     int32_t screen_pos_y = 0;
 
+    struct player_t player_to_draw;
+
     stopwatch__start(&frame_sw);
 
     timing__declare_top_of_frame(&update_this_frame);
@@ -105,11 +108,19 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
+
+    player_to_draw = player;
+    
+    physics__dead_reckon( timing__get_top_of_update(),
+			  &player.location,
+			  timing__get_top_of_frame(),
+			  &player_to_draw.location );
+
     screen_pos_x = utils__pos2screen(level->terrain_layer.background->scroll_position_x);
     screen_pos_y = utils__pos2screen(level->terrain_layer.background->scroll_position_y);
 
     video__translate( -screen_pos_x, -screen_pos_y );
-    player.prototype->draw_fxn(&player);
+    player.prototype->draw_fxn(&player_to_draw);
     video__translate( screen_pos_x, screen_pos_y );
     stopwatch__stop(&draw_players_sw);
 

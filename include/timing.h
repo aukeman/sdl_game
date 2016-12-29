@@ -17,9 +17,11 @@ uint32_t timing__get_update_count();
 int timing__declare_top_of_frame(bool_t* update_this_frame);
 
 timestamp_t timing__get_top_of_frame();
-milliseconds_t timing__get_frame_length();
+timestamp_t timing__get_top_of_update();
 
+ticks_t timing__get_frame_length();
 ticks_t timing__get_update_length();
+
 
 uint32_t timing__get_frame_count();
 

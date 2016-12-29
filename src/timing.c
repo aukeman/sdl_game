@@ -114,6 +114,10 @@ timestamp_t timing__get_top_of_frame(){
   return top_of_frame_timestamp;
 }
 
+timestamp_t timing__get_top_of_update(){
+  return top_of_update_timestamp;
+}
+
 ticks_t timing__get_frame_length(){
   return top_of_frame_timestamp - top_of_last_frame_timestamp;
 }

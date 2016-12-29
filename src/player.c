@@ -28,6 +28,7 @@ void player__basic_draw( const struct player_t* player )
 {
 
   const struct geo__rect_t* bbox = player__get_bounding_box(player);
+  struct geo__line_t line;
 
   struct geo__rect_t dest;
   geo__init_rect( &dest, 
@@ -37,6 +38,33 @@ void player__basic_draw( const struct player_t* player )
 		  utils__pos2screen(bbox->height) );
 
   video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
+
+
+  line.x1 = utils__pos2screen(player->location.position.x + bbox->x);
+  line.y1 = utils__pos2screen(player->location.position.y + bbox->y);
+  line.x2 = utils__pos2screen(player->location.position.x + bbox->x);
+  line.y2 = utils__pos2screen(player->location.position.y + bbox->y + bbox->height);
+
+  video__line( &line, 255, 255, 255, 255 );
+
+  line.x2 = utils__pos2screen(player->location.position.x + bbox->x + bbox->width);
+  line.y2 = utils__pos2screen(player->location.position.y + bbox->y);
+
+  video__line( &line, 255, 255, 255, 255 );
+
+  line.x1 = utils__pos2screen(player->location.position.x + bbox->x + bbox->width);
+  line.y1 = utils__pos2screen(player->location.position.y + bbox->y + bbox->height);
+  line.x2 = utils__pos2screen(player->location.position.x + bbox->x + bbox->width);
+  line.y2 = utils__pos2screen(player->location.position.y + bbox->y);
+
+  video__line( &line, 255, 255, 255, 255 );
+
+  line.x2 = utils__pos2screen(player->location.position.x + bbox->x);
+  line.y2 = utils__pos2screen(player->location.position.y + bbox->y + bbox->height);
+
+  video__line( &line, 255, 255, 255, 255 );
+
+
 
 }
 
