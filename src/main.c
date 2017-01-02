@@ -89,6 +89,8 @@ int main( int argc, char** argv ) {
 
   video__clearscreen();
 
+  /* timing__set_fixed_frame_rate(60); */
+
   while ( keep_looping ) {
     ticks_t frame_length = 0;
 

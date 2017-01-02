@@ -8,8 +8,8 @@
 int timing__setup();
 int timing__teardown();
 
-int32_t timing__set_frame_rate(int32_t);
-int32_t timing__get_frame_rate();
+int timing__set_fixed_frame_rate(hertz_t);
+hertz_t timing__get_fixed_frame_rate();
 
 uint32_t timing__get_frame_count();
 

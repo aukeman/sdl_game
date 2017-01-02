@@ -7,7 +7,11 @@
 #include <stdint.h>
 
 static timestamp_t top_of_frame_timestamp = 0;
+static timestamp_t top_of_next_frame_timestamp = 0;
 static timestamp_t top_of_last_frame_timestamp = 0;
+
+static hertz_t fixed_frame_rate = 0;
+static ticks_t fixed_frame_length = 0;
 
 static uint32_t frame_count = 0;
 
@@ -37,7 +41,11 @@ int timing__setup(){
 
 int timing__teardown(){
   top_of_frame_timestamp = 0;
+  top_of_next_frame_timestamp = 0;
   top_of_last_frame_timestamp = 0;
+
+  fixed_frame_rate = 0;
+  fixed_frame_length = 0;
 
   memset(tof_history, '\0', sizeof(tof_history));
 
@@ -46,10 +54,28 @@ int timing__teardown(){
   return SUCCESS;
 }
 
-int timing__declare_top_of_frame(){
- 
-  top_of_last_frame_timestamp = top_of_frame_timestamp;
+int timing__set_fixed_frame_rate(hertz_t new_fixed_frame_rate){
 
+  fixed_frame_rate = new_fixed_frame_rate;
+  fixed_frame_length = (1.0f / new_fixed_frame_rate) * TIMING__SECONDS_TO_TICKS;
+
+  top_of_next_frame_timestamp = _get_timestamp() + fixed_frame_length;
+
+  return SUCCESS;
+}
+
+hertz_t timing__get_fixed_frame_rate(){
+  return fixed_frame_rate;
+}
+
+int timing__declare_top_of_frame(){
+
+  if ( 0 < fixed_frame_length ){
+    while ( _get_timestamp() < top_of_next_frame_timestamp ){ }
+    top_of_next_frame_timestamp += fixed_frame_length;
+  }
+
+  top_of_last_frame_timestamp = top_of_frame_timestamp;
   top_of_frame_timestamp = _get_timestamp();
 
   *tof_history_iter = top_of_frame_timestamp;
