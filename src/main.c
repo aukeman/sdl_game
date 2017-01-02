@@ -65,7 +65,7 @@ int main( int argc, char** argv ) {
   geo__init_point( &player.location.position, utils__screen2pos(225), utils__screen2pos(225) );
   geo__init_vector( &player.location.velocity, 0, 0 );
   player.prototype = &default_player;
-  player.control = control__get_state(1);
+  player.control = control__get_state(0);
 
   player.top_collision = FALSE;
   player.bottom_collision = FALSE;
@@ -132,6 +132,7 @@ int main( int argc, char** argv ) {
 			  &player.location,
 			  timing__get_top_of_frame(),
 			  &player_to_draw.location );
+    
 
     video__translate( -screen_pos_x, -screen_pos_y );
     player.prototype->draw_fxn(&player_to_draw);
@@ -149,8 +150,17 @@ int main( int argc, char** argv ) {
 				    level->terrain_layer.background,
 				    timing__get_ticks_between_updates() );
       stopwatch__stop(&update_players_sw);
+
+      printf("Update Length: %d\n",
+	     timing__get_update_length() );
+
     }
 
+    printf( "TOU: %u, TOF: %u, Frame Length : %d\n", 
+	    timing__get_top_of_update(),
+	    timing__get_top_of_frame(),
+	    timing__get_frame_length() );
+    
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
     		      "FPS:         %5.1f (%5.1f)\n"
@@ -183,6 +193,22 @@ int main( int argc, char** argv ) {
     stopwatch__start(&flip_page_sw);
     video__flip();
     stopwatch__stop(&flip_page_sw);
+
+    if ( 1000 < timing__get_frame_length() )
+      {
+      printf( " Process Events: %d\n"
+	      " Draw Background: %d\n"
+	      " Draw Players: %d\n"
+	      " Update Players: %d\n"
+	      " Draw Stats: %d\n"
+	      " Flip Page: %d\n",
+	      stopwatch__last(&process_events_sw),
+	      stopwatch__last(&draw_bg_sw),
+	      stopwatch__last(&draw_players_sw),
+	      stopwatch__last(&update_players_sw),
+	      stopwatch__last(&draw_stats_sw),
+	      stopwatch__last(&flip_page_sw) );
+    }
 
     stopwatch__stop(&frame_sw);
   }

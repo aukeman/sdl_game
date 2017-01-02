@@ -82,6 +82,11 @@ void stopwatch__stop( struct stopwatch_t* sw ){
 }
 
 static
+int stopwatch__last(const struct stopwatch_t* sw){
+  return (sw->stop.tv_sec - sw->start.tv_sec) * 1000000 + (sw->stop.tv_usec - sw->start.tv_usec);
+}
+
+static
 void stopwatch__dump( struct stopwatch_t* sw, const char* name, FILE* fout )
 {
   struct timeval mean;

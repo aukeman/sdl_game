@@ -79,6 +79,8 @@ int timing__declare_top_of_frame(bool_t* update_this_frame){
     top_of_update_timestamp = top_of_frame_timestamp;
     start_of_next_update_frame += ticks_between_updates;
 
+printf("start of next update: %u\n", start_of_next_update_frame);
+
     *update_history_iter = top_of_frame_timestamp;
     ++update_history_iter;
     if ( update_history_iter == update_history_end ){
