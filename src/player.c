@@ -51,14 +51,14 @@ void player__basic_draw( int32_t pos_x,
 
 void player__basic_update( struct player_t* player, 
 			   const struct  background_t* terrain,
-			   milliseconds_t frame_length )
+			   ticks_t frame_length )
 {
   enum player__state_e previous_state = player->state.value;
   enum player__state_e new_state = player__calculate_new_state( player );
   struct geo__rect_t bbox = *player__get_bounding_box(player);
   struct geo__vector_t movement_this_frame;
-  movement_this_frame.x = (player->velocity.x * frame_length)/1000;
-  movement_this_frame.y = (player->velocity.y * frame_length)/1000;
+  movement_this_frame.x = (player->velocity.x * frame_length)/TIMING__SECONDS_TO_TICKS;
+  movement_this_frame.y = (player->velocity.y * frame_length)/TIMING__SECONDS_TO_TICKS;
   
   
 
@@ -336,7 +336,7 @@ enum player__state_e player__calculate_new_state( const struct player_t* player 
 
 int player__calculate_new_velocity( enum player__state_e previous_state,
 				    const struct player_t* player, 
-				    milliseconds_t frame_length,
+				    ticks_t frame_length,
 				    struct geo__vector_t* new_velocity )
 {
   if ( !new_velocity ) {
@@ -348,8 +348,8 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
 
     const player__config_t* config = &(player->prototype->config);
 
-    const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / 1000;
-    const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / 1000;
+    const int this_frame_x_acceleration = (config->per_second_x_acceleration * frame_length) / TIMING__SECONDS_TO_TICKS;
+    const int this_frame_x_decceleration = (config->per_second_x_decceleration * frame_length) / TIMING__SECONDS_TO_TICKS;
 
     int gravity_this_frame = 0;
 
@@ -407,7 +407,7 @@ int player__calculate_new_velocity( enum player__state_e previous_state,
       }
 
     gravity_this_frame = 
-      (config->per_second_gravity_acceleration * frame_length)/1000;
+      (config->per_second_gravity_acceleration * frame_length)/TIMING__SECONDS_TO_TICKS;
 
     /* y velocity */
     switch ( player->state.value )

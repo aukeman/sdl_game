@@ -16,12 +16,12 @@ int utils__sqrt( int i ){
 
 int utils__pos2screen( int pos )
 {
-  return (pos >> 12);
+  return (pos >> 8);
 }
 
 int utils__screen2pos( int screen )
 {
-  return (screen << 12);
+  return (screen << 8);
 }
 
 int utils__round( float input ){

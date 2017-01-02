@@ -1,8 +1,9 @@
 #include <timing.h>
 #include <constants.h>
 
-#include <SDL/SDL.h>
+#include <sys/time.h>
 
+#include <string.h>
 #include <stdint.h>
 
 static timestamp_t top_of_frame_timestamp = 0;
@@ -15,14 +16,21 @@ static timestamp_t tof_history[tof_history_size];
 static timestamp_t* tof_history_iter = tof_history;
 static const timestamp_t* tof_history_end = tof_history + tof_history_size;
 
-static int32_t frame_rate = 0;
-static timestamp_t top_of_next_frame=0;
+static struct timeval epoch = { 0, 0 };
+
+static 
+timestamp_t _get_timestamp(){
+  struct timeval now = {0, 0};
+
+  gettimeofday(&now, NULL);
+  return (now.tv_sec - epoch.tv_usec) * TIMING__SECONDS_TO_TICKS + (now.tv_usec - epoch.tv_usec);
+}
 
 int timing__setup(){
 
   timing__teardown();
 
-  SDL_Init(SDL_INIT_TIMER);
+  gettimeofday(&epoch, NULL);
 
   return SUCCESS;
 }
@@ -38,25 +46,11 @@ int timing__teardown(){
   return SUCCESS;
 }
 
-int timing__set_frame_rate(int32_t new_frame_rate){
-  return frame_rate = new_frame_rate;
-}
-
-int timing__get_frame_rate(){
-  return frame_rate;
-}
-
 int timing__declare_top_of_frame(){
  
   top_of_last_frame_timestamp = top_of_frame_timestamp;
 
-  while ( 0 < frame_rate && SDL_GetTicks() < top_of_next_frame ) { }
-
-  top_of_frame_timestamp = SDL_GetTicks();
-
-  if ( 0 < frame_rate ){
-    top_of_next_frame = top_of_frame_timestamp + (1000 / frame_rate);
-  }
+  top_of_frame_timestamp = _get_timestamp();
 
   *tof_history_iter = top_of_frame_timestamp;
   ++tof_history_iter;
@@ -77,12 +71,12 @@ timestamp_t timing__get_top_of_frame(){
   return top_of_frame_timestamp;
 }
 
-milliseconds_t timing__get_frame_length(){
+ticks_t timing__get_frame_length(){
   return top_of_frame_timestamp - top_of_last_frame_timestamp;
 }
 
 float timing__get_average_fps(){
-  return ((float)frame_count / top_of_frame_timestamp) * 1000;
+  return ((float)frame_count / top_of_frame_timestamp) * TIMING__SECONDS_TO_TICKS;
 }
 
 float timing__get_instantaneous_fps(){
@@ -92,6 +86,7 @@ float timing__get_instantaneous_fps(){
   }
   else{
     return ((float)tof_history_size / 
-	    (top_of_frame_timestamp - *tof_history_iter)) * 1000;
+	    (top_of_frame_timestamp - *tof_history_iter)) * TIMING__SECONDS_TO_TICKS;
   }
 }
+

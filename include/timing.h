@@ -3,6 +3,8 @@
 
 #include <types.h>
 
+#define TIMING__SECONDS_TO_TICKS 100000
+
 int timing__setup();
 int timing__teardown();
 
@@ -14,7 +16,7 @@ uint32_t timing__get_frame_count();
 int timing__declare_top_of_frame();
 
 timestamp_t timing__get_top_of_frame();
-milliseconds_t timing__get_frame_length();
+ticks_t timing__get_frame_length();
 
 uint32_t timing__get_frame_count();
 

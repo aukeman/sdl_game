@@ -12,7 +12,7 @@ struct background_t;
 typedef void player__draw_fxn( int32_t screen_pos_x, int32_t screen_pos_y, const struct player_t* player );
 typedef void player__update_fxn( struct player_t* player, 
 				 const struct background_t* terrain,
-				 milliseconds_t frame_length );
+				 ticks_t frame_length );
 
 enum player__state_e{
   PLAYER__STATE_NONE,
@@ -109,7 +109,7 @@ struct player_t{
 void player__basic_draw( int32_t screen_pos_x, int32_t screen_pos_y, const struct player_t* player );
 void player__basic_update( struct player_t* player, 
 			   const struct  background_t* background,
-			   milliseconds_t frame_length );
+			   ticks_t frame_length );
 
 
 
@@ -122,7 +122,7 @@ enum player__state_e player__calculate_new_state(
 
 int player__calculate_new_velocity( enum player__state_e previous_state,
 				    const struct player_t* player, 
-				    milliseconds_t frame_length,
+				    ticks_t frame_length,
 				    struct geo__vector_t* new_velocity );
 
 const struct geo__rect_t* player__get_bounding_box( const struct player_t* player );
