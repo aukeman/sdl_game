@@ -108,9 +108,13 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
-    player.prototype->draw_fxn( level->terrain_layer.background->scroll_position_x, 
-				level->terrain_layer.background->scroll_position_y, 
-				&player );
+
+    video__translate( -utils__pos2screen(level->terrain_layer.background->scroll_position_x), 
+		      -utils__pos2screen(level->terrain_layer.background->scroll_position_y) );
+    player.prototype->draw_fxn(&player);
+    video__translate( utils__pos2screen(level->terrain_layer.background->scroll_position_x), 
+		      utils__pos2screen(level->terrain_layer.background->scroll_position_y) ); 
+
     stopwatch__stop(&draw_players_sw);
     
     stopwatch__start(&update_players_sw);

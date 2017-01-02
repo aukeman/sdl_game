@@ -24,14 +24,8 @@ static void _walk_or_run_or_coast( const struct control__analog_t* left,
 static void _coast( int this_frame_x_decceleration,
 		    int* velocity_x_ptr );
 
-void player__basic_draw( int32_t pos_x, 
-			 int32_t pos_y, 
-			 const struct player_t* player )
+void player__basic_draw( const struct player_t* player )
 {
-
-  int32_t screen_pos_x = utils__pos2screen(pos_x);
-  int32_t screen_pos_y = utils__pos2screen(pos_y);
-
   const struct geo__rect_t* bbox = player__get_bounding_box(player);
 
   struct geo__rect_t dest;
@@ -40,13 +34,7 @@ void player__basic_draw( int32_t pos_x,
 		  utils__pos2screen(player->position.y + bbox->y), 
 		  utils__pos2screen(bbox->width), 
 		  utils__pos2screen(bbox->height) );
-
-  video__translate( -screen_pos_x, -screen_pos_y );
-
   video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
-
-  video__translate( screen_pos_x, screen_pos_y );
-
 }
 
 void player__basic_update( struct player_t* player, 
