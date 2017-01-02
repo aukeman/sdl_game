@@ -23,7 +23,7 @@ timestamp_t _get_timestamp(){
   struct timeval now = {0, 0};
 
   gettimeofday(&now, NULL);
-  return (now.tv_sec - epoch.tv_usec) * TIMING__SECONDS_TO_TICKS + (now.tv_usec - epoch.tv_usec);
+  return (now.tv_sec - epoch.tv_usec) * TIMING__SECONDS_TO_TICKS + (now.tv_usec - epoch.tv_usec) / 10;
 }
 
 int timing__setup(){
