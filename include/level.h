@@ -6,6 +6,7 @@
 
 struct background_t;
 struct player_t;
+struct geo__rect_t;
 
 enum {
   LEVEL__ERROR_CODE_BASE = 0x0,
@@ -40,5 +41,6 @@ int level__update( struct level_t* level,
 
 int level__draw( struct level_t* level );
 
+int level__get_bounds( const struct level_t*, struct geo__rect_t* );
 
 #endif

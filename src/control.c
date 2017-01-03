@@ -262,7 +262,7 @@ float _get_axis_value( float input_value,
     (input_value-control_mapping->min_input) / 
     (control_mapping->max_input-control_mapping->min_input);
 
-  return utils__clamp(0.0f, 1.0f, value);
+  return utils__clampf(0.0f, 1.0f, value);
 
   /* if ( value <= 0.0f ){ */
   /*   return 0.0f; */

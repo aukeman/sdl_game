@@ -208,3 +208,16 @@ int level__draw( struct level_t* level ){
 
   return SUCCESS;
 }
+
+int level__get_bounds( const struct level_t* level, struct geo__rect_t* bounds ){
+
+  const struct background_t* background = level->terrain_layer.background;
+
+  geo__init_rect( bounds, 
+		  0, 
+		  0, 
+		  background->tiles_wide * background->tile_width,
+		  background->tiles_high * background->tile_height );
+
+  return SUCCESS;
+}

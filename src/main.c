@@ -10,6 +10,7 @@
 #include <stopwatch.h>
 #include <joystick.h>
 #include <utils.h>
+#include <camera.h>
 
 #include <string.h>
 #include <unistd.h>
@@ -36,7 +37,8 @@ int main( int argc, char** argv ) {
   struct player_prototype_t default_player;
   struct player_t player;
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
-
+  struct geo__rect_t viewport = {0, 0, 0, 0}, world_bounds = {0, 0, 0, 0};
+  
 
   video__setup(1600, 1200, 400, 300, (1 < argc) && !strcmp("-f", argv[1]) );
   js__setup();
@@ -87,17 +89,22 @@ int main( int argc, char** argv ) {
   stopwatch__init(&flip_page_sw);
   stopwatch__init(&frame_sw);
 
+  video__get_viewport( &viewport );
+  level__get_bounds( level, &world_bounds );
+
+  camera__setup( &player.position,
+		 &viewport,
+		 &world_bounds );
+
   video__clearscreen();
 
   /* timing__set_fixed_frame_rate(60); */
 
   while ( keep_looping ) {
-    ticks_t frame_length = 0;
-
-    stopwatch__start(&frame_sw);
 
     timing__declare_top_of_frame();
-    frame_length = timing__get_frame_length();
+
+    stopwatch__start(&frame_sw);
 
     stopwatch__start(&process_events_sw);
     events__process_events();
@@ -108,19 +115,16 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
-
-    video__translate( -utils__pos2screen(level->terrain_layer.background->scroll_position_x), 
-		      -utils__pos2screen(level->terrain_layer.background->scroll_position_y) );
+    camera__center_on( &player.position );
+    camera__begin_render();
     player.prototype->draw_fxn(&player);
-    video__translate( utils__pos2screen(level->terrain_layer.background->scroll_position_x), 
-		      utils__pos2screen(level->terrain_layer.background->scroll_position_y) ); 
-
+    camera__end_render();
     stopwatch__stop(&draw_players_sw);
     
     stopwatch__start(&update_players_sw);
     player.prototype->update_fxn( &player, 
 				  level->terrain_layer.background,
-				  frame_length );
+				  timing__get_frame_length() );
     stopwatch__stop(&update_players_sw);
     
     level__update( level, 

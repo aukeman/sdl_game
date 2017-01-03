@@ -33,7 +33,20 @@ int utils__round( float input ){
   }
 }
 
-float utils__clamp( float min, float max, float value ){
+int utils__clamp( int min, int max, int value ){
+
+  if ( value <= min ){
+    return min;
+  }
+  else if ( max <= value ){
+    return max;
+  }
+  else{
+    return value;
+  }
+}
+
+float utils__clampf( float min, float max, float value ){
 
   if ( value <= min ){
     return min;

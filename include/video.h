@@ -56,6 +56,8 @@ int video__setup(uint32_t screen_width,
 		 int fullscreen);
 int video__teardown();
 
+int video__get_viewport( struct geo__rect_t* );
+
 int video__clearscreen();
 
 int video__flip();
