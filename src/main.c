@@ -112,13 +112,17 @@ int main( int argc, char** argv ) {
     events__process_events();
     stopwatch__stop(&process_events_sw);
 
+    camera__center_on( &camera,
+		       &player.position );
+
     stopwatch__start(&draw_bg_sw);
+
+
+
     level__draw(level);
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
-    camera__center_on( &camera,
-		       &player.position );
     camera__begin_render(&camera);
     player.prototype->draw_fxn(&player);
     camera__end_render(&camera);

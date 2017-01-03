@@ -20,6 +20,9 @@ int camera__setup( struct camera_t* camera,
   camera->max_world_x = bounds->x + bounds->width - 2*camera->viewport_half_width;
   camera->max_world_y = bounds->y + bounds->height - 2*camera->viewport_half_height;
 
+  camera->render_translate_x = 0;
+  camera->render_translate_y = 0;
+
   return SUCCESS;
 }
 
@@ -35,6 +38,9 @@ int camera__teardown(struct camera_t* camera){
   camera->max_world_x = 0;
   camera->max_world_y = 0;
     
+  camera->render_translate_x = 0;
+  camera->render_translate_y = 0;
+
   return SUCCESS;
 }
 
@@ -69,15 +75,36 @@ int camera__center_on( struct camera_t* camera,
 			  center->y - camera->viewport_half_height );
 }
 
-int camera__begin_render( const struct camera_t* camera ){
+int camera__begin_render( struct camera_t* camera ){
+  camera->render_translate_x = -utils__pos2screen( camera->position.x );
+  camera->render_translate_y = -utils__pos2screen( camera->position.y );
 
-  return video__translate( -utils__pos2screen(camera->position.x), 
-			   -utils__pos2screen(camera->position.y) );
+  return video__translate( camera->render_translate_x, 
+			   camera->render_translate_y );
 }
 
-int camera__end_render( const struct camera_t* camera ){
-  return video__translate( utils__pos2screen(camera->position.x), 
-			   utils__pos2screen(camera->position.y) );
+int camera__begin_render_parallax( struct camera_t* camera,
+				   float parallax_x,
+				   float parallax_y ){
+
+  camera->render_translate_x = -utils__pos2screen( utils__round(camera->position.x*parallax_x) );
+  camera->render_translate_y = -utils__pos2screen( utils__round(camera->position.y*parallax_y) );
+
+  return video__translate( camera->render_translate_x, 
+			   camera->render_translate_y );
+}
+
+int camera__end_render( struct camera_t* camera ){
+
+  int result;
+
+  result = video__translate( -camera->render_translate_x, 
+			     -camera->render_translate_y );
+
+  camera->render_translate_x = 0;
+  camera->render_translate_y = 0;
+
+  return result;
 }
 
 
