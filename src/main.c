@@ -36,6 +36,7 @@ int main( int argc, char** argv ) {
   struct font__handle_t* font = NULL;
   struct player_prototype_t default_player;
   struct player_t player;
+  struct camera_t camera;
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
   struct geo__rect_t viewport = {0, 0, 0, 0}, world_bounds = {0, 0, 0, 0};
   
@@ -92,7 +93,8 @@ int main( int argc, char** argv ) {
   video__get_viewport( &viewport );
   level__get_bounds( level, &world_bounds );
 
-  camera__setup( &player.position,
+  camera__setup( &camera, 
+		 &player.position,
 		 &viewport,
 		 &world_bounds );
 
@@ -115,10 +117,11 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
-    camera__center_on( &player.position );
-    camera__begin_render();
+    camera__center_on( &camera,
+		       &player.position );
+    camera__begin_render(&camera);
     player.prototype->draw_fxn(&player);
-    camera__end_render();
+    camera__end_render(&camera);
     stopwatch__stop(&draw_players_sw);
     
     stopwatch__start(&update_players_sw);

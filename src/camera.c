@@ -6,79 +6,78 @@
 
 #include <stdio.h>
 
-static struct geo__point_t camera_position = {0, 0};
-static struct geo__rect_t camera_viewport = {0, 0, 0, 0};
-static struct geo__rect_t world_bounds = {0, 0, 0, 0};
-
-
-int camera__setup( const struct geo__point_t* position,
+int camera__setup( struct camera_t* camera,
+		   const struct geo__point_t* position,
 		   const struct geo__rect_t* viewport,
 		   const struct geo__rect_t* bounds ){
-  camera_position = *position;
-  camera_viewport = *viewport;
-  world_bounds = *bounds;
+  camera->position = *position;
+
+  camera->viewport_half_width = utils__screen2pos(viewport->width/2);
+  camera->viewport_half_height = utils__screen2pos(viewport->height/2);
+
+  camera->min_world_x = bounds->x;
+  camera->min_world_y = bounds->y;
+  camera->max_world_x = bounds->x + bounds->width - 2*camera->viewport_half_width;
+  camera->max_world_y = bounds->y + bounds->height - 2*camera->viewport_half_height;
 
   return SUCCESS;
 }
 
-int camera__teardown(){
-  camera_position.x = 0;
-  camera_position.y = 0;
+int camera__teardown(struct camera_t* camera){
+  camera->position.x = 0;
+  camera->position.y = 0;
 
-  camera_viewport.x = 0;
-  camera_viewport.y = 0;
-  camera_viewport.width = 0;
-  camera_viewport.height = 0;
-
-  world_bounds.x = 0;
-  world_bounds.y = 0;
-  world_bounds.width = 0;
-  world_bounds.height = 0;
+  camera->viewport_half_width = 0;
+  camera->viewport_half_height = 0;
   
+  camera->min_world_x = 0;
+  camera->min_world_y = 0;
+  camera->max_world_x = 0;
+  camera->max_world_y = 0;
+    
   return SUCCESS;
 }
 
-int camera__set_position( const struct geo__point_t* position){
-  camera_position = *position;
+int camera__set_position( struct camera_t* camera, 
+			  const struct geo__point_t* position){
+  camera__move_to( camera, position->x, position->y );
   return SUCCESS;
 }
 
-const struct geo__point_t* camera__get_position(){
-  return &camera_position;
+const struct geo__point_t* camera__get_position(const struct camera_t* camera){
+  return &camera->position;
 }
 
-int camera__move( uint32_t dx, uint32_t dy ){
-  return camera__move_to( camera_position.x + dx, 
-			  camera_position.y + dy );
-}
+int camera__move_to( struct camera_t* camera, int32_t x, int32_t y ){
 
-int camera__move_to( uint32_t x, uint32_t y ){
+  camera->position.x = utils__clamp( camera->min_world_x, 
+				     camera->max_world_x,
+				     x );
 
-  camera_position.x = utils__clamp(world_bounds.x, 
-				   world_bounds.x + world_bounds.width - utils__screen2pos(camera_viewport.width), 
-				   x);
-  camera_position.y = utils__clamp(world_bounds.y, 
-				   world_bounds.y + world_bounds.height - utils__screen2pos(camera_viewport.height), 
-				   y);
+  camera->position.y = utils__clamp( camera->min_world_y,
+				     camera->max_world_y,
+				     y );
 
   return SUCCESS;
 }
 
-int camera__center_on( const struct geo__point_t* center ){
+int camera__center_on( struct camera_t* camera, 
+		       const struct geo__point_t* center ){
   
-  return camera__move_to( center->x - utils__screen2pos(camera_viewport.width)/2,
-			  center->y - utils__screen2pos(camera_viewport.height)/2 );
+  return camera__move_to( camera,
+			  center->x - camera->viewport_half_width,
+			  center->y - camera->viewport_half_height );
 }
 
-int camera__begin_render(){
+int camera__begin_render( const struct camera_t* camera ){
 
-  return video__translate( -utils__pos2screen(camera_position.x), 
-			   -utils__pos2screen(camera_position.y) );
+  return video__translate( -utils__pos2screen(camera->position.x), 
+			   -utils__pos2screen(camera->position.y) );
 }
 
-int camera__end_render(){
-  return video__translate( utils__pos2screen(camera_position.x), 
-			   utils__pos2screen(camera_position.y) );
+int camera__end_render( const struct camera_t* camera ){
+  return video__translate( utils__pos2screen(camera->position.x), 
+			   utils__pos2screen(camera->position.y) );
 }
 
 
