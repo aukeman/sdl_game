@@ -4,6 +4,7 @@
 #include <utils.h>
 #include <geometry.h>
 #include <collision.h>
+#include <camera.h>
 
 #include <stdlib.h>
 #include <string.h>

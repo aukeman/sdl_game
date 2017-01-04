@@ -110,13 +110,11 @@ int video__teardown() {
   return SUCCESS;
 }
 
-int video__get_viewport( struct geo__rect_t* bounds ){
+int video__get_viewport_dimensions( struct geo__vector_t* dimensions ){
   
-  geo__init_rect( bounds,
-		  0,
-		  0,
-		  video__get_screen_extents()->viewport_screen_width,
-		  video__get_screen_extents()->viewport_screen_height );
+  geo__init_vector( dimensions,
+		    video__get_screen_extents()->viewport_screen_width,
+		    video__get_screen_extents()->viewport_screen_height );
 
   return SUCCESS;
 }

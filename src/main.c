@@ -37,8 +37,10 @@ int main( int argc, char** argv ) {
   struct player_prototype_t default_player;
   struct player_t player;
   struct camera_t camera;
+  struct camera__render_params_t render_params;
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
-  struct geo__rect_t viewport = {0, 0, 0, 0}, world_bounds = {0, 0, 0, 0};
+  struct geo__vector_t viewport_dimensions = {0, 0};
+  struct geo__rect_t world_bounds = {0, 0, 0, 0};
   
 
   video__setup(1600, 1200, 400, 300, (1 < argc) && !strcmp("-f", argv[1]) );
@@ -90,12 +92,12 @@ int main( int argc, char** argv ) {
   stopwatch__init(&flip_page_sw);
   stopwatch__init(&frame_sw);
 
-  video__get_viewport( &viewport );
+  video__get_viewport_dimensions( &viewport_dimensions );
   level__get_bounds( level, &world_bounds );
 
   camera__setup( &camera, 
 		 &player.position,
-		 &viewport,
+		 &viewport_dimensions,
 		 &world_bounds );
 
   video__clearscreen();
@@ -123,9 +125,9 @@ int main( int argc, char** argv ) {
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
-    camera__begin_render(&camera);
+    camera__begin_render(&camera, &render_params);
     player.prototype->draw_fxn(&player);
-    camera__end_render(&camera);
+    camera__end_render(&camera, &render_params);
     stopwatch__stop(&draw_players_sw);
     
     stopwatch__start(&update_players_sw);
