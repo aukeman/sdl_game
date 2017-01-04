@@ -7,6 +7,7 @@
 #include <geometry.h>
 #include <background.h>
 #include <video.h>
+#include <camera.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,8 +25,9 @@ static void _walk_or_run_or_coast( const struct control__analog_t* left,
 static void _coast( int this_frame_x_decceleration,
 		    int* velocity_x_ptr );
 
-void player__basic_draw( const struct player_t* player )
+void player__basic_draw( const struct player_t* player, const struct camera_t* camera )
 {
+  struct camera__render_params_t render_params;
   const struct geo__rect_t* bbox = player__get_bounding_box(player);
 
   struct geo__rect_t dest;
@@ -34,7 +36,12 @@ void player__basic_draw( const struct player_t* player )
 		  utils__pos2screen(player->position.y + bbox->y), 
 		  utils__pos2screen(bbox->width), 
 		  utils__pos2screen(bbox->height) );
+
+  camera__begin_render(camera, &render_params);
+  
   video__rect( &dest, player->color[0], player->color[1], player->color[2], 255 );
+
+  camera__end_render(camera, &render_params);
 }
 
 void player__basic_update( struct player_t* player, 

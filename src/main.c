@@ -37,7 +37,6 @@ int main( int argc, char** argv ) {
   struct player_prototype_t default_player;
   struct player_t player;
   struct camera_t camera;
-  struct camera__render_params_t render_params;
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
   struct geo__vector_t viewport_dimensions = {0, 0};
   struct geo__rect_t world_bounds = {0, 0, 0, 0};
@@ -118,16 +117,11 @@ int main( int argc, char** argv ) {
 		       &player.position );
 
     stopwatch__start(&draw_bg_sw);
-
-
-
     level__draw(level, &camera);
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
-    camera__begin_render(&camera, &render_params);
-    player.prototype->draw_fxn(&player);
-    camera__end_render(&camera, &render_params);
+    player.prototype->draw_fxn(&player, &camera);
     stopwatch__stop(&draw_players_sw);
     
     stopwatch__start(&update_players_sw);

@@ -8,8 +8,9 @@
 
 struct player_t;
 struct background_t;
+struct camera_t;
 
-typedef void player__draw_fxn( const struct player_t* player );
+typedef void player__draw_fxn( const struct player_t*, const struct camera_t* );
 typedef void player__update_fxn( struct player_t* player, 
 				 const struct background_t* terrain,
 				 ticks_t frame_length );
@@ -106,7 +107,7 @@ struct player_t{
   uint8_t color[3];
 };
 
-void player__basic_draw( const struct player_t* player );
+void player__basic_draw( const struct player_t*, const struct camera_t* );
 void player__basic_update( struct player_t* player, 
 			   const struct  background_t* background,
 			   ticks_t frame_length );
