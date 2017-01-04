@@ -7,6 +7,7 @@
 struct background_t;
 struct player_t;
 struct geo__rect_t;
+struct camera_t;
 
 enum {
   LEVEL__ERROR_CODE_BASE = 0x0,
@@ -20,8 +21,8 @@ enum {
 struct layer_t{
   struct background_t* background;
   
-  int32_t scroll_factor_x;
-  int32_t scroll_factor_y;
+  float scroll_factor_x;
+  float scroll_factor_y;
 };
 
 struct level_t {
@@ -39,7 +40,7 @@ int level__update( struct level_t* level,
 		   int32_t scroll_position_x,
 		   int32_t scroll_position_y );
 
-int level__draw( struct level_t* level );
+int level__draw( const struct level_t*, const struct camera_t* );
 
 int level__get_bounds( const struct level_t*, struct geo__rect_t* );
 

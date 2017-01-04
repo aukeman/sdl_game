@@ -2,6 +2,7 @@
 #include <background.h>
 #include <player.h>
 #include <video.h>
+#include <camera.h>
 #include <constants.h>
 
 #include <stdio.h>
@@ -90,7 +91,7 @@ bool_t _create_layers( FILE* fin,
 
   for ( idx = 0; idx < (*number_of_layers_ptr); ++idx ){
     
-    rc = fscanf(fin, "%1023s %d %d*c", 
+    rc = fscanf(fin, "%1023s %f %f*c", 
 		buffer,
 		&(*layers_ptr)[idx].scroll_factor_x,
 		&(*layers_ptr)[idx].scroll_factor_y);
@@ -193,17 +194,44 @@ int level__update( struct level_t* level,
   return SUCCESS;
 }
 
-int level__draw( struct level_t* level ){
+int level__draw( const struct level_t* level, const struct camera_t* camera ){
 
   size_t idx;
+  struct camera__render_params_t render_params;
+  struct geo__rect_t viewport;
+
   for ( idx = 0; idx < level->number_of_background_layers; ++idx ){
-    background__draw( level->background_layers[idx].background );
+    viewport = *camera__get_viewport(camera);
+    viewport.x *= level->background_layers[idx].scroll_factor_x;
+    viewport.y *= level->background_layers[idx].scroll_factor_y;
+
+    camera__begin_render_parallax( camera, 
+				   level->background_layers[idx].scroll_factor_x,
+				   level->background_layers[idx].scroll_factor_y,
+				   &render_params );
+    background__draw( level->background_layers[idx].background, &viewport );
+    
+    camera__end_render( camera, &render_params );
   }
 
-  background__draw( level->terrain_layer.background );
+  camera__begin_render( camera, &render_params );
+  viewport = *camera__get_viewport(camera);
+  background__draw( level->terrain_layer.background, &viewport );
+  camera__end_render( camera, &render_params );
 
   for ( idx = 0; idx < level->number_of_foreground_layers; ++idx ){
-    background__draw( level->foreground_layers[idx].background );
+    viewport = *camera__get_viewport(camera);
+    viewport.x *= level->foreground_layers[idx].scroll_factor_x;
+    viewport.y *= level->foreground_layers[idx].scroll_factor_y;
+
+    camera__begin_render_parallax( camera, 
+				   level->foreground_layers[idx].scroll_factor_x,
+				   level->foreground_layers[idx].scroll_factor_y,
+			  &render_params );
+
+    background__draw( level->foreground_layers[idx].background, &viewport );
+    
+    camera__end_render( camera, &render_params );
   }
 
   return SUCCESS;

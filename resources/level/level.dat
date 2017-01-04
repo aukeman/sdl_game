@@ -1,7 +1,7 @@
 resources/background/background3.dat
 2
-resources/background/sky.dat 4 0
-resources/background/background2.dat 2 0
+resources/background/sky.dat 0.25 0
+resources/background/background2.dat 0.5 0
 1
-resources/background/foreground.dat 2 1
+resources/background/foreground.dat 1.25 1
 

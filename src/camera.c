@@ -58,6 +58,10 @@ const struct geo__point_t* camera__get_position(const struct camera_t* camera){
   return &camera->position;
 }
 
+const struct geo__rect_t* camera__get_viewport(const struct camera_t* camera){
+  return &camera->viewport;
+}
+
 int camera__move_to( struct camera_t* camera, int32_t x, int32_t y ){
 
   camera->position.x = 

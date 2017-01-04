@@ -245,18 +245,16 @@ int background__free( struct background_t* handle ){
   return SUCCESS;
 }
 
-void background__draw( const struct background_t* background ){
+void background__draw( const struct background_t* background,
+		       const struct geo__rect_t* bounds){
 
   int32_t col_idx = 0, row_idx = 0;
 
-  int32_t screen_pos_x = utils__pos2screen(background->scroll_position_x);
-  int32_t screen_pos_y = utils__pos2screen(background->scroll_position_y);
+  int32_t min_col_idx = bounds->x / background->tile_width;
+  int32_t min_row_idx = bounds->y / background->tile_height;
 
-  int32_t min_col_idx = screen_pos_x / background->tile_screen_width;
-  int32_t min_row_idx = screen_pos_y / background->tile_screen_height;
-
-  int32_t max_col_idx = min_col_idx + (video__get_screen_extents()->viewport_screen_width / background->tile_screen_width) + 1;
-  int32_t max_row_idx = min_row_idx + (video__get_screen_extents()->viewport_screen_height / background->tile_screen_height) + 1;
+  int32_t max_col_idx = min_col_idx + (bounds->width / background->tile_width) + 1;
+  int32_t max_row_idx = min_row_idx + (bounds->height / background->tile_height) + 1;
 
   if ( background->tiles_wide < max_col_idx ){
     max_col_idx = background->tiles_wide;
@@ -265,8 +263,6 @@ void background__draw( const struct background_t* background ){
   if ( background->tiles_high < max_row_idx ){
     max_row_idx = background->tiles_high;
   }
-
-  video__translate( -screen_pos_x, -screen_pos_y );
 
   blit_params.texture_handle = background->texture;
   blit_params.suppress_transparency = !background->transparency_allowed;
@@ -284,7 +280,6 @@ void background__draw( const struct background_t* background ){
     }
   }
   video__end_blits();
-  video__translate( screen_pos_x, screen_pos_y );
 }
 
 void background__scroll_to( struct background_t* background,

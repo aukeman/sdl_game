@@ -36,9 +36,7 @@ struct background__tile_prototype_t;
 int background__create( const char* background_config_file, struct background_t** handle_ptr );
 int background__free( struct background_t* handle );
 
-void background__draw( const struct background_t* background );
-
-void background__update( struct background_t* background );
+void background__draw( const struct background_t* background, const struct geo__rect_t* );
 
 struct background_t {
   

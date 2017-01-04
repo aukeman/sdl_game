@@ -121,7 +121,7 @@ int main( int argc, char** argv ) {
 
 
 
-    level__draw(level);
+    level__draw(level, &camera);
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
