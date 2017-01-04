@@ -140,60 +140,6 @@ int level__free( struct level_t* handle ){
   return result;
 }
 
-int level__update( struct level_t* level,
-		   int32_t scroll_position_x,
-		   int32_t scroll_position_y ){
-
-  int32_t terrain_scroll_position_x = 0, terrain_scroll_position_y = 0, idx = 0;
-
-  background__scroll_to( level->terrain_layer.background,
-			 scroll_position_x, 
-			 scroll_position_y );
-
-  terrain_scroll_position_x = level->terrain_layer.background->scroll_position_x;
-  terrain_scroll_position_y = level->terrain_layer.background->scroll_position_y;
-
-  for ( idx = 0; idx < level->number_of_background_layers; ++idx ){
-
-    struct layer_t* background_layer = &level->background_layers[idx];
-
-    int32_t background_scroll_position_x = 0;
-    int32_t background_scroll_position_y = 0;
-
-    if ( 0 < background_layer->scroll_factor_x ){
-      background_scroll_position_x = 
-	(terrain_scroll_position_x/background_layer->scroll_factor_x);
-    }
-
-    if ( 0 < background_layer->scroll_factor_y ){
-      background_scroll_position_y = 
-	(terrain_scroll_position_y/background_layer->scroll_factor_y);
-    }
-
-    background__scroll_to( background_layer->background, 
-			   background_scroll_position_x,
-			   background_scroll_position_y );
-  }
-
-
-  for ( idx = 0; idx < level->number_of_foreground_layers; ++idx ){
-
-    struct layer_t* foreground_layer = &level->foreground_layers[idx];
-
-    int32_t foreground_scroll_position_x = 
-      (terrain_scroll_position_x*foreground_layer->scroll_factor_x);
-
-    int32_t foreground_scroll_position_y = 
-      (terrain_scroll_position_y*foreground_layer->scroll_factor_y);
-
-    background__scroll_to( foreground_layer->background, 
-			   foreground_scroll_position_x,
-			   foreground_scroll_position_y );
-  }
-
-  return SUCCESS;
-}
-
 int level__draw( const struct level_t* level, const struct camera_t* camera ){
 
   size_t idx;

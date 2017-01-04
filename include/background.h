@@ -55,9 +55,6 @@ struct background_t {
 
   uint32_t tile_screen_width; 
   uint32_t tile_screen_height;
-
-  int32_t scroll_position_x;
-  int32_t scroll_position_y;
 };
 
 typedef void background__tile_draw_fxn( size_t idx_x, size_t idx_y, const struct background__tile_t* background );
@@ -85,10 +82,6 @@ struct background__tile_t{
 
   const struct background__tile_prototype_t* prototype;
 };
-
-void background__scroll_to( struct background_t* background,
-			    int32_t position_x, 
-			    int32_t position_y );
 
 void background__tile_basic_draw( size_t idx_x, 
 				  size_t idx_y, 

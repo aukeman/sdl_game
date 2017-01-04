@@ -136,10 +136,6 @@ int main( int argc, char** argv ) {
 				  timing__get_frame_length() );
     stopwatch__stop(&update_players_sw);
     
-    level__update( level, 
-		   player.position.x - video__get_screen_extents()->viewport_position_width/2,
-		   player.position.y - video__get_screen_extents()->viewport_position_height/2 );
-
     stopwatch__start(&draw_stats_sw);
     font__draw_string(font, 0, 0,
     		      "FPS:         %5.1f\n"
@@ -152,8 +148,8 @@ int main( int argc, char** argv ) {
     		      timing__get_instantaneous_fps(),
     		      timing__get_frame_count(),
     		      timing__get_frame_length(),
-		      level->terrain_layer.background->scroll_position_x,
-		      level->terrain_layer.background->scroll_position_y,
+		      utils__pos2screen(camera.position.x),
+		      utils__pos2screen(camera.position.y),
 		      player.position.x, 
 		      player.position.y, 
 		      player.velocity.x, 

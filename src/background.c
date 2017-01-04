@@ -282,33 +282,6 @@ void background__draw( const struct background_t* background,
   video__end_blits();
 }
 
-void background__scroll_to( struct background_t* background,
-			    int32_t position_x, 
-			    int32_t position_y ){
-  
-  int minimum_scroll_position_x = 0;
-  int minimum_scroll_position_y = 0;
-  int maximum_scroll_position_x = background->tiles_wide*background->tile_width - video__get_screen_extents()->viewport_position_width;
-  int maximum_scroll_position_y = background->tiles_high*background->tile_height - video__get_screen_extents()->viewport_position_height;
-    
-  background->scroll_position_x = position_x;
-  background->scroll_position_y = position_y;
-
-  if ( background->scroll_position_x < minimum_scroll_position_x ){
-    background->scroll_position_x = minimum_scroll_position_x;
-  }
-  else if ( maximum_scroll_position_x < background->scroll_position_x ){
-    background->scroll_position_x = maximum_scroll_position_x;
-  }
-  
-  if ( background->scroll_position_y < minimum_scroll_position_y ){
-    background->scroll_position_y = minimum_scroll_position_y;
-  }
-  else if ( maximum_scroll_position_y < background->scroll_position_y ){
-    background->scroll_position_y = maximum_scroll_position_y;
-  }
-}
-
 void background__tile_basic_draw( size_t idx_x, 
 				  size_t idx_y, 
 				  const struct background__tile_t* tile ){
