@@ -21,10 +21,16 @@ typedef struct{
   uint8_t button_id;
 } events__joystick_button_param_t;
 
+typedef struct{
+  uint32_t width;
+  uint32_t height;
+} events__screen_resize_param_t;
+
 typedef union{
   events__key_param_t key;
   events__joystick_axis_param_t js_axis;
   events__joystick_button_param_t js_button;
+  events__screen_resize_param_t screen_resize;
 } events__event_parameter_t;
 
 enum {
@@ -40,6 +46,7 @@ typedef enum {
   EVENTS__TYPE_KEYUP,
   EVENTS__TYPE_JOYSTICK_AXIS,
   EVENTS__TYPE_JOYSTICK_BUTTON,
+  EVENTS__TYPE_SCREEN_RESIZE,
   EVENTS__TYPE_LAST
 } events__type_e;
 

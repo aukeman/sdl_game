@@ -28,6 +28,35 @@ void on_quit( events__type_e type,
   }
 }
 
+struct resize_context_t{
+  struct player_t* player;
+  struct level_t* level;
+  struct camera_t* camera;
+};
+
+void on_resize( events__type_e type,
+		const events__event_parameter_t* param,
+		void* context ){
+
+  struct geo__vector_t viewport_dimensions;
+  struct geo__rect_t world_bounds;
+  struct resize_context_t* resize_context = (struct resize_context_t*)context;
+
+  video__setup(param->screen_resize.width, 
+	       param->screen_resize.height, 
+	       400, 
+	       300, 
+	       FALSE );
+
+  video__get_viewport_dimensions( &viewport_dimensions );
+  level__get_bounds( resize_context->level, &world_bounds );
+
+  camera__setup( resize_context->camera, 
+		 &resize_context->player->position,
+		 &viewport_dimensions,
+		 &world_bounds );
+}
+
 
 int main( int argc, char** argv ) {
 
@@ -40,6 +69,7 @@ int main( int argc, char** argv ) {
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
   struct geo__vector_t viewport_dimensions = {0, 0};
   struct geo__rect_t world_bounds = {0, 0, 0, 0};
+  struct resize_context_t resize_context = { NULL, NULL, NULL };
   
 
   video__setup(1600, 1200, 400, 300, (1 < argc) && !strcmp("-f", argv[1]) );
@@ -100,6 +130,12 @@ int main( int argc, char** argv ) {
 		 &world_bounds );
 
   video__clearscreen();
+
+  resize_context.level = level;
+  resize_context.player = &player;
+  resize_context.camera = &camera;
+  events__add_callback( EVENTS__TYPE_SCREEN_RESIZE, on_resize, &resize_context );
+
 
   /* timing__set_fixed_frame_rate(60); */
 

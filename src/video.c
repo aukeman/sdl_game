@@ -73,6 +73,7 @@ int video__setup( uint32_t screen_width,
 		       SDL_HWSURFACE | 
 		       SDL_OPENGL | 
 		       SDL_DOUBLEBUF |
+		       SDL_RESIZABLE |
 		       (fullscreen ? SDL_FULLSCREEN : 0));
 
     /*

@@ -234,7 +234,15 @@ int events__process_events() {
       param_ptr = &param;
       
       break;
+      
+    case SDL_VIDEORESIZE:
+      event_type = EVENTS__TYPE_SCREEN_RESIZE;
+      param.screen_resize.width = event.resize.w;
+      param.screen_resize.height = event.resize.h;
+      
+      param_ptr = &param;
 
+      break;
     case SDL_QUIT:      
       event_type = EVENTS__TYPE_QUIT;
       param_ptr = NULL;
