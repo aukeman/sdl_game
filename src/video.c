@@ -58,11 +58,15 @@ int video__setup( uint32_t screen_width,
   
   if ( viewport_aspect_ratio < screen_aspect_ratio ){
     /* screen is wider than viewport */
+    float pixels_per_virtual_pixel = (float)screen_height / (float)viewport_height;
 
+    video__screen_extents.viewport_left = (screen_width - viewport_width*pixels_per_virtual_pixel)/2;
   }
   else if ( screen_aspect_ratio < viewport_aspect_ratio ){
     /* viewport is wider than screen */
-    
+    float pixels_per_virtual_pixel = (float)screen_width / (float)viewport_width;
+
+    video__screen_extents.viewport_top = (screen_height - viewport_height*pixels_per_virtual_pixel)/2;
   }
   
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -88,8 +92,7 @@ int video__setup( uint32_t screen_width,
 		       SDL_HWSURFACE | 
 		       SDL_OPENGL | 
 		       SDL_DOUBLEBUF |
-		       SDL_RESIZABLE |
-		       (fullscreen ? SDL_FULLSCREEN : 0));
+		       (fullscreen ? SDL_FULLSCREEN : SDL_RESIZABLE));
 
     /*
      * Set up OpenGL for 2D rendering.
@@ -97,11 +100,8 @@ int video__setup( uint32_t screen_width,
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    
-
-
-    glViewport(video__screen_extents.viewport_top, 
-	       video__screen_extents.viewport_left, 
+    glViewport(video__screen_extents.viewport_left, 
+	       video__screen_extents.viewport_top, 
 	       video__screen_extents.pixels_width, 
 	       video__screen_extents.pixels_height);
 
