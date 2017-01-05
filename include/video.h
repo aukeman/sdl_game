@@ -18,6 +18,9 @@ enum {
 typedef struct {
   uint32_t pixels_width;
   uint32_t pixels_height;
+
+  uint32_t viewport_left;
+  uint32_t viewport_top;
   
   uint32_t viewport_screen_width;
   uint32_t viewport_screen_height;

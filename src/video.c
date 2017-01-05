@@ -41,15 +41,30 @@ int video__setup( uint32_t screen_width,
 		  int fullscreen ) {
 
   int result = SUCCESS;
+  float viewport_aspect_ratio, screen_aspect_ratio;
 
   video__screen_extents.pixels_width = screen_width;
   video__screen_extents.pixels_height = screen_height;
+  video__screen_extents.viewport_left = 0;
+  video__screen_extents.viewport_top = 0;
   video__screen_extents.viewport_screen_width = viewport_width;
   video__screen_extents.viewport_screen_height = viewport_height;
   video__screen_extents.viewport_position_width = utils__screen2pos(viewport_width);
   video__screen_extents.viewport_position_height = utils__screen2pos(viewport_height);
   video__screen_extents.fullscreen = fullscreen;
 
+  viewport_aspect_ratio = (float)viewport_width / (float)viewport_height;
+  screen_aspect_ratio = (float)screen_width / (float)screen_height;
+  
+  if ( viewport_aspect_ratio < screen_aspect_ratio ){
+    /* screen is wider than viewport */
+
+  }
+  else if ( screen_aspect_ratio < viewport_aspect_ratio ){
+    /* viewport is wider than screen */
+    
+  }
+  
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
       fprintf(stderr,
               "\nError: I could not initialize video!\n"
@@ -82,7 +97,14 @@ int video__setup( uint32_t screen_width,
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    glViewport(0, 0, video__screen_extents.pixels_width, video__screen_extents.pixels_height);
+    
+
+
+    glViewport(video__screen_extents.viewport_top, 
+	       video__screen_extents.viewport_left, 
+	       video__screen_extents.pixels_width, 
+	       video__screen_extents.pixels_height);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, viewport_width, viewport_height, 0, -1.0, 1.0);
