@@ -101,9 +101,9 @@ int video__setup( uint32_t screen_width,
     glDisable(GL_CULL_FACE);
 
     glViewport(video__screen_extents.viewport_left, 
-	       video__screen_extents.viewport_top, 
-	       video__screen_extents.pixels_width, 
-	       video__screen_extents.pixels_height);
+	       video__screen_extents.viewport_top,
+	       video__screen_extents.pixels_width - 2*video__screen_extents.viewport_left, 
+	       video__screen_extents.pixels_height - 2*video__screen_extents.viewport_top);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
