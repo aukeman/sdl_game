@@ -52,22 +52,6 @@ int video__setup( uint32_t screen_width,
   video__screen_extents.viewport_position_width = utils__screen2pos(viewport_width);
   video__screen_extents.viewport_position_height = utils__screen2pos(viewport_height);
   video__screen_extents.fullscreen = fullscreen;
-
-  viewport_aspect_ratio = (float)viewport_width / (float)viewport_height;
-  screen_aspect_ratio = (float)screen_width / (float)screen_height;
-  
-  if ( viewport_aspect_ratio < screen_aspect_ratio ){
-    /* screen is wider than viewport */
-    float pixels_per_virtual_pixel = (float)screen_height / (float)viewport_height;
-
-    video__screen_extents.viewport_left = (screen_width - viewport_width*pixels_per_virtual_pixel)/2;
-  }
-  else if ( screen_aspect_ratio < viewport_aspect_ratio ){
-    /* viewport is wider than screen */
-    float pixels_per_virtual_pixel = (float)screen_width / (float)viewport_width;
-
-    video__screen_extents.viewport_top = (screen_height - viewport_height*pixels_per_virtual_pixel)/2;
-  }
   
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
       fprintf(stderr,
@@ -93,6 +77,39 @@ int video__setup( uint32_t screen_width,
 		       SDL_OPENGL | 
 		       SDL_DOUBLEBUF |
 		       (fullscreen ? SDL_FULLSCREEN : SDL_RESIZABLE));
+
+    if ( fullscreen ){
+
+      const SDL_VideoInfo* video_info = SDL_GetVideoInfo();
+
+      if ( video_info ){
+	screen_width = video_info->current_w;
+	screen_height = video_info->current_h;
+      }
+      else{
+	fprintf(stderr,
+		"\nError: I could not retrieve video mode information!\n"
+		"The error that occured was:\n"
+		"%s\n\n", SDL_GetError());
+      }
+    }
+
+    viewport_aspect_ratio = (float)viewport_width / (float)viewport_height;
+    screen_aspect_ratio = (float)screen_width / (float)screen_height;
+    
+    if ( viewport_aspect_ratio < screen_aspect_ratio ){
+      /* screen is wider than viewport */
+      float pixels_per_virtual_pixel = (float)screen_height / (float)viewport_height;
+      
+      video__screen_extents.viewport_left = (screen_width - viewport_width*pixels_per_virtual_pixel)/2;
+    }
+    else if ( screen_aspect_ratio < viewport_aspect_ratio ){
+      /* viewport is wider than screen */
+      float pixels_per_virtual_pixel = (float)screen_width / (float)viewport_width;
+      
+      video__screen_extents.viewport_top = (screen_height - viewport_height*pixels_per_virtual_pixel)/2;
+    }
+
 
     /*
      * Set up OpenGL for 2D rendering.

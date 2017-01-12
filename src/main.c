@@ -32,7 +32,36 @@ struct resize_context_t{
   struct player_t* player;
   struct level_t* level;
   struct camera_t* camera;
+  bool_t* fullscreen;
 };
+
+void on_toggle_fullscreen( events__type_e type,
+			   const events__event_parameter_t* parameter,
+			   void* context ){
+  if ( parameter->key.value == 'f' ){
+
+    struct geo__vector_t viewport_dimensions;
+    struct geo__rect_t world_bounds;
+    struct resize_context_t* resize_context = (struct resize_context_t*)context;
+
+    *(resize_context->fullscreen) = ! *(resize_context->fullscreen);
+    
+    video__setup(1600,
+		 1200,
+		 400, 
+		 300, 
+		 *(resize_context->fullscreen) );
+    
+    video__get_viewport_dimensions( &viewport_dimensions );
+    level__get_bounds( resize_context->level, &world_bounds );
+    
+    camera__setup( resize_context->camera, 
+		   &resize_context->player->position,
+		   &viewport_dimensions,
+		   &world_bounds );
+
+  }
+}
 
 void on_resize( events__type_e type,
 		const events__event_parameter_t* param,
@@ -46,7 +75,7 @@ void on_resize( events__type_e type,
 	       param->screen_resize.height, 
 	       400, 
 	       300, 
-	       FALSE );
+	       *(resize_context->fullscreen) );
 
   video__get_viewport_dimensions( &viewport_dimensions );
   level__get_bounds( resize_context->level, &world_bounds );
@@ -60,7 +89,8 @@ void on_resize( events__type_e type,
 
 int main( int argc, char** argv ) {
 
-  int keep_looping = TRUE;
+  int keep_looping = TRUE; 
+  int fullscreen = (1 < argc) && !strcmp("-f", argv[1]);
   struct level_t* level = NULL;
   struct font__handle_t* font = NULL;
   struct player_prototype_t default_player;
@@ -69,16 +99,17 @@ int main( int argc, char** argv ) {
   struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
   struct geo__vector_t viewport_dimensions = {0, 0};
   struct geo__rect_t world_bounds = {0, 0, 0, 0};
-  struct resize_context_t resize_context = { NULL, NULL, NULL };
+  struct resize_context_t resize_context = { NULL, NULL, NULL, NULL };
   
 
-  video__setup(1600, 1200, 400, 300, (1 < argc) && !strcmp("-f", argv[1]) );
+  video__setup(1600, 1200, 400, 300, fullscreen );
   js__setup();
   timing__setup();
   control__setup("data/controls.dat");
 
   events__add_callback( EVENTS__TYPE_QUIT, on_quit, &keep_looping );
   events__add_callback( EVENTS__TYPE_KEYUP, on_quit, &keep_looping );
+  events__add_callback( EVENTS__TYPE_KEYUP, on_toggle_fullscreen, &resize_context );
 
   font__create("resources/font/test_font.dat", &font);
 
@@ -134,6 +165,7 @@ int main( int argc, char** argv ) {
   resize_context.level = level;
   resize_context.player = &player;
   resize_context.camera = &camera;
+  resize_context.fullscreen = &fullscreen;
   events__add_callback( EVENTS__TYPE_SCREEN_RESIZE, on_resize, &resize_context );
 
 
