@@ -140,7 +140,8 @@ int level__free( struct level_t* handle ){
   return result;
 }
 
-int level__draw( const struct level_t* level, const struct camera_t* camera ){
+int level__draw_background( const struct level_t* level, 
+			    const struct camera_t* camera ){
 
   size_t idx;
   struct camera__render_params_t render_params;
@@ -164,6 +165,15 @@ int level__draw( const struct level_t* level, const struct camera_t* camera ){
   viewport = *camera__get_viewport(camera);
   background__draw( level->terrain_layer.background, &viewport );
   camera__end_render( camera, &render_params );
+
+  return SUCCESS;
+}
+
+int level__draw_foreground( const struct level_t* level, const struct camera_t* camera ){
+
+  size_t idx;
+  struct camera__render_params_t render_params;
+  struct geo__rect_t viewport;
 
   for ( idx = 0; idx < level->number_of_foreground_layers; ++idx ){
     viewport = *camera__get_viewport(camera);

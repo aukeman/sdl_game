@@ -37,7 +37,7 @@ int main( int argc, char** argv ) {
   struct player_prototype_t default_player;
   struct player_t player;
   struct camera_t camera;
-  struct stopwatch_t process_events_sw, draw_bg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
+  struct stopwatch_t process_events_sw, draw_bg_sw, draw_fg_sw, draw_players_sw, update_players_sw, draw_stats_sw, flip_page_sw, frame_sw;
   struct geo__vector_t viewport_dimensions = {0, 0};
   struct geo__rect_t world_bounds = {0, 0, 0, 0};
   
@@ -85,6 +85,7 @@ int main( int argc, char** argv ) {
 
   stopwatch__init(&process_events_sw);
   stopwatch__init(&draw_bg_sw);
+  stopwatch__init(&draw_fg_sw);
   stopwatch__init(&draw_players_sw);
   stopwatch__init(&update_players_sw);
   stopwatch__init(&draw_stats_sw);
@@ -117,12 +118,16 @@ int main( int argc, char** argv ) {
 		       &player.position );
 
     stopwatch__start(&draw_bg_sw);
-    level__draw(level, &camera);
+    level__draw_background(level, &camera);
     stopwatch__stop(&draw_bg_sw);
 
     stopwatch__start(&draw_players_sw);
     player.prototype->draw_fxn(&player, &camera);
     stopwatch__stop(&draw_players_sw);
+
+    stopwatch__start(&draw_fg_sw);
+    level__draw_foreground(level, &camera);
+    stopwatch__stop(&draw_fg_sw);
     
     stopwatch__start(&update_players_sw);
     player.prototype->update_fxn( &player, 
@@ -172,6 +177,7 @@ int main( int argc, char** argv ) {
 
   stopwatch__dump(&process_events_sw, "Process Events", stdout);
   stopwatch__dump(&draw_bg_sw, "Draw Background", stdout);
+  stopwatch__dump(&draw_fg_sw, "Draw Foreground", stdout);
   stopwatch__dump(&draw_players_sw, "Draw Players", stdout);
   stopwatch__dump(&update_players_sw, "Update Players", stdout);
   stopwatch__dump(&draw_stats_sw, "Draw Stats", stdout);
